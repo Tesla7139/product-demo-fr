@@ -26,10 +26,19 @@ type Branding = {
 };
 
 // --- simple in-memory cache (per server instance) ---
-const cache = new Map<string, { data: Branding; at: number }>();
-const TTL = 1000 * 60 * 30; // 30 min
+const cache = new Map<string, { data: Branding; at: number; ttl: number }>();
+const TTL = 1000 * 60 * 30; // 30 min — a good scrape
+const FAIL_TTL = 1000 * 60 * 2; // 2 min — a blocked scrape, so a retry can recover
 
 const FETCH_TIMEOUT = 4500;
+// Jina drives a real headless browser, so a cold read of a WAF-protected store
+// routinely takes 20s+ — far beyond the direct-fetch budget. Cold reads aborting
+// early is what sent protected stores to the sample catalog.
+const JINA_TIMEOUT = 30000;
+// Phase 2 can make three of those calls back to back, which at 30s each would
+// overrun maxDuration and kill the response outright. They share one budget
+// instead: each call gets whatever is left, so the phase always lands in time.
+const JINA_PHASE_BUDGET = 45000;
 const MAX_BYTES = 600_000; // cap HTML we read
 
 // Many stores (Cloudflare/WAF) block generic bot User-Agents — even for the
@@ -153,9 +162,13 @@ async function curlFetch(url: string, accept: string): Promise<string | null> {
 // back to the sample). A free key (jina.ai/reader) raises the limit dramatically.
 const JINA_KEY = process.env.JINA_API_KEY;
 
-async function jinaFetch(url: string, format?: "html"): Promise<string | null> {
+async function jinaFetch(url: string, format?: "html", deadline?: number): Promise<string | null> {
+  // Whatever is left of the phase budget, capped at one call's worth. Too little
+  // left to finish a read is not worth spending, so bail rather than stall.
+  const budget = deadline ? Math.min(JINA_TIMEOUT, deadline - Date.now()) : JINA_TIMEOUT;
+  if (budget < 3000) return null;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT + 12000);
+  const timer = setTimeout(() => controller.abort(), budget);
   try {
     const headers: Record<string, string> = { "User-Agent": BROWSER_HEADERS["User-Agent"] };
     if (format) headers["X-Return-Format"] = format;
@@ -203,8 +216,8 @@ async function directJson(url: string): Promise<unknown | null> {
 }
 
 /** Jina-only (headless browser proxy) — used sequentially as a last resort. */
-async function jinaJson(url: string): Promise<unknown | null> {
-  return safeJson(await jinaFetch(url));
+async function jinaJson(url: string, deadline?: number): Promise<unknown | null> {
+  return safeJson(await jinaFetch(url, undefined, deadline));
 }
 
 type ShopifyProduct = {
@@ -524,7 +537,7 @@ export async function POST(req: Request) {
 
   const key = url.hostname;
   const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < TTL) {
+  if (hit && Date.now() - hit.at < hit.ttl) {
     return NextResponse.json(hit.data);
   }
 
@@ -551,17 +564,18 @@ export async function POST(req: Request) {
 
   // Phase 2 — Jina fallback (WAF-protected stores). Sequential + products FIRST so
   // the important call isn't starved by a concurrent branding call under rate limits.
+  const jinaDeadline = Date.now() + JINA_PHASE_BUDGET;
   if (products.length === 0) {
-    productsJson = await jinaJson(productsUrl);
+    productsJson = await jinaJson(productsUrl, jinaDeadline);
     products = parseProducts(productsJson);
   }
   if (products.length === 0) {
-    const alt = await jinaJson(collectionsUrl);
+    const alt = await jinaJson(collectionsUrl, jinaDeadline);
     products = parseProducts(alt);
     if (products.length > 0) productsJson = alt;
   }
   if (!html) {
-    html = await jinaFetch(url.toString(), "html");
+    html = await jinaFetch(url.toString(), "html", jinaDeadline);
   }
   // Non-Shopify stores — pull schema.org/JSON-LD products from the homepage.
   if (products.length === 0 && html) {
@@ -577,9 +591,11 @@ export async function POST(req: Request) {
   const branding = html
     ? parseBranding(html, url)
     : {
-        // No homepage: use the products' vendor, else the domain name.
+        // No homepage: use the domain. A Shopify vendor is often the supplier
+        // rather than the store (shobitam.com ships vendor "Ethnic Bay"), so it
+        // is only worth reaching for when the host gives us nothing.
         brandName:
-          vendorFrom(productsJson) || capitalize(url.hostname.replace(/^www\./, "").split(".")[0]),
+          capitalize(url.hostname.replace(/^www\./, "").split(".")[0]) || vendorFrom(productsJson),
         brandColor: null,
         logo: null,
       };
@@ -594,6 +610,8 @@ export async function POST(req: Request) {
   }
 
   const data: Branding = { ...branding, currency, products };
-  cache.set(key, { data, at: Date.now() });
+  // A catalog is what makes a result worth keeping: branding alone means the scrape
+  // was blocked, and pinning that for 30 min made every retry return the failure.
+  cache.set(key, { data, at: Date.now(), ttl: products.length > 0 ? TTL : FAIL_TTL });
   return NextResponse.json(data);
 }
