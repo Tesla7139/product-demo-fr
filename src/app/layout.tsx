@@ -35,6 +35,7 @@ export const metadata: Metadata = {
     "order cancellation",
     "ecommerce",
   ],
+  other: { "deploy-check": "2026-10-01-mohit" },
   openGraph: {
     type: "website",
     url: SITE_URL,
