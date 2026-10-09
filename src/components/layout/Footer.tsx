@@ -13,13 +13,13 @@ import { footerColumns, site } from "@/lib/site";
 //   2. Or drop 4 separate files matching COMPLIANCE[].src below.
 // Until a file exists, a clean labeled fallback chip is shown.
 const COMPLIANCE = [
-  { src: "/badges/soc2.svg", label: "AICPA SOC 2" },
-  { src: "/badges/gdpr.svg", label: "GDPR" },
-  { src: "/badges/iso-27001.svg", label: "ISO 27001" },
-  { src: "/badges/iso-27701.svg", label: "ISO 27701" },
+  { src: "/badges/soc2.svg", label: "AICPA SOC 2", alt: "Conforme AICPA SOC 2" },
+  { src: "/badges/gdpr.svg", label: "RGPD", alt: "Conforme RGPD" },
+  { src: "/badges/iso-27001.svg", label: "ISO 27001", alt: "Certifié ISO 27001" },
+  { src: "/badges/iso-27701.svg", label: "ISO 27701", alt: "Certifié ISO 27701" },
 ];
 
-function ComplianceBadge({ src, label }: { src: string; label: string }) {
+function ComplianceBadge({ src, label, alt }: { src: string; label: string; alt: string }) {
   const [errored, setErrored] = useState(false);
   if (errored) {
     return (
@@ -33,7 +33,7 @@ function ComplianceBadge({ src, label }: { src: string; label: string }) {
     // eslint-disable-next-line @next/next/no-img-element -- official badge assets dropped in /public/badges
     <img
       src={src}
-      alt={label}
+      alt={alt}
       className="h-14 w-auto object-contain"
       onError={() => setErrored(true)}
     />
@@ -53,17 +53,17 @@ export function Footer() {
           <div className="col-span-2 flex flex-col gap-5 lg:col-span-2">
             <Logo light />
             <p className="max-w-xs text-sm text-white/55">
-              Self-service order editing, address validation, and post-purchase upsells for
-              modern commerce.
+              Modification de commande en libre-service, validation d’adresse et upsells
+              post-achat pour l’e-commerce d’aujourd’hui.
             </p>
           </div>
 
           {/* Security & compliance — top-aligned column (lines up with the link columns) */}
           <div className="col-span-2 flex flex-col gap-3 lg:col-span-2">
-            <h3 className="text-eyebrow text-white/45">Security &amp; compliance</h3>
+            <h3 className="text-eyebrow text-white/45">Sécurité et conformité</h3>
             <div className="grid w-fit grid-cols-2 gap-x-4 gap-y-3">
               {COMPLIANCE.map((b) => (
-                <ComplianceBadge key={b.label} src={b.src} label={b.label} />
+                <ComplianceBadge key={b.label} src={b.src} label={b.label} alt={b.alt} />
               ))}
             </div>
           </div>
@@ -93,7 +93,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm text-white/50 sm:flex-row">
-          <p>©2026 Copyright ClickPost — Felurian Technology Private Limited</p>
+          <p>© 2026 ClickPost — Felurian Technology Private Limited. Tous droits réservés.</p>
         </div>
       </Container>
 

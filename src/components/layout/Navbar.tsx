@@ -33,7 +33,7 @@ export function Navbar() {
       )}
     >
       <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6">
-          <nav className="flex w-full items-center gap-5 py-4" aria-label="Primary">
+          <nav className="flex w-full items-center gap-5 py-4" aria-label="Navigation principale">
             <div className="pl-0.5">
               <Logo className="h-5" />
             </div>
@@ -112,7 +112,7 @@ export function Navbar() {
                 rel="noopener noreferrer"
                 className="whitespace-nowrap rounded-full bg-[#155FFF] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98]"
               >
-                Get started for free
+                Commencer gratuitement
               </a>
             </div>
 
@@ -122,7 +122,7 @@ export function Navbar() {
               onClick={() => fireDemoShake("/#demo")}
               className="ml-auto inline-flex items-center rounded-full px-4 py-2 text-[0.9rem] font-semibold text-foreground transition-colors hover:text-primary lg:hidden"
             >
-              Product Tour
+              Visite produit
             </a>
           </nav>
       </div>

@@ -21,52 +21,52 @@ type Plan = {
 };
 
 const GROWTH_FEATURES = [
-  "Access to all features",
-  "Unlimited Self Service Order Editing",
-  "Post Purchase Upsell (Increase AOV)",
-  "Address Validation (powered by Google)",
-  "Customizable editing window",
-  "Add/replace items",
-  "Apply Discounts + Automated Refunds",
-  "24*7 Chat Support",
-  "Priority Support - Chat + Slack",
-  "WMS/3PL Integrations",
-  "White glove onboarding",
+  "Accès à toutes les fonctionnalités",
+  "Modification de commande en libre-service illimitée",
+  "Upsell post-achat (panier moyen en hausse)",
+  "Validation d’adresse (via Google)",
+  "Délai de modification personnalisable",
+  "Ajout / remplacement d’articles",
+  "Codes promo + remboursements automatiques",
+  "Support chat 24h/24, 7j/7",
+  "Support prioritaire — chat + Slack",
+  "Intégrations WMS / 3PL",
+  "Onboarding personnalisé",
 ];
 
 const plans: Plan[] = [
   {
-    volume: "0–500 orders/m",
+    volume: "0–500 commandes/mois",
     price: "0",
     yearlyPrice: "0",
-    sub: "25 edits/upsells free every month",
+    sub: "25 modifications/upsells offerts chaque mois",
     features: [
-      "Access to all features",
-      "Self Service Order Editing",
-      "Post Purchase Upsell (Increase AOV)",
-      "Address Validation (powered by Google)",
-      "Customizable editing window",
-      "Add/replace items",
-      "Apply Discounts + Automated Refunds",
-      "24*7 Chat Support",
+      "Accès à toutes les fonctionnalités",
+      "Modification de commande en libre-service",
+      "Upsell post-achat (panier moyen en hausse)",
+      "Validation d’adresse (via Google)",
+      "Délai de modification personnalisable",
+      "Ajout / remplacement d’articles",
+      "Codes promo + remboursements automatiques",
+      "Support chat 24h/24, 7j/7",
     ],
-    trial: "14-day free trial",
+    trial: "14 jours d’essai gratuit",
   },
   {
-    volume: "500–5,000 orders/m",
+    volume: "500–5 000 commandes/mois",
     price: "49",
     yearlyPrice: "49",
-    sub: "unlimited order edits + upsells",
+    sub: "modifications et upsells illimités",
     features: GROWTH_FEATURES,
-    trial: "14-day free trial",
+    trial: "14 jours d’essai gratuit",
   },
   {
-    volume: "5,000–15,000 orders/m",
+    volume: "5 000–15 000 commandes/mois",
     price: "129",
     yearlyPrice: "129",
-    sub: "unlimited order edits + upsells",
-    features: [...GROWTH_FEATURES, "Phone-call Support", "Dedicated Success Manager"],
-    trial: "14-day free trial",
+    sub: "modifications et upsells illimités",
+    features: [...GROWTH_FEATURES, "Support téléphonique", "Customer Success Manager dédié"],
+    trial: "14 jours d’essai gratuit",
   },
 ];
 
@@ -99,22 +99,22 @@ export function Pricing() {
     <section id="pricing" className="py-20 md:py-28">
       <Container>
         <div className="mb-10 space-y-3 text-center">
-          <h2 className="text-h2">Simple, transparent pricing</h2>
+          <h2 className="text-h2">Des tarifs simples et transparents</h2>
           <p className="mx-auto max-w-xl text-muted-foreground md:text-lg">
-            Choose the plan that fits your order volume. Start free, upgrade anytime.
+            Choisissez le plan adapté à votre volume de commandes. Commencez gratuitement, évoluez quand vous voulez.
           </p>
         </div>
 
         {/* billing toggle */}
         <div className="mb-12 flex items-center justify-center gap-2.5">
           <span className={cn("text-sm font-medium", isMonthly ? "text-foreground" : "text-muted-foreground")}>
-            Monthly
+            Mensuel
           </span>
           <Label className="relative inline-flex cursor-pointer items-center">
             <Switch ref={switchRef} checked={!isMonthly} onCheckedChange={handleToggle} />
           </Label>
           <span className={cn("text-sm font-medium", !isMonthly ? "text-foreground" : "text-muted-foreground")}>
-            Annual
+            Annuel
           </span>
         </div>
 
@@ -134,12 +134,13 @@ export function Pricing() {
                     <span className="text-4xl font-bold tracking-tight text-foreground tabular-nums">
                       <NumberFlow
                         value={value}
+                        locales="fr-FR"
                         format={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
                         transformTiming={{ duration: 500, easing: "ease-out" }}
                         willChange
                       />
                     </span>
-                    <span className="text-sm font-medium text-muted-foreground">/month</span>
+                    <span className="text-sm font-medium text-muted-foreground">/mois</span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{plan.sub}</p>
 
@@ -161,7 +162,7 @@ export function Pricing() {
                       href="/#contact"
                       className="block w-full rounded-lg bg-gradient-to-b from-neutral-800 to-neutral-900 py-3 text-center text-sm font-semibold text-white shadow-soft-md transition-all hover:brightness-125 active:scale-[0.99]"
                     >
-                      Try for free
+                      Essayer gratuitement
                     </Link>
                     <p className="mt-3 text-center text-sm text-muted-foreground">{plan.trial}</p>
                   </div>
@@ -172,7 +173,7 @@ export function Pricing() {
         </RevealGroup>
 
         <p className="mt-10 text-center text-sm text-muted-foreground">
-          All charges are billed in USD. Recurring and usage-based charges are billed every 30 days.
+          Tous les montants sont facturés en dollars US (USD) par Shopify. Les frais récurrents et à l’usage sont facturés tous les 30 jours.
         </p>
       </Container>
     </section>

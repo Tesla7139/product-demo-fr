@@ -3,17 +3,11 @@
 import { useState } from "react";
 import { CalendarDays, ChevronDown, Search } from "lucide-react";
 import type { DemoStore, DemoProduct } from "@/lib/site";
+import { money, money2, DEFAULT_CURRENCY } from "@/lib/format";
 
 const TEAL = "#0d9488";
 
-function amount(n: number, currency: string) {
-  return `${currency} ${new Intl.NumberFormat("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
-}
-function price(n: number, currency: string) {
-  return new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
-}
-
-const X_LABELS = ["Jun 1", "Jun 4", "Jun 7", "Jun 10", "Jun 13", "Jun 16", "Jun 19", "Jun 22", "Jun 25", "Jun 28"];
+const X_LABELS = ["1 juin", "4 juin", "7 juin", "10 juin", "13 juin", "16 juin", "19 juin", "22 juin", "25 juin", "28 juin"];
 
 /** Deterministic 30-point series (SSR-safe: no Math.random / Date). */
 function series(base: number, swing: number, seed: number) {
@@ -74,7 +68,7 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
   const [innerTab, setInnerTab] = useState<AnalyticsView>("overview");
   const tab = viewTab ?? innerTab;
   const setTab = setInnerTab;
-  const currency = store.currency || "USD";
+  const currency = store.currency || DEFAULT_CURRENCY;
   const products: DemoProduct[] = store.products.filter((p) => (p.price ?? 0) > 0);
 
   // --- edits ---
@@ -87,19 +81,19 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
   const editsPrev = editsSeries.map((v) => Math.round(v * 0.82));
 
   const breakdown = [
-    { label: "Address Changed", pct: 0.33 },
-    { label: "Contact Updated", pct: 0.18 },
-    { label: "Quantity Changed", pct: 0.24 },
-    { label: "Items Added (Upsell)", pct: 0.15 },
-    { label: "Order Cancelled", pct: 0.05 },
-    { label: "Discount Applied", pct: 0.05 },
+    { label: "Adresse modifiée", pct: 0.33 },
+    { label: "Coordonnées mises à jour", pct: 0.18 },
+    { label: "Quantité modifiée", pct: 0.24 },
+    { label: "Articles ajoutés (upsell)", pct: 0.15 },
+    { label: "Commande annulée", pct: 0.05 },
+    { label: "Code promo appliqué", pct: 0.05 },
   ].map((b) => ({ ...b, value: Math.round(totalEdits * b.pct) }));
 
   const cancellations = [
-    { reason: "Changed my mind", count: 11 },
-    { reason: "Ordered by mistake", count: 7 },
-    { reason: "Found it cheaper elsewhere", count: 5 },
-    { reason: "Delivery too slow", count: 3 },
+    { reason: "J'ai changé d'avis", count: 11 },
+    { reason: "Commandé par erreur", count: 7 },
+    { reason: "Moins cher ailleurs", count: 5 },
+    { reason: "Livraison trop lente", count: 3 },
   ];
   const cancelTotal = cancellations.reduce((a, c) => a + c.count, 0);
 
@@ -120,8 +114,8 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
   const upsellPrev = upsellSeries.map((v) => Math.round(v * 0.78));
 
   const TABS = [
-    { key: "overview", label: "Overview" },
-    { key: "edits", label: "Edit Activity" },
+    { key: "overview", label: "Vue d'ensemble" },
+    { key: "edits", label: "Modifications" },
     { key: "upsell", label: "Upsell" },
   ] as const;
 
@@ -130,10 +124,10 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
       <div className="max-h-[560px] overflow-y-auto no-scrollbar p-5">
         {/* header */}
         <div className="flex items-center justify-between">
-          <h3 className="text-[20px] font-extrabold tracking-tight text-neutral-900">Analytics</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight text-neutral-900">Statistiques</h3>
           <div className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-neutral-600">
             <CalendarDays className="size-3.5 text-neutral-400" />
-            2026-06-01 – 2026-07-01
+            01/06/2026 – 01/07/2026
             <ChevronDown className="size-3.5 text-neutral-400" />
           </div>
         </div>
@@ -155,15 +149,15 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
         {tab === "overview" && (
           <div ref={tourRefs?.overview} className="mt-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <Stat label="Total Edits" value={String(totalEdits)} sub={`${editPct}% of total orders`} />
-              <Stat label="Support Cost Savings" value={amount(supportSavings, currency)} sub={`${currency} ${avgSaved} avg saved per edit`} />
-              <Stat label="Upsell Revenue Added" value={amount(upsellRevenue, currency)} sub={`From ${upsellCount} completed upsells`} />
+              <Stat label="Modifications totales" value={String(totalEdits)} sub={`${editPct} % des commandes`} />
+              <Stat label="Économies sur le support" value={money2(supportSavings, currency)} sub={`${money(avgSaved, currency)} économisés en moyenne par modification`} />
+              <Stat label="Revenus d'upsell générés" value={money2(upsellRevenue, currency)} sub={`Sur ${upsellCount} upsells finalisés`} />
             </div>
             <div className="mt-4 rounded-xl border border-border p-4">
               <LineChart data={editsSeries} prev={editsPrev} />
               <div className="mt-2 flex justify-center gap-5 text-[11px] text-neutral-500">
-                <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded" style={{ background: TEAL }} /> Total Edits</span>
-                <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded border-b-2 border-dashed border-blue-300" /> Previous period</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded" style={{ background: TEAL }} /> Modifications totales</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded border-b-2 border-dashed border-blue-300" /> Période précédente</span>
               </div>
             </div>
           </div>
@@ -173,26 +167,26 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
         {tab === "edits" && (
           <div ref={tourRefs?.edits} className="mt-4">
             <div className="rounded-xl border border-border px-4 py-3 text-[14px] text-neutral-700">
-              Total <span className="font-bold text-neutral-900">{totalEdits} edits</span> out of <span className="font-bold text-neutral-900">{totalOrders} orders</span>
+              Au total, <span className="font-bold text-neutral-900">{totalEdits} modifications</span> sur <span className="font-bold text-neutral-900">{totalOrders} commandes</span>
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {breakdown.map((b) => (
                 <div key={b.label} className="rounded-xl border border-border p-4">
                   <div className="text-[13px] text-neutral-500">{b.label}</div>
                   <div className="mt-1 text-[20px] font-bold text-neutral-900">{b.value}</div>
-                  <div className="mt-1 text-[12px] text-neutral-400">{Math.round(b.pct * 100)}% of edits</div>
+                  <div className="mt-1 text-[12px] text-neutral-400">{Math.round(b.pct * 100)}&nbsp;% des modifications</div>
                 </div>
               ))}
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div className="rounded-xl border border-border p-4">
-                <div className="mb-3 text-[14px] font-bold text-neutral-900">Edit Type Distribution</div>
+                <div className="mb-3 text-[14px] font-bold text-neutral-900">Répartition par type de modification</div>
                 <div className="space-y-2.5">
                   {breakdown.map((b) => (
                     <div key={b.label}>
                       <div className="flex justify-between text-[12px] text-neutral-600">
                         <span>{b.label}</span>
-                        <span className="font-semibold text-neutral-900">{Math.round(b.pct * 100)}%</span>
+                        <span className="font-semibold text-neutral-900">{Math.round(b.pct * 100)}&nbsp;%</span>
                       </div>
                       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
                         <div className="h-full rounded-full" style={{ width: `${Math.round(b.pct * 100)}%`, background: TEAL }} />
@@ -203,9 +197,9 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
               </div>
               <div className="rounded-xl border border-border p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="text-[14px] font-bold text-neutral-900">Cancellation Reasons</div>
+                  <div className="text-[14px] font-bold text-neutral-900">Motifs d’annulation</div>
                   <div className="flex gap-1 rounded-lg bg-neutral-100 p-0.5 text-[11px] font-medium">
-                    {["All", "Prepaid", "COD"].map((f, i) => (
+                    {["Toutes", "Prépayées", "À la livraison"].map((f, i) => (
                       <span key={f} className={`rounded px-2 py-0.5 ${i === 0 ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"}`}>{f} ({i === 0 ? cancelTotal : i === 1 ? Math.round(cancelTotal * 0.6) : Math.round(cancelTotal * 0.4)})</span>
                     ))}
                   </div>
@@ -227,16 +221,16 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
         {tab === "upsell" && (
           <div ref={tourRefs?.upsell} className="mt-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <Stat label="Upsell Revenue" value={amount(upsellRevenue, currency)} sub={`From ${upsellCount} completed upsells`} />
-              <Stat label="Upsell Conversion" value={`${upsellConversion}%`} sub="of eligible orders" />
-              <Stat label="Avg Revenue Per Upsell" value={amount(avgPerUpsell, currency)} sub={`Items Added: ${upsellCount}`} />
+              <Stat label="Revenus d'upsell" value={money2(upsellRevenue, currency)} sub={`Sur ${upsellCount} upsells finalisés`} />
+              <Stat label="Taux de conversion upsell" value={`${upsellConversion} %`} sub="des commandes éligibles" />
+              <Stat label="Revenu moyen par upsell" value={money2(avgPerUpsell, currency)} sub={`Articles ajoutés : ${upsellCount}`} />
             </div>
             <div className="mt-4 rounded-xl border border-border p-4">
-              <div className="mb-2 text-[14px] font-bold text-neutral-900">Upsell Revenue Over Time</div>
+              <div className="mb-2 text-[14px] font-bold text-neutral-900">Évolution des revenus d’upsell</div>
               <LineChart data={upsellSeries} prev={upsellPrev} />
             </div>
             <div className="mt-4 rounded-xl border border-border p-4">
-              <div className="mb-3 text-[14px] font-bold text-neutral-900">Top {topProducts.length} Upsell Products</div>
+              <div className="mb-3 text-[14px] font-bold text-neutral-900">Top {topProducts.length} des produits en upsell</div>
               {topProducts.length ? (
                 <div className="divide-y divide-border">
                   {topProducts.map((p, i) => (
@@ -250,8 +244,8 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
                       </div>
                       <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-neutral-800">{p.title}</div>
                       <div className="text-right">
-                        <div className="text-[13px] font-semibold text-neutral-900">{price(p.revenue, currency)}</div>
-                        <div className="text-[11px] text-neutral-400">{p.units} sold</div>
+                        <div className="text-[13px] font-semibold text-neutral-900">{money(p.revenue, currency)}</div>
+                        <div className="text-[11px] text-neutral-400">{p.units} vendus</div>
                       </div>
                     </div>
                   ))}
@@ -259,8 +253,8 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
               ) : (
                 <div className="flex flex-col items-center py-10 text-center">
                   <Search className="size-8 text-neutral-300" />
-                  <div className="mt-3 text-[15px] font-bold text-neutral-900">No Items found</div>
-                  <div className="text-[12px] text-neutral-500">Try changing the filters or search term</div>
+                  <div className="mt-3 text-[15px] font-bold text-neutral-900">Aucun article trouvé</div>
+                  <div className="text-[12px] text-neutral-500">Essayez de modifier les filtres ou votre recherche</div>
                 </div>
               )}
             </div>

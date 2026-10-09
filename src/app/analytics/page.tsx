@@ -9,26 +9,26 @@ import { mockStore } from "@/lib/site";
 const APP_URL = "https://apps.shopify.com/clickpost-order-edit-cancel";
 
 export const metadata: Metadata = {
-  title: "Analytics & reporting",
+  title: "Statistiques et reporting",
   description:
-    "See exactly how self-serve order editing pays off: support-cost savings, edit-type breakdowns, cancellation reasons, and upsell revenue across any date range.",
+    "Mesurez précisément ce que vous rapporte la modification de commande en libre-service : économies sur le support, répartition des modifications, motifs d'annulation et revenus d'upsell, sur la période de votre choix.",
 };
 
 const HIGHLIGHTS = [
   {
     icon: PiggyBank,
-    title: "Support-cost savings",
-    body: "Every self-serve edit is a ticket your team never touches. We turn edit volume into the support hours and cost you saved.",
+    title: "Économies sur le support",
+    body: "Chaque modification en libre-service, c'est un ticket que votre équipe n'a jamais à traiter. Nous traduisons ce volume en heures de support et en euros économisés.",
   },
   {
     icon: LineChart,
-    title: "Edit-type breakdown",
-    body: "See what customers actually change — address, contact, quantity, add-ons, cancellations — plus the reasons behind every cancel.",
+    title: "Répartition des modifications",
+    body: "Voyez ce que vos clients modifient vraiment — adresse, coordonnées, quantités, ajouts, annulations — et le motif derrière chaque annulation.",
   },
   {
     icon: PackageCheck,
-    title: "Upsell performance",
-    body: "Track upsell conversion, revenue per upsell, and your top-performing add-ons over any date range.",
+    title: "Performance des upsells",
+    body: "Suivez le taux de conversion de vos upsells, le revenu par upsell et vos produits additionnels les plus performants, sur la période de votre choix.",
   },
 ];
 
@@ -38,16 +38,17 @@ export default function AnalyticsPage() {
       <section className="relative overflow-hidden pb-8 pt-20 md:pt-28">
         <Container>
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-eyebrow text-primary">Analytics &amp; reporting</span>
+            <span className="text-eyebrow text-primary">Statistiques et reporting</span>
             <h1
               className="text-display mt-4 text-balance text-white"
               style={{ fontSize: "clamp(2.25rem,5vw,3.5rem)" }}
             >
-              Every edit, saving and upsell, measured
+              Chaque modification, chaque économie, chaque upsell : mesurés
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">
-              A live merchant dashboard that turns self-serve order editing into numbers you can
-              report on: tickets deflected, revenue recovered, and AOV lifted.
+              Un tableau de bord en temps réel qui transforme la modification de commande en
+              libre-service en chiffres concrets&nbsp;: tickets évités, chiffre d’affaires récupéré et
+              panier moyen en hausse.
             </p>
           </div>
         </Container>
@@ -60,7 +61,7 @@ export default function AnalyticsPage() {
             <AnalyticsMock store={mockStore} />
           </div>
           <p className="mt-3 text-center text-xs text-white/40">
-            Sample data shown. Your dashboard reflects your own orders, products, and currency.
+            Données d’exemple. Votre tableau de bord affiche vos propres commandes, produits et devise.
           </p>
         </div>
       </Container>
@@ -84,20 +85,20 @@ export default function AnalyticsPage() {
       <Container>
         <div className="my-14 flex flex-col items-center justify-between gap-5 rounded-2xl border border-white/15 bg-white/5 p-8 text-center md:flex-row md:text-left">
           <div>
-            <h2 className="text-h3 text-white">Put your order editing on the record</h2>
+            <h2 className="text-h3 text-white">Des résultats que vous pouvez chiffrer</h2>
             <p className="mt-1 text-sm text-white/60">
-              Install CP: Order Editing and start measuring saved tickets and recovered revenue from day one.
+              Installez CP: Order Editing et mesurez dès le premier jour les tickets évités et le chiffre d’affaires récupéré.
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg" className="rounded-full">
               <a href={APP_URL} target="_blank" rel="noreferrer">
-                Get it on Shopify <ExternalLink className="size-4" />
+                Installer sur Shopify <ExternalLink className="size-4" />
               </a>
             </Button>
             <Button asChild size="lg" variant="outline" className="rounded-full border-white/25 bg-transparent text-white hover:bg-white/10">
               <Link href="/#contact">
-                Book a demo <ArrowRight className="size-4" />
+                Réserver une démo <ArrowRight className="size-4" />
               </Link>
             </Button>
           </div>

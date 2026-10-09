@@ -139,14 +139,14 @@ export function TourOverlay({
             <div className="pointer-events-auto relative flex w-full max-w-sm flex-col overflow-hidden rounded-[20px] border border-[#155FFF]/15 bg-[#faf8f4] px-6 py-7 text-center shadow-2xl">
               <button
                 onClick={onClose}
-                aria-label="Close"
+                aria-label="Fermer"
                 className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-200/70 hover:text-neutral-700"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
               <div className="mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full bg-[#155FFF]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#155FFF]">
                 <span className="size-1.5 rounded-full bg-[#155FFF]" />
-                Up next
+                À suivre
               </div>
               <h2 className="font-sans text-[22px] font-extrabold leading-tight tracking-tight text-neutral-900">
                 {nextFeatureLabel}
@@ -160,7 +160,7 @@ export function TourOverlay({
                 onClick={onNextFeature}
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#155FFF] px-5 py-3 text-[14px] font-bold text-white transition-all hover:brightness-110 active:scale-[0.99]"
               >
-                Next
+                Suivant
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
               </button>
             </div>
@@ -171,8 +171,8 @@ export function TourOverlay({
     }
 
     const headline = finalStep
-      ? "Ready to reduce support tickets and boost AOV using CP Order Editing?"
-      : outcomeHeadline ?? "You've seen it in action — start your free trial now.";
+      ? "Prêt à réduire vos tickets support et à booster votre panier moyen avec CP Order Editing ?"
+      : outcomeHeadline ?? "Vous l’avez vu en action — lancez votre essai gratuit.";
 
     return createPortal(
       <div className="pointer-events-none fixed inset-0 z-[500]">
@@ -204,7 +204,7 @@ export function TourOverlay({
              {/* close cross */}
              <button
                onClick={onClose}
-               aria-label="Close"
+               aria-label="Fermer"
                className="absolute right-3 top-3 z-10 flex size-7 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-200/70 hover:text-neutral-700"
              >
                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
@@ -213,7 +213,7 @@ export function TourOverlay({
               {/* top text — eyebrow */}
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-[#155FFF]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#155FFF]">
                 <span className="size-1.5 rounded-full bg-[#155FFF]" />
-                You&apos;ve seen it in action
+                Vous l’avez vu en action
               </div>
 
               {/* headline */}
@@ -230,7 +230,7 @@ export function TourOverlay({
                   onClick={onNextFeature}
                   className="mt-3 flex w-full max-w-[280px] items-center justify-center gap-2 rounded-xl border-2 border-[#155FFF] bg-white px-4 py-2.5 text-[13px] font-bold text-[#155FFF] transition-colors hover:bg-[#155FFF]/5 active:scale-[0.99]"
                 >
-                  Watch next: {nextFeatureLabel}
+                  Ensuite : {nextFeatureLabel}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </button>
               )}
@@ -332,7 +332,7 @@ export function TourOverlay({
               ? { top: dotRect.top + dotRect.height / 2 - 8, left: dotRect.left + dotRect.width - 34 }
               : { top: sl.top + sl.height / 2 - 8, left: sl.left + sl.width - 34 }
           }
-          aria-label="tap here"
+          aria-label="touchez ici"
         >
           <span className="relative flex size-4">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
@@ -394,7 +394,7 @@ export function TourOverlay({
         className="group pointer-events-auto absolute right-5 top-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[13px] font-bold text-neutral-700 shadow-[0_6px_20px_-6px_rgba(15,23,42,0.5)] ring-1 ring-black/5 backdrop-blur-md transition-all hover:bg-white hover:text-neutral-900 active:scale-95"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="transition-transform group-hover:rotate-90"><path d="M6 6l12 12M18 6L6 18" /></svg>
-        Close tour
+        Quitter la visite
       </button>
     </div>,
     document.body

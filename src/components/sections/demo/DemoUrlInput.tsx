@@ -41,7 +41,7 @@ export function DemoUrlInput({
     <div className={cn("w-full", align === "center" && "mx-auto max-w-xl")}>
       <form onSubmit={onSubmit} className="w-full">
         <label htmlFor="store-url" className="sr-only">
-          Your store URL
+          URL de votre boutique
         </label>
         <motion.div
           animate={controls}
@@ -59,7 +59,7 @@ export function DemoUrlInput({
             inputMode="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Enter your store URL"
+            placeholder="ex. votre-boutique.fr"
             className="h-10 flex-1 bg-transparent pl-4 pr-2 text-[0.85rem] text-foreground placeholder:text-muted-foreground/70 outline-none focus:outline-none focus-visible:outline-none [&:focus-visible]:outline-none lg:h-14 lg:pl-6 lg:text-[1.05rem]"
             style={{ outline: "none", boxShadow: "none" }}
           />
@@ -72,11 +72,11 @@ export function DemoUrlInput({
             {loading ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                <span className="max-lg:hidden">Generating</span>
+                <span className="max-lg:hidden">Génération…</span>
               </>
             ) : (
               <>
-                <span className="max-lg:hidden">See it live</span>
+                <span className="max-lg:hidden">Voir en direct</span>
                 <ArrowRight className="size-4" />
               </>
             )}

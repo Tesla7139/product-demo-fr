@@ -2,19 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, reviewDateFr } from "@/lib/utils";
 import { customerLogos, brandInfo } from "@/lib/site";
 import { reviews } from "@/lib/reviews";
 
 const SQRT_5000 = Math.sqrt(5000);
 
-// Real review dates from the Shopify export, keyed by store name ("JUNE 9, 2026" -> "Jun 9, 2026").
-function fmtDate(d: string): string {
-  const m = d.match(/^([A-Za-z]+)\s+(\d+),\s*(\d{4})$/);
-  if (!m) return d;
-  return `${m[1][0].toUpperCase()}${m[1].slice(1, 3).toLowerCase()} ${m[2]}, ${m[3]}`;
-}
-const DATE_BY_NAME = new Map(reviews.map((r) => [r.name.toLowerCase(), fmtDate(r.date)]));
+// Real review dates from the Shopify export, keyed by store name ("JUNE 9, 2026" -> "9 juin 2026").
+const DATE_BY_NAME = new Map(reviews.map((r) => [r.name.toLowerCase(), reviewDateFr(r.date, "short")]));
 
 // Real Clickpost reviews only (the ones that have a written review + brand logo).
 const REVIEWS = customerLogos

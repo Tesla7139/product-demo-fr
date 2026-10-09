@@ -9,6 +9,9 @@ import { integrations } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = ["All", "iPaaS", "ERP", "3PL", "WMS", "Shipping", "Tech"];
+// display labels (category ids above match the data in site.ts)
+const CATEGORY_LABELS: Record<string, string> = { All: "Toutes", Shipping: "Expédition" };
+const catLabel = (c: string) => CATEGORY_LABELS[c] ?? c;
 
 export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean }) {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -29,8 +32,8 @@ export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean
           <div className="mb-12">
             <SectionHeading
               eyebrow="Integrations"
-              title="Plugs into your stack"
-              subtitle="Connect checkout, fulfillment, and marketing in a few clicks."
+              title="S’intègre à vos outils"
+              subtitle="Connectez paiement, logistique et marketing en quelques clics."
             />
           </div>
         )}
@@ -50,7 +53,7 @@ export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean
                     : "border border-white/15 bg-transparent text-white/70 hover:bg-white/5 hover:text-white"
                 )}
               >
-                {cat}
+                {catLabel(cat)}
               </button>
             ))}
           </div>
@@ -60,7 +63,7 @@ export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean
             <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/40" />
             <input
               type="text"
-              placeholder="Search integrations..."
+              placeholder="Rechercher une intégration…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full rounded-full border border-white/15 bg-white/5 py-1.5 pl-10 pr-4 text-xs text-white placeholder-white/40 outline-none transition-colors focus:border-white/30 focus:bg-white/10"
@@ -96,7 +99,7 @@ export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean
                 {/* Category Indicator Area */}
                 <div className="mb-4 border-b border-black/10 pb-2.5">
                   <span className="text-[9px] font-extrabold tracking-widest text-black/50 uppercase">
-                    {category}
+                    {catLabel(category)}
                   </span>
                 </div>
 
@@ -137,7 +140,7 @@ export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean
 
         {filteredIntegrations.length === 0 && (
           <div className="py-12 text-center text-white/50 text-sm">
-            No integrations match your search.
+            Aucune intégration ne correspond à votre recherche.
           </div>
         )}
       </Container>

@@ -20,18 +20,19 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { money2 } from "@/lib/format";
 
 const BRAND = "#2f5bff";
-const money = (n: number) => `$${n.toFixed(2)}`;
+const money = (n: number) => money2(n);
 
 /* scene timeline (auto-advancing, looping) */
 const SCENES = ["confirmed", "editing", "address", "upsell", "analytics"] as const;
 const DURATIONS = [2000, 3000, 4800, 3600, 4600];
 
 const UPSELLS = [
-  { title: "Everyday Tote", price: 64 },
-  { title: "Trail Runner 2.0", price: 128 },
-  { title: "Wool Beanie", price: 32 },
+  { title: "Cabas du quotidien", price: 64 },
+  { title: "Basket trail 2.0", price: 128 },
+  { title: "Bonnet en laine", price: 32 },
 ];
 
 const SPARKLES = [
@@ -60,7 +61,7 @@ export function HeroPhone() {
   }, []);
   const mm = Math.floor(secondsLeft / 60);
   const ss = (secondsLeft % 60).toString().padStart(2, "0");
-  const countdown = `${mm} minute${mm === 1 ? "" : "s"} and ${ss} seconds`;
+  const countdown = `${mm} minute${mm > 1 ? "s" : ""} et ${ss} secondes`;
 
   // scene advance + loop
   useEffect(() => {
@@ -120,9 +121,9 @@ export function HeroPhone() {
       <AnimatePresence>
         {scene === "analytics" && (
           <>
-            <FloatCard className="-left-5 top-2" delay={0.15} icon={TrendingUp} value="$4,320" label="Upsell revenue" tint />
-            <FloatCard className="-right-6 top-16" delay={0.3} icon={Zap} value="128" label="Upsells accepted" />
-            <FloatCard className="-right-2 -bottom-4" delay={0.45} icon={Check} value="412" label="Tickets deflected" />
+            <FloatCard className="-left-5 top-2" delay={0.15} icon={TrendingUp} value="4 320 €" label="Revenus d’upsell" tint />
+            <FloatCard className="-right-6 top-16" delay={0.3} icon={Zap} value="128" label="Upsells acceptés" />
+            <FloatCard className="-right-2 -bottom-4" delay={0.45} icon={Check} value="412" label="Tickets support évités" />
           </>
         )}
       </AnimatePresence>
@@ -169,7 +170,7 @@ function BrowserFrame({ children }: { children: React.ReactNode }) {
         </div>
         <div className="mx-auto flex w-[55%] items-center justify-center gap-1.5 rounded-md bg-white px-3 py-1 text-[11px] text-neutral-500 ring-1 ring-neutral-200">
           <Lock className="size-3 text-neutral-400" />
-          yourstore.com/order
+          votreboutique.fr/commande
         </div>
       </div>
       {/* body */}
@@ -202,8 +203,8 @@ function ConfirmedBody() {
       <div className="mt-3 text-[10px] font-medium uppercase tracking-wide text-neutral-400">
         Confirmation #JDTNH5Z6N
       </div>
-      <div className="mt-1 text-lg font-bold text-neutral-900">Order confirmed</div>
-      <p className="mt-1 text-[12px] text-neutral-500">Thank you, Tucker! A receipt is on its way.</p>
+      <div className="mt-1 text-lg font-bold text-neutral-900">Commande confirmée</div>
+      <p className="mt-1 text-[12px] text-neutral-500">Merci, Camille ! Votre reçu arrive par e-mail.</p>
     </motion.div>
   );
 }
@@ -220,26 +221,26 @@ function EditingBody({ countdown }: { countdown: string }) {
         </span>
         <div className="min-w-0">
           <div className="text-[9px] text-neutral-500">#JDTNH5Z6N</div>
-          <div className="truncate text-[13px] font-bold text-neutral-900">Thank you, Tucker!</div>
+          <div className="truncate text-[13px] font-bold text-neutral-900">Merci, Camille !</div>
         </div>
       </div>
 
-      <h3 className="mb-2 text-[12px] font-bold text-neutral-900">Make changes to your order</h3>
+      <h3 className="mb-2 text-[12px] font-bold text-neutral-900">Modifiez votre commande</h3>
 
       <div className="mb-2.5 flex items-start gap-1.5 rounded-lg bg-amber-50 px-2.5 py-2 text-[10px] leading-snug text-neutral-700">
         <TriangleAlert className="mt-0.5 size-3 shrink-0 text-amber-500" />
         <span>
-          You can make changes for another{" "}
+          Vous pouvez encore modifier votre commande pendant{" "}
           <span className="font-semibold tabular-nums text-red-500">{countdown}</span>
         </span>
       </div>
 
       <div className="flex flex-1 flex-col justify-center gap-1.5">
-        <Opt icon={UserRound} label="Change Contact Information" />
-        <Opt icon={MapPin} label="Edit Shipping Address" highlight />
-        <Opt icon={Pencil} label="Update your order" />
-        <Opt icon={Tag} label="Apply Discount Code" />
-        <Opt icon={X} label="Cancel Your Order" />
+        <Opt icon={UserRound} label="Modifier les coordonnées" />
+        <Opt icon={MapPin} label="Modifier l’adresse de livraison" highlight />
+        <Opt icon={Pencil} label="Modifier les articles" />
+        <Opt icon={Tag} label="Appliquer un code promo" />
+        <Opt icon={X} label="Annuler la commande" />
       </div>
     </motion.div>
   );
@@ -252,9 +253,9 @@ function AddressBody({ onSaved }: { onSaved: () => void }) {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const A = "76 Greene Ave";
-    const C = "New York";
-    const Z = "10001";
+    const A = "18 rue des Lilas";
+    const C = "Lyon";
+    const Z = "69003";
     let ai = 0;
     let ci = 0;
     let zi = 0;
@@ -278,15 +279,15 @@ function AddressBody({ onSaved }: { onSaved: () => void }) {
     <motion.div {...bodyMotion} className="relative flex h-full flex-col p-4">
       <div className="mb-3 flex items-center gap-2">
         <ArrowLeft className="size-4 text-neutral-500" />
-        <span className="text-[13px] font-bold text-neutral-900">Edit shipping address</span>
+        <span className="text-[13px] font-bold text-neutral-900">Modifier l’adresse de livraison</span>
       </div>
 
-      <Field label="Address 1" value={address} typing={!saved && address.length < 13} />
+      <Field label="Adresse" value={address} typing={!saved && address.length < 16} />
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <Field label="City" value={city} />
-        <Field label="Postal code" value={zip} />
+        <Field label="Ville" value={city} />
+        <Field label="Code postal" value={zip} />
       </div>
-      <Field label="State" value="New York" className="mt-2" />
+      <Field label="Région" value="Auvergne-Rhône-Alpes" className="mt-2" />
 
       <button
         className="mt-auto flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-[12px] font-semibold text-white transition-colors"
@@ -294,10 +295,10 @@ function AddressBody({ onSaved }: { onSaved: () => void }) {
       >
         {saved ? (
           <>
-            <Check className="size-4" strokeWidth={3} /> Address saved
+            <Check className="size-4" strokeWidth={3} /> Adresse enregistrée
           </>
         ) : (
-          "Save address"
+          "Enregistrer l’adresse"
         )}
       </button>
 
@@ -335,10 +336,10 @@ function UpsellBody() {
   return (
     <motion.div {...bodyMotion} className="relative flex h-full flex-col p-4">
       <div className="flex items-center gap-1.5 text-[13px] font-bold text-neutral-900">
-        <Plus className="size-4 text-primary" /> You may also like these products
+        <Plus className="size-4 text-primary" /> Vous aimerez aussi
       </div>
       <p className="mb-3 mt-0.5 text-[10px] text-neutral-500">
-        Frequently bought together — ships in the same box.
+        Souvent achetés ensemble, expédiés dans le même colis.
       </p>
 
       <div className="grid flex-1 grid-cols-3 gap-2.5">
@@ -356,7 +357,7 @@ function UpsellBody() {
                 style={{ background: isAdded ? "#16a34a" : BRAND }}
               >
                 {isAdded ? <Check className="size-3" /> : <Plus className="size-3" />}
-                {isAdded ? "Added" : "Add to order"}
+                {isAdded ? "Ajouté" : "Ajouter"}
               </button>
             </div>
           );
@@ -373,7 +374,7 @@ function UpsellBody() {
           >
             <div className="flex flex-col items-center gap-2 rounded-2xl bg-white px-5 py-4 shadow-soft-xl">
               <Loader2 className="size-6 animate-spin" style={{ color: BRAND }} />
-              <span className="text-[11px] font-medium text-neutral-600">Syncing with your order…</span>
+              <span className="text-[11px] font-medium text-neutral-600">Mise à jour de votre commande…</span>
             </div>
           </motion.div>
         )}
@@ -391,16 +392,16 @@ function AnalyticsBody() {
   const bars = [38, 52, 46, 64, 58, 78, 96];
   return (
     <motion.div {...bodyMotion} className="flex h-full flex-col p-4">
-      <div className="text-[13px] font-bold text-neutral-900">Your impact this month</div>
-      <p className="mb-3 mt-0.5 text-[10px] text-neutral-500">Updated in real time</p>
+      <div className="text-[13px] font-bold text-neutral-900">Vos résultats ce mois-ci</div>
+      <p className="mb-3 mt-0.5 text-[10px] text-neutral-500">Mis à jour en temps réel</p>
 
       <div className="mb-3 grid grid-cols-2 gap-2">
-        <MiniStat label="Revenue added" value="$4.3k" tint />
-        <MiniStat label="AOV lift" value="+18%" />
+        <MiniStat label="Revenus générés" value="4,3 k€" tint />
+        <MiniStat label="Hausse du panier moyen" value="+18 %" />
       </div>
 
       <div className="flex flex-1 flex-col rounded-2xl border border-neutral-200 p-3">
-        <div className="mb-2 text-[10px] font-bold text-neutral-900">Upsell revenue / week</div>
+        <div className="mb-2 text-[10px] font-bold text-neutral-900">Revenus d’upsell / semaine</div>
         <div className="flex flex-1 items-end gap-1.5">
           {bars.map((h, i) => (
             <motion.div
@@ -424,21 +425,21 @@ function Sidebar({ added }: { added: boolean }) {
   const subtotal = 89 + (added ? 64 : 0);
   return (
     <aside className="flex flex-col bg-neutral-50 p-3.5">
-      <div className="mb-3 text-[11px] font-bold text-neutral-900">Order summary</div>
+      <div className="mb-3 text-[11px] font-bold text-neutral-900">Récapitulatif de commande</div>
       <div className="flex flex-col gap-2.5">
-        <SummaryItem title="Merino Wool Crew" qty={1} price={89} />
+        <SummaryItem title="Pull col rond en mérinos" qty={1} price={89} />
         <AnimatePresence>
           {added && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="overflow-hidden">
-              <SummaryItem title="Everyday Tote" qty={1} price={64} highlight />
+              <SummaryItem title="Cabas du quotidien" qty={1} price={64} highlight />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       <div className="mt-auto space-y-1 border-t border-neutral-200 pt-2.5 text-[11px]">
-        <Row label="Subtotal" value={money(subtotal)} />
-        <Row label="Shipping" value="FREE" />
+        <Row label="Sous-total" value={money(subtotal)} />
+        <Row label="Livraison" value="OFFERTE" />
       </div>
       <div className="mt-2 flex items-baseline justify-between border-t border-neutral-200 pt-2">
         <span className="text-[12px] font-bold text-neutral-900">Total</span>

@@ -28,6 +28,14 @@ function logoFor(name: string): string | null {
   const key = name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
   return CUSTOMER_LOGOS[key] ?? null;
 }
+// "JUNE 9, 2026" (App Store export) -> "9 juin 2026"
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+function frDate(raw: string) {
+  const m = raw.trim().match(/^([A-Za-z]+)\.?\s+(\d{1,2}),?\s+(\d{4})$/);
+  const mi = m ? MONTHS.indexOf(m[1].slice(0, 3).toLowerCase()) : -1;
+  if (!m || mi < 0) return raw;
+  return new Date(Number(m[3]), mi, Number(m[2])).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+}
 function tidyName(name: string) {
   return name.replace(/[-_]/g, " ").split(" ").map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(" ");
 }
@@ -70,7 +78,7 @@ function ReviewMarqueeCard({ review }: { review: Review }) {
           </span>
           <div className="min-w-0">
             <div className="truncate text-[14px] font-bold tracking-tight text-neutral-900">{name}</div>
-            <div className="truncate text-[12px] text-neutral-500">{review.date}</div>
+            <div className="truncate text-[12px] text-neutral-500">{frDate(review.date)}</div>
           </div>
         </div>
         {logo && (
@@ -100,7 +108,7 @@ function MiniCard({ review }: { review: Review }) {
         </span>
         <div className="min-w-0">
           <div className="truncate text-[10px] font-bold text-neutral-900">{name}</div>
-          <div className="truncate text-[8px] text-neutral-400">{review.date}</div>
+          <div className="truncate text-[8px] text-neutral-400">{frDate(review.date)}</div>
         </div>
       </div>
     </div>
@@ -139,12 +147,12 @@ export function WallOfLoveTeaser() {
     <section className="overflow-hidden border-t border-black/5 bg-[#FAF9F6] py-20 md:py-28">
       <Container>
         <div className="mx-auto mb-10 max-w-3xl text-center">
-          <span className="text-sm font-semibold uppercase tracking-[0.12em] text-primary md:text-base">Wall of Love</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.12em] text-primary md:text-base">Avis clients</span>
           <h2 className="mt-3 font-serif font-normal tracking-tight text-black" style={{ fontSize: "clamp(1.875rem,4vw,2.75rem)", lineHeight: 1.1 }}>
-            Loved by fast-growing brands
+            Adopté par des marques en pleine croissance
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base font-medium text-black/60">
-            See how merchants use Clickpost Order Editing to automate customer service and recover cart revenue.
+            Découvrez comment les marchands utilisent Clickpost Order Editing pour automatiser leur service client et récupérer du chiffre d’affaires.
           </p>
         </div>
       </Container>
@@ -199,7 +207,7 @@ export function WallOfLoveTeaser() {
             <div className="absolute bottom-0 left-0 flex h-[104px] w-full items-end justify-center rounded-2xl border border-white/15 bg-gradient-to-b from-[#343434] to-[#141414] pb-5 shadow-[inset_0_2px_10px_rgba(255,255,255,0.08)]">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
               <div className="rounded-lg border border-white/10 bg-black px-4 py-2 text-[13px] font-medium tracking-wide text-white/90 backdrop-blur">
-                Wall of Love
+                Avis clients
               </div>
             </div>
           </div>
@@ -209,7 +217,7 @@ export function WallOfLoveTeaser() {
       <Container>
         <div className="mt-12 flex justify-center">
           <Button asChild size="lg" className="cursor-pointer rounded-full bg-black px-8 py-6 text-sm font-semibold text-white shadow-md transition-all hover:bg-black/90 active:scale-95">
-            <Link href="/reviews">See all 52 reviews in our Love Gallery →</Link>
+            <Link href="/reviews">Voir les 70+ avis →</Link>
           </Button>
         </div>
       </Container>

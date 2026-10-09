@@ -22,45 +22,48 @@ const SITE_URL = "https://clickpost.ai";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Clickpost — Self-Service Order Editing & Upsell for Shopify",
+    default: "Clickpost — Modification de commande et upsell en libre-service pour Shopify",
     template: "%s · Clickpost",
   },
   description:
-    "Let shoppers edit, cancel, and upgrade their own orders. Cut support tickets, validate addresses, and lift AOV with post-purchase upsells.",
+    "Vos clients modifient, annulent et complètent eux-mêmes leurs commandes. Moins de tickets support, des adresses validées et un panier moyen en hausse grâce aux upsells post-achat.",
   keywords: [
-    "order editing",
+    "modification de commande",
     "Shopify",
-    "post-purchase upsell",
-    "address validation",
-    "order cancellation",
-    "ecommerce",
+    "upsell post-achat",
+    "validation d'adresse",
+    "annulation de commande",
+    "droit de rétractation",
+    "RGPD",
+    "e-commerce",
   ],
   other: { "deploy-check": "2026-10-01-mohit" },
   openGraph: {
     type: "website",
+    locale: "fr_FR",
     url: SITE_URL,
-    title: "Clickpost — Self-Service Order Editing & Upsell",
+    title: "Clickpost — Modification de commande et upsell en libre-service",
     description:
-      "Let shoppers fix their own orders. Fewer tickets, fewer failed deliveries, higher AOV.",
+      "Vos clients corrigent eux-mêmes leurs commandes. Moins de tickets, moins d'échecs de livraison, un panier moyen plus élevé.",
     siteName: "Clickpost",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clickpost — Self-Service Order Editing & Upsell",
-    description: "Let shoppers fix their own orders. Fewer tickets, higher AOV.",
+    title: "Clickpost — Modification de commande et upsell en libre-service",
+    description: "Vos clients corrigent eux-mêmes leurs commandes. Moins de tickets, un panier moyen plus élevé.",
   },
   robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="fr" className={`${inter.variable} ${fraunces.variable}`}>
       <body className="relative min-h-screen antialiased">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-foreground focus:px-4 focus:py-2 focus:text-background"
         >
-          Skip to content
+          Aller au contenu
         </a>
         <Navbar />
         <main id="main">{children}</main>

@@ -75,8 +75,8 @@ export function Hero() {
             className="text-balance font-semibold tracking-tight text-foreground"
             style={{ fontFamily: "var(--font-display), sans-serif", fontSize: "clamp(2rem, 5vw, 5.25rem)", lineHeight: 1.04, letterSpacing: "-0.022em" }}
           >
-            Reduce Support Tickets and Add Thousands in{" "}
-            <span className="text-[#155FFF]">Upsell Revenue</span>
+            Moins de tickets support,{" "}
+            <span className="text-[#155FFF]">des milliers d’euros d’upsell en plus</span>
           </motion.h1>
 
           <motion.p
@@ -84,7 +84,7 @@ export function Hero() {
             className="mt-4 text-muted-foreground md:mt-6"
             style={{ fontSize: "clamp(1rem, 1.5vw, 1.4rem)" }}
           >
-            Enter your store URL to have a personalized demo tailored to your store.
+            Saisissez l’URL de votre boutique : votre démo personnalisée est prête en quelques secondes.
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-5 w-full max-w-xl md:mt-7 lg:max-w-2xl">

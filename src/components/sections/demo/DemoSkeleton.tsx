@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
-const LOADING_STEPS = ["Reading your store…", "Pulling your products…", "Building your demo…"];
+const LOADING_STEPS = ["Analyse de votre boutique…", "Récupération de vos produits…", "Création de votre démo…"];
 
 export function DemoSkeleton({ step }: { step: number }) {
   return (

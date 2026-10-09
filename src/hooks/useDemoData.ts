@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { mockStore, type DemoProduct, type DemoStore } from "@/lib/site";
+import { DEFAULT_CURRENCY } from "@/lib/format";
 
 type Status = "idle" | "loading" | "ready";
 
@@ -51,7 +52,7 @@ export function useDemoData() {
       brandName: branding?.brandName || deriveBrandName(url) || mockStore.brandName,
       brandColor: branding?.brandColor || mockStore.brandColor,
       logo: branding?.logo || null,
-      currency: branding?.currency || currencyFromUrl(url) || mockStore.currency || "USD",
+      currency: branding?.currency || currencyFromUrl(url) || mockStore.currency || DEFAULT_CURRENCY,
       products: fillProducts(branding?.products),
     });
     setStatus("ready");
@@ -88,14 +89,15 @@ function currencyFromUrl(url: string): string | null {
     [/\.(co\.uk|uk)$/, "GBP"],
     [/\.(com\.au|au)$/, "AUD"],
     [/\.ca$/, "CAD"],
-    [/\.(de|fr|it|es|nl|ie|eu|pt|at|be|fi)$/, "EUR"],
+    [/\.ch$/, "CHF"],
+    [/\.(de|fr|it|es|nl|ie|eu|pt|at|be|lu|fi)$/, "EUR"],
     [/\.(sg)$/, "SGD"],
     [/\.(ae)$/, "AED"],
     [/\.(jp)$/, "JPY"],
   ];
   for (const [re, cur] of byTld) if (re.test(host)) return cur;
   // Unknown / generic TLD (.com, .co, .shop …): don't assume USD — fall through so
-  // the caller's India-first default (INR) applies. Real Shopify stores still get
+  // the caller's European default (EUR, via DEFAULT_CURRENCY) applies. Real Shopify stores still get
   // their true currency from cart.js upstream, so this only affects unreadable sites.
   return null;
 }

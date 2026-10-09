@@ -6,8 +6,7 @@ import type { DemoStore, DemoProduct } from "@/lib/site";
 import { TooGoodToMiss } from "./TooGoodToMiss";
 import { DemoImg } from "./DemoImg";
 
-const money = (n: number, currency = "USD") =>
-  new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+import { money, DEFAULT_CURRENCY } from "@/lib/format";
 
 function Img({ src, className }: { src?: string | null; className: string }) {
   return <DemoImg src={src} className={className} />;
@@ -40,13 +39,13 @@ function AddCard({
           className="mt-2.5 w-full rounded-md py-2 text-[13px] font-semibold text-white transition-all hover:brightness-110"
           style={{ background: brand }}
         >
-          Add to order
+          Ajouter
         </button>
       ) : (
         <div className="mt-2.5 flex items-center justify-between rounded-md" style={{ border: `1.5px solid ${brand}` }}>
-          <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="flex size-8 items-center justify-center text-[18px] font-bold leading-none" style={{ color: brand }} aria-label="Decrease">−</button>
+          <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="flex size-8 items-center justify-center text-[18px] font-bold leading-none" style={{ color: brand }} aria-label="Diminuer">−</button>
           <span className="text-[13px] font-bold text-neutral-900">{qty}</span>
-          <button onClick={add} className="flex size-8 items-center justify-center text-[18px] font-bold leading-none" style={{ color: brand }} aria-label="Increase">+</button>
+          <button onClick={add} className="flex size-8 items-center justify-center text-[18px] font-bold leading-none" style={{ color: brand }} aria-label="Augmenter">+</button>
         </div>
       )}
     </div>
@@ -80,7 +79,7 @@ export function ThankYouUpsell({
   shipBoxRef?: React.RefObject<HTMLDivElement | null>;
   shipAddBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
-  const fmt = (n: number) => money(n, store.currency || "USD");
+  const fmt = (n: number) => money(n, store.currency || DEFAULT_CURRENCY);
   const featured = products[products.length - 1] ?? products[0];
 
   const showShipBar = typeof subtotal === "number" && typeof freeShipAt === "number" && freeShipAt > 0;
@@ -94,7 +93,7 @@ export function ThankYouUpsell({
   const bestSellers = pool.slice(0, half);
   const moreItems = pool.slice(half).length ? pool.slice(half) : pool;
 
-  const currency = store.currency || "USD";
+  const currency = store.currency || DEFAULT_CURRENCY;
 
   return (
     <div className="flex flex-col gap-4">
@@ -102,7 +101,7 @@ export function ThankYouUpsell({
       {showShipBar && (
         <div ref={shipBoxRef} className="rounded-xl border border-border p-4">
           <h4 className="text-[15px] font-bold text-neutral-900">
-            {unlocked ? "You've unlocked free shipping!" : "Unlock free shipping by adding best sellers."}
+            {unlocked ? "Vous avez débloqué la livraison offerte !" : "Débloquez la livraison offerte en ajoutant nos best-sellers."}
           </h4>
           <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-neutral-200">
             <div
@@ -112,10 +111,10 @@ export function ThankYouUpsell({
           </div>
           <p className="mt-2 text-[13.5px] text-neutral-600">
             {unlocked ? (
-              <span className="font-semibold text-emerald-600">Free shipping applied to your order.</span>
+              <span className="font-semibold text-emerald-600">Livraison offerte appliquée à votre commande.</span>
             ) : (
               <>
-                <span className="font-bold text-neutral-900">{fmt(remaining)}</span> away from free shipping.
+                <span className="font-bold text-neutral-900">{fmt(remaining)}</span> de plus pour profiter de la livraison offerte.
               </>
             )}
           </p>
@@ -131,7 +130,7 @@ export function ThankYouUpsell({
       <div ref={gridRef} className="rounded-xl border border-border p-4">
         <div className="mb-3 flex items-center gap-2">
           <Plus className="size-4 text-neutral-500" />
-          <h4 className="text-[15px] font-bold text-neutral-900">Add More Items</h4>
+          <h4 className="text-[15px] font-bold text-neutral-900">Ajouter d’autres articles</h4>
         </div>
         <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2">
           {moreItems.map((p, i) => (
@@ -143,7 +142,7 @@ export function ThankYouUpsell({
           className="mt-3 w-full rounded-md py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-110"
           style={{ background: brand }}
         >
-          Explore all products
+          Voir tous les produits
         </button>
       </div>
 

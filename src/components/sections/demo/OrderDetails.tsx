@@ -3,13 +3,6 @@
 import { CreditCard } from "lucide-react";
 import type { Addr } from "./DemoMock";
 
-const STATE_ABBR: Record<string, string> = {
-  California: "CA", "New York": "NY", Texas: "TX", Florida: "FL", Washington: "WA",
-  Illinois: "IL", Massachusetts: "MA", Georgia: "GA", Colorado: "CO", Oregon: "OR",
-  Arizona: "AZ", Nevada: "NV", Pennsylvania: "PA", Ohio: "OH", Michigan: "MI",
-};
-const region = (s: string) => STATE_ABBR[s] ?? s;
-
 function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -36,19 +29,19 @@ export function OrderDetails({
   const lines = [
     `${addr.first} ${addr.last}`,
     addr.line1,
-    `${addr.city} ${region(addr.state)} ${addr.zip}`,
+    `${addr.zip} ${addr.city}`, // French order: postal code first, no region
     country,
     phone,
   ];
 
   return (
     <div className="rounded-xl border border-border p-5">
-      <h3 className="text-[17px] font-bold text-neutral-900">Order details</h3>
+      <h3 className="text-[17px] font-bold text-neutral-900">Détails de la commande</h3>
       <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
-        <Block label="Contact information">
+        <Block label="Coordonnées">
           <div>{email}</div>
         </Block>
-        <Block label="Payment method">
+        <Block label="Moyen de paiement">
           <div className="flex items-center gap-2">
             <span className="flex h-6 w-9 shrink-0 items-center justify-center rounded border border-border bg-neutral-50">
               <CreditCard className="size-4 text-neutral-400" />
@@ -56,13 +49,13 @@ export function OrderDetails({
             <span className="text-neutral-700">•••• 1 · {amount}</span>
           </div>
         </Block>
-        <Block label="Shipping address">
+        <Block label="Adresse de livraison">
           {lines.map((l, i) => <div key={i}>{l}</div>)}
         </Block>
-        <Block label="Billing address">
+        <Block label="Adresse de facturation">
           {lines.map((l, i) => <div key={i}>{l}</div>)}
         </Block>
-        <Block label="Shipping method">
+        <Block label="Mode de livraison">
           <div>Standard</div>
         </Block>
       </div>

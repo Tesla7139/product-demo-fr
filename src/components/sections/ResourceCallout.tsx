@@ -21,14 +21,14 @@ export function ResourceCallout() {
           <div className="pointer-events-none absolute -left-20 -top-20 size-64 rounded-full bg-primary/30 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -right-16 size-72 rounded-full bg-primary/20 blur-3xl" />
           <div className="relative mx-auto max-w-2xl">
-            <h2 className="text-h2 text-balance">Go live in minutes, not sprints</h2>
+            <h2 className="text-h2 text-balance">En ligne en quelques minutes, pas en quelques sprints</h2>
             <p className="mx-auto mt-4 max-w-lg text-background/70">
-              Install, set your editing window, and let shoppers take it from there.
+              Installez l’app, fixez votre délai de modification, et laissez vos clients faire le reste.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild size="lg">
                 <a href="#demo">
-                  See your demo <ArrowRight className="size-4" />
+                  Voir ma démo <ArrowRight className="size-4" />
                 </a>
               </Button>
               <Button
@@ -37,7 +37,7 @@ export function ResourceCallout() {
                 variant="outline"
                 className="border-background/30 bg-transparent text-background hover:bg-background/10 hover:text-background"
               >
-                <a href="#contact">Book a demo</a>
+                <a href="#contact">Réserver une démo</a>
               </Button>
             </div>
           </div>

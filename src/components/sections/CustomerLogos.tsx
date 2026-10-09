@@ -63,7 +63,7 @@ function LogoItem({ logo }: { logo: CustomerLogo }) {
             </p>
           ) : (
             <p className="text-[14px] italic leading-relaxed text-muted-foreground">
-              Verified Clickpost customer — review coming soon.
+              Client Clickpost vérifié — avis bientôt disponible.
             </p>
           )}
           <div className="mt-2 text-[13px] font-bold text-foreground">{reviewer}</div>
@@ -85,7 +85,7 @@ export function CustomerLogos({ embedded = false }: { embedded?: boolean }) {
 
   return (
     <Wrapper
-      aria-label="Brands working with us"
+      aria-label="Marques qui nous font confiance"
       className={embedded ? "w-full border-t border-border/60 pt-10 pb-2" : "py-12"}
     >
       {/* slow the drift while the pointer is over the strip (instead of stopping)

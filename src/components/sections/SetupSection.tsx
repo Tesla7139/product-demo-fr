@@ -19,20 +19,20 @@ export function SetupSection() {
             viewport={viewportOnce}
           >
             <motion.span variants={fadeUp} className="text-eyebrow text-primary">
-              Setup
+              Configuration
             </motion.span>
             <motion.h2 variants={fadeUp} className="text-h2 mt-3 text-balance">
-              You stay in control of the rules
+              C’est vous qui fixez les règles
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-4 max-w-md text-muted-foreground">
-              Decide how long shoppers can edit, and exactly what they’re allowed to change — no
-              code, live in minutes.
+              Décidez combien de temps vos clients peuvent modifier leur commande, et ce qu’ils ont
+              le droit de changer — sans code, en ligne en quelques minutes.
             </motion.p>
             <motion.ul variants={fadeUp} className="mt-7 flex flex-col gap-3.5">
               {[
-                "Set an editing window by time or until fulfilled",
-                "Toggle each action on or off",
-                "Changes sync straight to your fulfillment stack",
+                "Délai de modification fixe ou jusqu’à l’expédition",
+                "Activez ou désactivez chaque action",
+                "Modifications synchronisées avec votre logistique",
               ].map((t) => (
                 <li key={t} className="flex items-center gap-3 text-sm text-foreground/90">
                   <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">

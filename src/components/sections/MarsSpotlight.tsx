@@ -7,19 +7,19 @@ import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
 
 const STATS = [
   {
-    figure: "6,644",
-    label: "orders self-edited",
-    detail: "Customers corrected addresses, swapped variants, and applied discounts — without emailing support once.",
+    figure: "6 644",
+    label: "commandes modifiées en autonomie",
+    detail: "Les clients ont corrigé leur adresse, changé de variante et appliqué des codes promo — sans jamais écrire au support.",
   },
   {
-    figure: "$11,713",
-    label: "in upsell revenue",
-    detail: "Generated directly on the post-purchase thank-you page. No ad spend. No new checkout friction.",
+    figure: "11 713 $",
+    label: "de revenus d’upsell",
+    detail: "Générés directement sur la page de remerciement. Zéro budget pub. Aucune friction ajoutée au paiement.",
   },
   {
-    figure: "200k+",
-    label: "shoppers shown the edit option",
-    detail: "Across every order confirmation — every one of them a potential support ticket that never happened.",
+    figure: "200 000+",
+    label: "clients ont vu l’option de modification",
+    detail: "Sur chaque confirmation de commande — autant de tickets support potentiels qui n’ont jamais existé.",
   },
 ];
 
@@ -49,10 +49,10 @@ export function MarsSpotlight() {
           {/* Badges */}
           <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-white/50">
-              Customer spotlight
+              Cas client
             </span>
             <span className="rounded-full bg-amber-400/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-amber-300">
-              9-figure brand
+              CA à 9 chiffres
             </span>
           </motion.div>
 
@@ -66,10 +66,10 @@ export function MarsSpotlight() {
               letterSpacing: "-0.025em",
             }}
           >
-            Mars By GHC scaled
+            Mars By GHC a grandi
             <br />
             <span style={{ color: "rgba(255,255,255,0.35)" }}>
-              without scaling support.
+              sans grossir son support.
             </span>
           </motion.h2>
 
@@ -78,8 +78,8 @@ export function MarsSpotlight() {
             className="mt-5 max-w-lg text-[16px] leading-relaxed"
             style={{ color: "rgba(255,255,255,0.55)" }}
           >
-            A nine-figure Shopify brand turned their order confirmation page into a self-service
-            hub. Their customers now fix their own orders — and add to them.
+            Une marque Shopify à neuf chiffres a fait de sa page de confirmation un espace en
+            libre-service. Ses clients corrigent eux-mêmes leurs commandes — et les complètent.
           </motion.p>
 
           {/* Stats — horizontal data rows, not pedestals */}
@@ -127,7 +127,7 @@ export function MarsSpotlight() {
                 &ldquo;{REVIEW}&rdquo;
               </blockquote>
               <footer className="mt-3 text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.32)" }}>
-                Mars By GHC &mdash; Shopify App Store, January 2026
+                Mars By GHC &mdash; Shopify App Store, janvier 2026
               </footer>
             </div>
 
@@ -138,7 +138,7 @@ export function MarsSpotlight() {
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[14px] font-semibold text-neutral-900 shadow-lg transition-opacity hover:opacity-90"
               >
-                Read their review
+                Lire leur avis
                 <ExternalLink className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </a>
             </div>

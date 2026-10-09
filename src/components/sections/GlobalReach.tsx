@@ -7,6 +7,7 @@ import { MapPin } from "lucide-react";
 import { Container } from "@/components/primitives/Container";
 import { SectionHeading } from "@/components/primitives/SectionHeading";
 import { globeEvents } from "@/lib/site";
+import { num } from "@/lib/format";
 
 /** Live-ticking counters that read as the product working across the globe. */
 function LiveCounter({
@@ -36,7 +37,7 @@ function LiveCounter({
     <div ref={ref} className="flex flex-col gap-1">
       <span className="text-h2 tabular-nums" style={{ fontSize: "clamp(1.8rem,3vw,2.5rem)" }}>
         {prefix}
-        {n.toLocaleString("en-US")}
+        {num(n)}
         {suffix}
       </span>
       <span className="text-sm text-muted-foreground">{label}</span>
@@ -80,9 +81,9 @@ export function GlobalReach() {
       <Container>
         <div className="mx-auto max-w-2xl text-center text-scrim rounded-3xl p-4">
           <SectionHeading
-            eyebrow="Every region, every order"
-            title="Orders getting saved around the world"
-            subtitle="Each ping is a shopper self-serving instead of opening a ticket."
+            eyebrow="Chaque région, chaque commande"
+            title="Des commandes sauvées partout en Europe et au-delà"
+            subtitle="Chaque signal, c’est un client qui se débrouille seul au lieu d’ouvrir un ticket."
           />
           <div className="mt-6 flex justify-center">
             <EventTicker />
@@ -90,9 +91,9 @@ export function GlobalReach() {
         </div>
 
         <div className="mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-10 sm:grid-cols-3">
-          <LiveCounter base={128430} label="Edits handled" rate={4} />
-          <LiveCounter base={742900} prefix="$" label="Upsell revenue" rate={120} />
-          <LiveCounter base={31280} label="Cancellations recovered" rate={2} />
+          <LiveCounter base={128430} label="Modifications traitées" rate={4} />
+          <LiveCounter base={742900} suffix={" €"} label="Revenus d’upsell" rate={120} />
+          <LiveCounter base={31280} label="Annulations évitées" rate={2} />
         </div>
       </Container>
     </section>

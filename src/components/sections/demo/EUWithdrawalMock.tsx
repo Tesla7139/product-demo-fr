@@ -6,13 +6,11 @@ import { ArrowLeft, Check, ChevronDown, HelpCircle, Truck } from "lucide-react";
 import type { DemoStore } from "@/lib/site";
 import { DEFAULT_ADDR, DEFAULT_EMAIL, DEFAULT_PHONE, DEFAULT_COUNTRY } from "./DemoMock";
 import { DemoImg } from "./DemoImg";
-
-const money = (n: number, currency = "USD") =>
-  new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+import { money, DEFAULT_CURRENCY } from "@/lib/format";
 
 // same customer/order details as the main order-editing window
 const CUSTOMER = `${DEFAULT_ADDR.first} ${DEFAULT_ADDR.last}`;
-const ADDR_LINES = [CUSTOMER, DEFAULT_ADDR.line1, `${DEFAULT_ADDR.city}, ${DEFAULT_ADDR.state} ${DEFAULT_ADDR.zip}`, DEFAULT_COUNTRY];
+const ADDR_LINES = [CUSTOMER, DEFAULT_ADDR.line1, `${DEFAULT_ADDR.zip} ${DEFAULT_ADDR.city}`, DEFAULT_COUNTRY];
 const TRACKING = "JAM8470GB72670273201";
 
 function Thumb({ src, alt }: { src?: string | null; alt: string }) {
@@ -41,12 +39,12 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 const WITHDRAWAL_REASONS = [
-  "I changed my mind",
-  "Ordered by mistake",
-  "Found a better price elsewhere",
-  "No longer needed",
-  "Delivery is taking too long",
-  "Ordered the wrong item or size",
+  "J'ai changé d'avis",
+  "Commande passée par erreur",
+  "J'ai trouvé moins cher ailleurs",
+  "Je n'en ai plus besoin",
+  "Le délai de livraison est trop long",
+  "Mauvais article ou mauvaise taille",
 ];
 
 /** Interactive reason dropdown, styled like the order-editing fields. */
@@ -90,10 +88,10 @@ type EUTourRefs = {
 };
 
 /** Shopify-style order status page with the EU Withdrawal Function + a two-step withdrawal request. */
-const WITHDRAWAL_MESSAGE = "I'd like to withdraw from this purchase within the cooling-off period.";
+const WITHDRAWAL_MESSAGE = "Je vous notifie par la présente ma rétractation du contrat portant sur la vente du bien ci-dessous.";
 
 export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = false, onWithdrawOpened, onWithdrawn }: { store: DemoStore; tourRefs?: EUTourRefs; autoFill?: number; manualFill?: boolean; onWithdrawOpened?: () => void; onWithdrawn?: () => void }) {
-  const currency = store.currency || "USD";
+  const currency = store.currency || DEFAULT_CURRENCY;
   const fmt = (n: number) => money(n, currency);
   const product = store.products.find((p) => (p.price ?? 0) > 0) ?? store.products[0];
   const price = product?.price ?? 95;
@@ -151,8 +149,8 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
           <div className="flex items-start gap-2">
             <ArrowLeft className="mt-1 size-4 text-neutral-500" />
             <div>
-              <div className="text-lg font-bold tracking-tight text-neutral-900">Order #133792</div>
-              <div className="text-xs text-neutral-500">Confirmed 18 Jun</div>
+              <div className="text-lg font-bold tracking-tight text-neutral-900">Commande n°&nbsp;133792</div>
+              <div className="text-xs text-neutral-500">Confirmée le 18 juin</div>
             </div>
           </div>
         </div>
@@ -162,10 +160,10 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
           <div className="space-y-4">
             {/* EU Withdrawal Function card */}
             <div ref={tourRefs?.euCard} className="rounded-xl border border-border p-4">
-              <h3 className="text-base font-bold text-neutral-900">EU Withdrawal Function</h3>
+              <h3 className="text-base font-bold text-neutral-900">Droit de rétractation (UE)</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-neutral-500">
-                EU customers can edit eligible orders during the editing period or use the withdrawal function for
-                cancellation, refund, or return help.
+                Les clients de l&apos;UE peuvent modifier une commande éligible pendant le délai de modification, ou
+                utiliser le formulaire de rétractation pour une annulation, un remboursement ou un retour.
               </p>
 
               <div ref={tourRefs?.withdrawRow} className="mt-3 overflow-hidden rounded-lg border border-border">
@@ -175,7 +173,7 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
                   aria-expanded={open}
                 >
                   <HelpCircle className="size-4 shrink-0 text-neutral-600" />
-                  <span className="flex-1 text-sm font-semibold text-neutral-900">Withdraw from contract request</span>
+                  <span className="flex-1 text-sm font-semibold text-neutral-900">Formulaire de rétractation</span>
                   <ChevronDown className={`size-4 text-neutral-400 transition-transform ${open ? "rotate-180" : ""}`} />
                 </button>
 
@@ -190,11 +188,11 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
                     >
                       {step === "form" ? (
                         <div className="flex flex-col gap-2.5 px-3.5 pb-4 pt-1">
-                          <ReasonSelect label="Reason for withdrawal" value={reason || "Select a reason"} onChange={setReason} />
-                          <Field label="Email" value={email} />
-                          <Field label="Phone" value={phone} />
+                          <ReasonSelect label="Motif de la rétractation" value={reason || "Choisir un motif"} onChange={setReason} />
+                          <Field label="E-mail" value={email} />
+                          <Field label="Téléphone" value={phone} />
                           <label className="relative block rounded-md border border-border px-3 pt-5 pb-2">
-                            <span className="pointer-events-none absolute left-3 top-1.5 text-[10px] font-medium uppercase tracking-wide text-neutral-400">Message (optional)</span>
+                            <span className="pointer-events-none absolute left-3 top-1.5 text-[10px] font-medium uppercase tracking-wide text-neutral-400">Message (facultatif)</span>
                             <span className="block min-h-[1.2em] text-sm leading-snug text-neutral-600">
                               {message}
                             </span>
@@ -210,7 +208,7 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
                               {agreed && <Check className="size-3 text-white" strokeWidth={3} />}
                             </span>
                             <span className="text-sm leading-snug text-neutral-600">
-                              I want to withdraw from this contract under my EU right of withdrawal.
+                              J&apos;exerce mon droit de rétractation pour ce contrat, conformément au droit européen.
                             </span>
                           </button>
                           <button
@@ -219,7 +217,7 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
                             className="w-full rounded-xl py-3.5 text-[14px] font-semibold text-white shadow-md transition-all hover:brightness-125 active:scale-[0.99]"
                             style={{ background: "#111827" }}
                           >
-                            Withdraw Contract
+                            Confirmer la rétractation
                           </button>
                         </div>
                       ) : (
@@ -229,11 +227,11 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
                               <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500 text-white">
                                 <Check className="size-3" strokeWidth={3} />
                               </span>
-                              Withdrawal request received
+                              Demande de rétractation reçue
                             </div>
                             <p className="mt-2 text-xs leading-relaxed text-emerald-800/80">
-                              A confirmation email is on its way to <span className="font-semibold">{DEFAULT_EMAIL}</span>. The order is
-                              held before it reaches your WMS / 3PL while we process the request.
+                              Un accusé de réception vient d&apos;être envoyé à <span className="font-semibold">{DEFAULT_EMAIL}</span>. La commande
+                              est bloquée avant de partir vers votre WMS / logisticien, le temps de traiter la demande.
                             </p>
                           </div>
                         </div>
@@ -253,15 +251,15 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
                 <div className="flex items-start gap-3">
                   <Truck className="mt-0.5 size-4 text-neutral-700" />
                   <div>
-                    <div className="text-sm font-bold text-neutral-900">On its way</div>
-                    <div className="text-xs text-neutral-400">18 Jun</div>
+                    <div className="text-sm font-bold text-neutral-900">En cours de livraison</div>
+                    <div className="text-xs text-neutral-400">18 juin</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 pl-[3px]">
                   <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-neutral-400" />
                   <div className="pl-[7px]">
-                    <div className="text-sm font-bold text-neutral-900">Confirmed</div>
-                    <div className="text-xs text-neutral-400">18 Jun</div>
+                    <div className="text-sm font-bold text-neutral-900">Confirmée</div>
+                    <div className="text-xs text-neutral-400">18 juin</div>
                   </div>
                 </div>
               </div>
@@ -269,10 +267,10 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
 
             {/* info grid */}
             <div className="grid grid-cols-2 gap-x-5 gap-y-4 rounded-xl border border-border p-4">
-              <InfoBlock label="Contact information" lines={[DEFAULT_EMAIL, DEFAULT_PHONE]} />
-              <InfoBlock label="Payment" lines={["Shop Pay · Visa", `${fmt(total)} · 18 Jun`]} />
-              <InfoBlock label="Shipping address" lines={ADDR_LINES} />
-              <InfoBlock label="Billing address" lines={ADDR_LINES} />
+              <InfoBlock label="Coordonnées" lines={[DEFAULT_EMAIL, DEFAULT_PHONE]} />
+              <InfoBlock label="Paiement" lines={["Shop Pay · Visa", `${fmt(total)} · 18 juin`]} />
+              <InfoBlock label="Adresse de livraison" lines={ADDR_LINES} />
+              <InfoBlock label="Adresse de facturation" lines={ADDR_LINES} />
             </div>
           </div>
 
@@ -280,19 +278,19 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
           <div className="rounded-xl border border-border p-4">
             <div className="flex items-start gap-3">
               <div className="relative">
-                <Thumb src={product?.image} alt={product?.title ?? "Product"} />
+                <Thumb src={product?.image} alt={product?.title ?? "Produit"} />
                 <span className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-neutral-900 text-xs font-semibold text-white">1</span>
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium leading-snug text-neutral-800">{product?.title ?? "Casey Premium Linen Shirt"}</div>
-                <div className="text-xs text-neutral-500">{product?.variant ?? "Yellow / L"}</div>
+                <div className="text-sm font-medium leading-snug text-neutral-800">{product?.title ?? "Chemise en lin Casey"}</div>
+                <div className="text-xs text-neutral-500">{product?.variant ?? "Jaune / L"}</div>
               </div>
               <div className="text-sm font-semibold text-neutral-900">{fmt(price)}</div>
             </div>
 
             <div className="mt-4 space-y-1.5 border-t border-border pt-4 text-sm">
-              <div className="flex justify-between text-neutral-600"><span>Subtotal</span><span className="font-medium text-neutral-900">{fmt(price)}</span></div>
-              <div className="flex justify-between text-neutral-600"><span>Shipping</span><span className="font-medium text-neutral-900">{fmt(shipping)}</span></div>
+              <div className="flex justify-between text-neutral-600"><span>Sous-total</span><span className="font-medium text-neutral-900">{fmt(price)}</span></div>
+              <div className="flex justify-between text-neutral-600"><span>Livraison</span><span className="font-medium text-neutral-900">{fmt(shipping)}</span></div>
             </div>
             <div className="mt-3 flex items-baseline justify-between border-t border-border pt-3">
               <span className="text-base font-bold text-neutral-900">Total</span>
@@ -300,7 +298,7 @@ export function EUWithdrawalMock({ store, tourRefs, autoFill = 0, manualFill = f
                 <span className="mr-1 text-xs font-medium text-neutral-400">{currency}</span>{fmt(total)}
               </span>
             </div>
-            <div className="mt-1 text-xs text-neutral-400">Including {fmt(0)} in taxes</div>
+            <div className="mt-1 text-xs text-neutral-400">Dont {fmt(0)} de TVA</div>
           </div>
         </div>
       </div>

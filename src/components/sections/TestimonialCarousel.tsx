@@ -9,21 +9,21 @@ import { Container } from "@/components/primitives/Container";
 const testimonials = [
   {
     quote:
-      "Our support team stopped drowning in address-change emails. Shoppers just fix it themselves now.",
-    name: "Sample Customer",
-    role: "Head of CX · Placeholder Brand",
+      "Notre équipe support ne croule plus sous les e-mails de changement d’adresse. Les clients corrigent tout eux-mêmes.",
+    name: "Client exemple",
+    role: "Responsable expérience client · Marque fictive",
   },
   {
     quote:
-      "Post-purchase upsells added a real bump to AOV without touching our checkout flow.",
-    name: "Sample Customer",
-    role: "Founder · Placeholder Co.",
+      "Les upsells post-achat ont vraiment fait grimper notre panier moyen, sans toucher au tunnel de commande.",
+    name: "Client exemple",
+    role: "Fondatrice · Société fictive",
   },
   {
     quote:
-      "Edits sync straight to our 3PL, so the warehouse always ships the corrected order. No more chaos.",
-    name: "Sample Customer",
-    role: "Ops Lead · Placeholder Goods",
+      "Les modifications partent directement chez notre 3PL : l’entrepôt expédie toujours la bonne commande. Fini le chaos.",
+    name: "Client exemple",
+    role: "Responsable des opérations · Marque fictive",
   },
 ];
 
@@ -86,7 +86,7 @@ export function TestimonialCarousel() {
                   <button
                     key={idx}
                     onClick={() => go(idx)}
-                    aria-label={`Go to testimonial ${idx + 1}`}
+                    aria-label={`Aller au témoignage ${idx + 1}`}
                     className={`h-2 rounded-full transition-all ${
                       idx === i ? "w-6 bg-primary" : "w-2 bg-border"
                     }`}
@@ -96,14 +96,14 @@ export function TestimonialCarousel() {
               <div className="flex gap-2">
                 <button
                   onClick={() => go(i - 1)}
-                  aria-label="Previous"
+                  aria-label="Précédent"
                   className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <ChevronLeft className="size-4" />
                 </button>
                 <button
                   onClick={() => go(i + 1)}
-                  aria-label="Next"
+                  aria-label="Suivant"
                   className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <ChevronRight className="size-4" />

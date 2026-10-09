@@ -36,7 +36,7 @@ function FeaturePlaceholder({ icon: Icon, flip }: { icon: Feature["icon"]; flip:
         <div className="h-2.5 w-1/2 rounded bg-background-muted" />
       </div>
       <span className="absolute bottom-2 right-3 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/50">
-        Placeholder
+        Aperçu
       </span>
     </motion.div>
   );
@@ -85,9 +85,9 @@ export function FeatureShowcase() {
     <section id="features" className="py-20 md:py-28">
       <Container>
         <SectionHeading
-          eyebrow="The platform"
-          title="Everything shoppers need to fix an order"
-          subtitle="Six capabilities that turn post-purchase chaos into self-service."
+          eyebrow="La plateforme"
+          title="Tout ce qu’il faut à vos clients pour corriger une commande"
+          subtitle="Six fonctionnalités qui transforment le chaos post-achat en libre-service."
         />
         <div className="mt-16 flex flex-col gap-20 md:gap-28">
           {features.map((f, i) => (

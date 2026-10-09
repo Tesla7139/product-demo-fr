@@ -10,7 +10,7 @@ export function AudienceSegments() {
   return (
     <section id="segments" className="py-20 md:py-28">
       <Container>
-        <SectionHeading eyebrow="Who it's for" title="Built for the way you sell" />
+        <SectionHeading eyebrow="Pour qui ?" title="Pensé pour votre façon de vendre" />
         <RevealGroup className="mt-14 grid gap-6 md:grid-cols-3">
           {segments.map(({ icon: Icon, title, blurb }) => (
             <RevealChild key={title}>
@@ -24,7 +24,7 @@ export function AudienceSegments() {
                   href="#features"
                   className="inline-flex items-center gap-1 text-sm font-semibold text-primary"
                 >
-                  Learn more
+                  En savoir plus
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </a>
               </article>

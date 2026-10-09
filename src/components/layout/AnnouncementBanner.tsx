@@ -19,19 +19,19 @@ export function AnnouncementBanner() {
         >
           <div className="mx-auto flex max-w-[1240px] items-center justify-center gap-3 px-6 py-2.5 text-sm">
             <span className="font-medium">
-              New: post-purchase upsells now live in CP: Order Editing
+              Nouveau : les upsells post-achat sont disponibles dans CP: Order Editing
             </span>
             <a
               href="#demo"
               className="group inline-flex items-center gap-1 font-semibold text-background underline-offset-4 hover:underline"
             >
-              Try a demo
+              Essayer la démo
               <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
             </a>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Dismiss announcement"
+              aria-label="Fermer l’annonce"
               className="absolute right-4 top-1/2 -translate-y-1/2 rounded p-1 text-background/70 transition-colors hover:text-background"
             >
               <X className="size-4" />

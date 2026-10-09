@@ -15,7 +15,7 @@ export function BuiltForShopifyBadge({ compact = false }: { compact?: boolean })
         <path d="M9 8 L15 8 L12 21 Z" fill="#4bbfe0" />
         <path d="M15 8 L20 8 L12 21 Z" fill="#3fb4d6" />
       </svg>
-      Built for Shopify
+      Conçu pour Shopify
     </span>
   );
 }

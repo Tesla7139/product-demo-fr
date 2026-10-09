@@ -11,9 +11,9 @@ import { fadeUp, viewportOnce } from "@/lib/motion";
 type Errors = Partial<Record<"name" | "email" | "company", string>>;
 
 const valuePoints = [
-  "Go live in minutes — no developer needed",
-  "Works with your existing checkout & 3PL",
-  "14-day free trial, cancel anytime",
+  "En ligne en quelques minutes, sans développeur",
+  "Compatible avec votre tunnel de commande et votre 3PL",
+  "14 jours d’essai gratuit, sans engagement",
 ];
 
 export function ContactForm() {
@@ -27,9 +27,9 @@ export function ContactForm() {
     const email = String(data.get("email") || "").trim();
     const company = String(data.get("company") || "").trim();
     const next: Errors = {};
-    if (!name) next.name = "Please enter your name";
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) next.email = "Enter a valid work email";
-    if (!company) next.company = "Please enter your company";
+    if (!name) next.name = "Veuillez indiquer votre nom";
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) next.email = "Saisissez une adresse e-mail professionnelle valide";
+    if (!company) next.company = "Veuillez indiquer votre entreprise";
     setErrors(next);
     if (Object.keys(next).length) return;
     setStatus("submitting");
@@ -48,11 +48,11 @@ export function ContactForm() {
             whileInView="show"
             viewport={viewportOnce}
           >
-            <span className="text-eyebrow text-primary">Talk to us</span>
-            <h2 className="text-h2 mt-3 text-balance">See it on your store</h2>
+            <span className="text-eyebrow text-primary">Parlons-en</span>
+            <h2 className="text-h2 mt-3 text-balance">Voir sur ma boutique</h2>
             <p className="mt-4 max-w-md text-muted-foreground">
-              Tell us a little about your store and we’ll put together a walkthrough tailored to
-              your post-purchase flow.
+              Parlez-nous de votre boutique : nous préparons une démo adaptée à votre parcours
+              post-achat.
             </p>
             <ul className="mt-8 flex flex-col gap-3.5">
               {valuePoints.map((p) => (
@@ -79,42 +79,42 @@ export function ContactForm() {
                 <div className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Sparkles className="size-7" />
                 </div>
-                <h3 className="text-h3">Thanks — we’ll be in touch</h3>
+                <h3 className="text-h3">Merci, nous revenons vers vous très vite</h3>
                 <p className="max-w-xs text-sm text-muted-foreground">
-                  We’ll reach out shortly with a demo tailored to your store.
+                  Nous vous recontactons sous peu avec une démo adaptée à votre boutique.
                 </p>
               </div>
             ) : (
               <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-                <Field label="Name" name="name" placeholder="Jane Doe" error={errors.name} />
+                <Field label="Nom" name="name" placeholder="Camille Dubois" error={errors.name} />
                 <Field
-                  label="Work email"
+                  label="E-mail professionnel"
                   name="email"
                   type="email"
-                  placeholder="jane@store.com"
+                  placeholder="camille@maboutique.fr"
                   error={errors.email}
                 />
-                <Field label="Company" name="company" placeholder="Your store" error={errors.company} />
+                <Field label="Entreprise" name="company" placeholder="Votre boutique" error={errors.company} />
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="message" className="text-sm font-medium">
-                    Message <span className="text-muted-foreground">(optional)</span>
+                    Message <span className="text-muted-foreground">(facultatif)</span>
                   </label>
                   <textarea
                     id="message"
                     name="message"
                     rows={3}
-                    placeholder="What would you like to see?"
+                    placeholder="Qu’aimeriez-vous voir ?"
                     className="rounded-md border border-border bg-background px-4 py-2.5 text-sm shadow-soft-sm transition-colors placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:outline-none"
                   />
                 </div>
                 <Button type="submit" size="lg" className="mt-1 w-full" disabled={status === "submitting"}>
                   {status === "submitting" ? (
                     <>
-                      <Loader2 className="size-4 animate-spin" /> Sending
+                      <Loader2 className="size-4 animate-spin" /> Envoi…
                     </>
                   ) : (
                     <>
-                      <Mail className="size-4" /> Request a demo
+                      <Mail className="size-4" /> Demander une démo
                     </>
                   )}
                 </Button>

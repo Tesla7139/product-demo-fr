@@ -6,19 +6,19 @@ import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
 
 const RESULTS = [
   {
-    stat: "42%",
-    heading: "Fewer support tickets",
-    body: "Customers correct addresses, swap sizes, and cancel on their own — the problems that used to stack up in your inbox resolve themselves.",
+    stat: "−42 %",
+    heading: "De tickets support en moins",
+    body: "Vos clients corrigent leur adresse, changent de taille ou annulent eux-mêmes — les demandes qui s’empilaient dans votre boîte mail se règlent toutes seules.",
   },
   {
-    stat: "+18%",
-    heading: "Higher average order value",
-    body: "The thank-you page becomes your best upsell moment. Shoppers add with one tap, no re-checkout, charged to the card already on file.",
+    stat: "+18 %",
+    heading: "De panier moyen en plus",
+    body: "La page de remerciement devient votre meilleur moment d’upsell. Ajout en un clic, sans repasser par le paiement, débité sur la carte déjà utilisée.",
   },
   {
-    stat: "5.0 ★",
-    heading: "Rated on Shopify",
-    body: "51 merchant reviews, no paid placement. The highest-rated order editing app on the App Store, start to finish.",
+    stat: "5,0 ★",
+    heading: "Note sur Shopify",
+    body: "Plus de 70 avis marchands, aucun placement payant. L’app de modification de commande la mieux notée de l’App Store.",
   },
 ];
 

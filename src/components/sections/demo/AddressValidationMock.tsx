@@ -13,12 +13,12 @@ type Fields = {
   city: string; state: string; zip: string; country: string;
 };
 const ENTERED: Fields = {
-  firstName: "Mohit", lastName: "Jain", address1: "123, Main Street", address2: "",
-  city: "New York", state: "New York", zip: "10044", country: "United States",
+  firstName: "Camille", lastName: "Dubois", address1: "18 r des Lilas", address2: "",
+  city: "Lyon", state: "Auvergne-Rhône-Alpes", zip: "6903", country: "France",
 };
 const CORRECTED: Fields = {
-  firstName: "Mohit", lastName: "Jain", address1: "123 Main St", address2: "",
-  city: "New York", state: "New York", zip: "10044-1601", country: "United States",
+  firstName: "Camille", lastName: "Dubois", address1: "18 Rue des Lilas", address2: "",
+  city: "Lyon", state: "Auvergne-Rhône-Alpes", zip: "69003", country: "France",
 };
 
 /** The four-colour Google "G". */
@@ -74,28 +74,28 @@ export function AddressValidationMock({ store, tourRefs, onValidated, onConfirme
   const flagged = step !== "done";
   const verified = step === "done";
   const f = verified ? CORRECTED : ENTERED;
-  const name = store.brandName || "Checkout";
+  const name = store.brandName || "Paiement";
 
   return (
     <div className="w-full bg-white">
       <div className="lg:h-[560px] lg:overflow-y-auto lg:no-scrollbar">
         {/* header */}
         <div className="border-b border-border px-6 py-4">
-          <div className="text-[13px] font-semibold text-neutral-800">{name} · Delivery</div>
+          <div className="text-[13px] font-semibold text-neutral-800">{name} · Livraison</div>
           <div className="mt-2.5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-[15px] font-bold text-neutral-900">
               <MapPin className="size-4 text-neutral-500" />
-              Edit Shipping Address
+              Modifier l&apos;adresse de livraison
             </div>
             {verified ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-[12px] font-semibold text-white">
                 <Check className="size-3.5" strokeWidth={3} />
-                Address verified
+                Adresse vérifiée
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-800 px-3 py-1 text-[12px] font-semibold text-white">
                 <TriangleAlert className="size-3.5" />
-                Address check required
+                Adresse à vérifier
               </span>
             )}
           </div>
@@ -109,28 +109,28 @@ export function AddressValidationMock({ store, tourRefs, onValidated, onConfirme
             animate={step === "review" ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
           >
-            <Field label="Country" value={f.country} chevron />
+            <Field label="Pays" value={f.country} chevron />
             <div className="grid grid-cols-2 gap-3">
-              <Field label="First Name" value={f.firstName} />
-              <Field label="Last Name" value={f.lastName} />
+              <Field label="Prénom" value={f.firstName} />
+              <Field label="Nom" value={f.lastName} />
             </div>
             <Field
-              label="Address 1"
+              label="Adresse"
               value={f.address1}
               invalid={flagged}
               valid={verified}
-              error={flagged ? "Street address could not be fully validated. Please review." : undefined}
+              error={flagged ? "Adresse incomplète ou non reconnue. Merci de la vérifier." : undefined}
             />
-            <Field label="Address 2" value={f.address2} />
+            <Field label="Complément d'adresse" value={f.address2} />
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-              <Field label="City" value={f.city} />
-              <Field label="Province / State" value={f.state} chevron />
+              <Field label="Ville" value={f.city} />
+              <Field label="Région" value={f.state} chevron />
               <Field
-                label="Postal Code"
+                label="Code postal"
                 value={f.zip}
                 invalid={flagged}
                 valid={verified}
-                error={flagged ? "Postal code could not be validated." : undefined}
+                error={flagged ? "Le code postal n'a pas pu être validé." : undefined}
               />
             </div>
           </motion.div>
@@ -149,9 +149,9 @@ export function AddressValidationMock({ store, tourRefs, onValidated, onConfirme
               >
                 <div className="flex items-center gap-2">
                   <GoogleG className="size-4" />
-                  <span className="text-[13px] font-bold text-neutral-900">Recommended address</span>
+                  <span className="text-[13px] font-bold text-neutral-900">Adresse recommandée</span>
                 </div>
-                <p className="mt-0.5 text-[12px] text-neutral-500">Use the corrected, deliverable address we found.</p>
+                <p className="mt-0.5 text-[12px] text-neutral-500">Utilisez l&apos;adresse corrigée et livrable que nous avons trouvée.</p>
                 <button
                   ref={tourRefs?.recommended}
                   className="mt-3 flex w-full items-start gap-3 rounded-xl border-2 bg-white p-3 text-left"
@@ -163,7 +163,7 @@ export function AddressValidationMock({ store, tourRefs, onValidated, onConfirme
                   <span className="min-w-0 text-[13px] leading-relaxed text-neutral-700">
                     <span className="block font-semibold text-neutral-900">{CORRECTED.firstName} {CORRECTED.lastName}</span>
                     <span className="block">{CORRECTED.address1}</span>
-                    <span className="block">{CORRECTED.city}, {CORRECTED.state} {CORRECTED.zip}</span>
+                    <span className="block">{CORRECTED.zip} {CORRECTED.city}</span>
                     <span className="block">{CORRECTED.country}</span>
                   </span>
                 </button>
@@ -173,7 +173,7 @@ export function AddressValidationMock({ store, tourRefs, onValidated, onConfirme
                   className="mt-3 w-full rounded-full py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-110"
                   style={{ background: GOOGLE_BLUE }}
                 >
-                  Use this address
+                  Utiliser cette adresse
                 </button>
               </motion.div>
             )}
@@ -183,7 +183,7 @@ export function AddressValidationMock({ store, tourRefs, onValidated, onConfirme
           {verified && (
             <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-semibold text-emerald-700">
               <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500 text-white"><Check className="size-3" strokeWidth={3} /></span>
-              Address verified &amp; deliverable
+              Adresse vérifiée et livrable
             </div>
           )}
 
@@ -195,7 +195,7 @@ export function AddressValidationMock({ store, tourRefs, onValidated, onConfirme
               className="w-full rounded-xl py-3.5 text-[14px] font-semibold text-white shadow-md transition-all hover:brightness-110 active:scale-[0.99]"
               style={{ background: CTA_BLUE }}
             >
-              Update Shipping Address
+              Mettre à jour l&apos;adresse
             </button>
           )}
         </div>

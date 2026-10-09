@@ -1,6 +1,7 @@
 import { Star } from "lucide-react";
 import { Review } from "@/lib/reviews";
 import { customerLogos, extraReviewLogos, brandInfo } from "@/lib/site";
+import { reviewDateFr } from "@/lib/utils";
 
 // Brand logos, keyed by lowercase name: the strip logos + the /reviews-only extras.
 const LOGOS = [
@@ -59,7 +60,7 @@ export function ReviewCard({ review }: { review: Review }) {
                 {info.tier}
               </span>
             )}
-            <span className="text-[12.5px] font-medium text-black/40">{date}</span>
+            <span className="text-[12.5px] font-medium text-black/40">{reviewDateFr(date)}</span>
           </div>
         </div>
       </div>

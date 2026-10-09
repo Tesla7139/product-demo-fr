@@ -6,13 +6,11 @@ import { Check, ChevronDown } from "lucide-react";
 import type { DemoStore, DemoProduct } from "@/lib/site";
 import { readableBrand, dedupeExactTitle } from "@/lib/utils";
 import { DemoImg } from "./DemoImg";
-
-const money = (n: number, currency = "USD") =>
-  new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+import { money, DEFAULT_CURRENCY } from "@/lib/format";
 
 export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, addBtnRef, offerRef, onAdded }: { store: DemoStore; onComplete?: (added: DemoProduct[]) => void; onViewOrder?: () => void; accentColor?: string; addBtnRef?: React.RefObject<HTMLButtonElement | null>; offerRef?: React.RefObject<HTMLDivElement | null>; onAdded?: () => void }) {
   const brand = readableBrand(store.brandColor || accentColor);
-  const currency = store.currency || "USD";
+  const currency = store.currency || DEFAULT_CURRENCY;
   const fmt = (n: number) => money(n, currency);
   const priced = store.products.filter((p) => (p.price ?? 0) > 0);
   // keep colour variants so there's enough variety for 3 distinct offers
@@ -74,7 +72,7 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
     if (!isLast) goNext();
     else onComplete?.(addedRef.current);
   };
-  const declineLabel = "Skip Offer";
+  const declineLabel = "Passer l’offre";
 
   return (
     <div className="mx-auto w-full bg-white">
@@ -91,19 +89,19 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
             </span>
             <div>
               <div className="text-xs text-neutral-500">Confirmation #0WP59XCW8</div>
-              <div className="text-lg font-bold text-neutral-900">Thank you, Tucker!</div>
+              <div className="text-lg font-bold text-neutral-900">Merci, Camille !</div>
             </div>
           </div>
           <button onClick={onViewOrder} className="mt-2 text-[12px] font-medium text-neutral-900">
-            View order confirmation &rsaquo;
+            Voir la confirmation de commande &rsaquo;
           </button>
         </div>
 
         {/* before-you-go header */}
         <div className="border-b border-border px-6 py-2.5 text-center">
-          <div className="text-[16px] font-bold text-neutral-900">Tucker, before you go!</div>
+          <div className="text-[16px] font-bold text-neutral-900">Camille, avant de partir !</div>
           <div className="mt-1 text-[12.5px] text-neutral-600">
-            Your order is confirmed but you can still add the following for a limited time{" "}
+            Votre commande est confirmée, mais vous pouvez encore ajouter ceci pendant une durée limitée{" "}
             <span className="font-bold tabular-nums text-red-500">{timer}</span>
           </div>
         </div>
@@ -120,7 +118,7 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
           {/* product image — with the urgency line on top */}
           <div className="flex flex-col items-center justify-center gap-2 bg-neutral-50 p-3">
             <p className="text-center font-serif text-[13px] font-semibold italic leading-snug text-red-500">
-              Don&apos;t miss out — this offer expires when you leave this page!
+              Ne la manquez pas : cette offre expire dès que vous quittez cette page !
             </p>
             <DemoImg src={offer?.image} alt={offer?.title ?? ""} className="h-[150px] w-full object-contain" />
           </div>
@@ -128,9 +126,9 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
           {/* offer details */}
           <div className="flex flex-col justify-between px-5 py-4">
             <div>
-              <div className="text-[12px] text-neutral-400">Offer {offerIdx + 1} of {total}</div>
+              <div className="text-[12px] text-neutral-400">Offre {offerIdx + 1} sur {total}</div>
               <h3 className="mt-1 text-[20px] font-bold leading-tight text-neutral-900">
-                {offer?.title ?? "Add-on product"}
+                {offer?.title ?? "Produit complémentaire"}
               </h3>
               <div className="mt-1.5 flex items-baseline gap-2">
                 <span className="text-[15px] text-neutral-400 line-through">{fmt(full)}</span>
@@ -146,7 +144,7 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
                     style={{ borderColor: showSizes ? brand : "#d1d5db" }}
                   >
                     <div className="text-left">
-                      <div className="text-[10px] text-neutral-400">Size</div>
+                      <div className="text-[10px] text-neutral-400">Taille</div>
                       <div className="font-medium">{selectedVariant?.title} — {fmt(selectedVariant?.price ?? deal)}</div>
                     </div>
                     <ChevronDown className={`size-4 text-neutral-400 transition-transform ${showSizes ? "rotate-180" : ""}`} />
@@ -171,12 +169,12 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
 
               <div className="mt-3 space-y-1 border-t border-border pt-3 text-[13px]">
                 <div className="flex justify-between text-neutral-600">
-                  <span>Shipping</span>
-                  <span className="font-semibold text-neutral-900">Free</span>
+                  <span>Livraison</span>
+                  <span className="font-semibold text-neutral-900">Offerte</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
-                  <span>Taxes</span>
-                  <span className="font-semibold text-neutral-900">Free</span>
+                  <span>TVA</span>
+                  <span className="font-semibold text-neutral-900">Incluse</span>
                 </div>
               </div>
             </div>
@@ -190,9 +188,9 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
                 style={{ background: "#111827" }}
               >
                 {justAdded ? (
-                  <><Check className="size-4" strokeWidth={3} /> Added to your order</>
+                  <><Check className="size-4" strokeWidth={3} /> Ajouté à votre commande</>
                 ) : (
-                  <>Add to order · {fmt(deal)}</>
+                  <>Ajouter à la commande · {fmt(deal)}</>
                 )}
               </button>
               <button

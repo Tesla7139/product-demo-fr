@@ -42,7 +42,7 @@ export function DemoExperience({
   }, [open]);
 
   const brand = store?.brandColor || ACCENT;
-  const name  = store?.brandName  || "Your store";
+  const name  = store?.brandName  || "Votre boutique";
   const domain = cleanDomain(submittedUrl);
 
   return (
@@ -57,7 +57,7 @@ export function DemoExperience({
         >
           <button
             onClick={onClose}
-            aria-label="Close preview"
+            aria-label="Fermer l’aperçu"
             className="fixed right-4 top-3 z-[120] flex size-9 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-soft-md transition-colors hover:bg-neutral-50"
           >
             <X className="size-5" />
@@ -117,12 +117,12 @@ function LoadingView({ label }: { label: string }) {
         {/* active item card */}
         <div className="rounded-2xl bg-white p-4 shadow-soft-md">
           <div className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: done ? READY : "#8a8fb3" }}>
-            {done ? "Ready" : "Brand details loading"}
+            {done ? "Prêt" : "Chargement de votre marque"}
           </div>
           <div className="mt-1 flex items-center gap-2">
             <span className={`size-2.5 shrink-0 rounded-full ${done ? "" : "animate-pulse"}`} style={{ background: accent }} />
             <span className="truncate text-[15px] font-bold text-foreground">
-              {done ? `${label} is ready` : `Building ${label}`}
+              {done ? `${label} est prête` : `Création de ${label}`}
             </span>
           </div>
         </div>
@@ -152,21 +152,21 @@ function LoadingView({ label }: { label: string }) {
               ) : (
                 <span className="size-2 animate-pulse rounded-full" style={{ background: accent }} />
               )}
-              {done ? "Your store is ready" : "Finalizing brand details"}
+              {done ? "Votre boutique est prête" : "Derniers réglages de marque"}
             </span>
             <span className="hidden text-[12px] font-bold uppercase tracking-[0.16em] text-muted-foreground sm:block">
-              {done ? "All set" : "Styling key moments"}
+              {done ? "C’est prêt" : "Mise en forme des moments clés"}
             </span>
           </div>
 
           {/* heading + copy */}
           <h2 className="mt-7 font-serif text-4xl text-foreground md:text-5xl">
-            {done ? `${label} is ready` : `Preparing your ${label} demo`}
+            {done ? `${label} est prête` : `Préparation de votre démo ${label}`}
           </h2>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
             {done
-              ? "All set. Opening your branded preview now."
-              : "We can open the experience now and continue settling in the remaining brand details in the background."}
+              ? "C’est prêt. Ouverture de votre aperçu personnalisé…"
+              : "Nous ouvrons la démo tout de suite et finalisons les derniers détails de votre marque en arrière-plan."}
           </p>
 
           {/* progress bar */}
@@ -183,7 +183,7 @@ function LoadingView({ label }: { label: string }) {
           {/* support tickets — scroll downward; the ones shoppers won't need to open */}
           <div className="mt-8 flex-1">
             <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-              Tickets your shoppers won&apos;t need to open
+              Les tickets que vos clients n’auront plus à ouvrir
             </p>
             <div
               className="marquee-group relative h-[calc(100%-2rem)] min-h-[180px] overflow-hidden"
@@ -223,13 +223,13 @@ function LoadingView({ label }: { label: string }) {
 }
 
 const TICKETS = [
-  { subject: "Can I change delivery date?",        email: "anna.ko@hotmail.com", time: "22m ago", hot: false },
-  { subject: "Ordered wrong, too late to switch?", email: "tom.baker@gmail.com", time: "25m ago", hot: true },
-  { subject: "Typed my email wrong on checkout",   email: "nina.s@yahoo.com",    time: "31m ago", hot: false },
-  { subject: "Need to add an item to my order",    email: "raj.m@gmail.com",     time: "34m ago", hot: true },
-  { subject: "Wrong size, can I swap it?",         email: "lea.f@outlook.com",   time: "39m ago", hot: false },
-  { subject: "Forgot to apply my discount code",   email: "mike.d@gmail.com",    time: "42m ago", hot: false },
-  { subject: "Want to cancel my order",            email: "sara.p@yahoo.com",    time: "47m ago", hot: true },
+  { subject: "Je peux changer la date de livraison ?",      email: "anne.kervella@orange.fr", time: "il y a 22 min", hot: false },
+  { subject: "Mauvais article, trop tard pour changer ?",   email: "thomas.bernard@gmail.com", time: "il y a 25 min", hot: true },
+  { subject: "Erreur dans mon e-mail au paiement",          email: "nina.s@free.fr",          time: "il y a 31 min", hot: false },
+  { subject: "J’aimerais ajouter un article à ma commande", email: "julien.m@gmail.com",      time: "il y a 34 min", hot: true },
+  { subject: "Mauvaise taille, je peux l’échanger ?",       email: "lea.f@outlook.fr",        time: "il y a 39 min", hot: false },
+  { subject: "J’ai oublié mon code promo",                  email: "marc.d@gmail.com",        time: "il y a 42 min", hot: false },
+  { subject: "Je veux annuler ma commande",                 email: "sarah.p@laposte.net",     time: "il y a 47 min", hot: true },
 ];
 
 /* ----------------------------- Welcome ----------------------------- */
@@ -238,7 +238,7 @@ function WelcomeView({ store, brand, name, domain, onContinue }: { store: DemoSt
   // prefer the store's logo (cleaner than a random product photo); fall back to a product image
   const storeLogo = store.logo || null;
   const productImg = store.products.find((p) => p.image)?.image || null;
-  const dom = domain || `${name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.com`;
+  const dom = domain || `${name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.fr`;
   // "dive into the laptop": on click, the laptop screen zooms up to fill the
   // viewport, then we hand off to the editing scene.
   const [entering, setEntering] = useState(false);
@@ -261,16 +261,16 @@ function WelcomeView({ store, brand, name, domain, onContinue }: { store: DemoSt
           transition={{ duration: 0.35, ease: "easeOut" }}
           className="w-full max-w-md text-center lg:text-left"
         >
-          <span className="text-2xl italic tracking-wide text-muted-foreground sm:text-3xl" style={{ fontFamily: fraunces, fontWeight: 400 }}>Welcome to</span>
+          <span className="text-2xl italic tracking-wide text-muted-foreground sm:text-3xl" style={{ fontFamily: fraunces, fontWeight: 400 }}>Bienvenue chez</span>
           <div className="mt-1 text-6xl leading-[0.92] tracking-tight text-foreground md:text-7xl" style={{ fontFamily: fraunces, fontWeight: 900, fontStyle: "italic", letterSpacing: "-0.02em" }}>
             {name}
           </div>
-          <p className="mt-3 text-base font-light tracking-wide text-muted-foreground sm:text-lg">your branded preview</p>
+          <p className="mt-3 text-base font-light tracking-wide text-muted-foreground sm:text-lg">votre aperçu personnalisé</p>
           <span
             className="mt-7 inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
             style={{ background: ACCENT }}
           >
-            Click anywhere to explore
+            Cliquez n’importe où pour découvrir
             <ArrowRight className="size-4" />
           </span>
         </motion.div>
@@ -339,9 +339,9 @@ function EditingView({ store }: { store: DemoStore }) {
         <section className="border-t border-border/60 pt-14 pb-4">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl" style={{ fontFamily: "var(--font-inter), sans-serif" }}>
-            Loved by fast-growing brands
+            Plébiscité par les marques en pleine croissance
           </h2>
-          <p className="mt-2 text-[15px] text-muted-foreground">What Shopify merchants say about Clickpost.</p>
+          <p className="mt-2 text-[15px] text-muted-foreground">Ce que les marchands Shopify disent de Clickpost.</p>
         </div>
         <div className="mt-6">
           <StaggerTestimonials />
@@ -351,7 +351,7 @@ function EditingView({ store }: { store: DemoStore }) {
             href="/reviews"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-6 py-3 text-sm font-semibold text-foreground shadow-soft-md transition-colors hover:bg-neutral-50"
           >
-            Show all 52 reviews
+            Voir les 70+ avis
             <ArrowRight className="size-4" />
           </a>
         </div>

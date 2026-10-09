@@ -46,7 +46,7 @@ const MAX_BYTES = 600_000; // cap HTML we read
 const BROWSER_HEADERS: Record<string, string> = {
   "User-Agent":
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  "Accept-Language": "en-US,en;q=0.9",
+  "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
 };
 
 /** Reject obviously-internal / non-public hosts (basic SSRF guard). */

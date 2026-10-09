@@ -3,27 +3,83 @@
 export type CountryData = {
   name: string;
   zip: string; // zippopotam country code
-  regionLabel: string; // "State" / "Province" / "Region"
+  regionLabel: string; // "Région" / "Province" / "Canton"
   zipLen: number; // digits/chars that make a "complete" postal code → trigger auto-detect
   regions: string[];
 };
 
 export const COUNTRIES: CountryData[] = [
   {
-    name: "United States",
-    zip: "us",
-    regionLabel: "State",
+    name: "France",
+    zip: "fr",
+    regionLabel: "Région",
     zipLen: 5,
     regions: [
-      "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
-      "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia",
-      "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
-      "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
-      "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
-      "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota",
-      "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island",
-      "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
-      "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
+      "Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Bretagne",
+      "Centre-Val de Loire", "Corse", "Grand Est", "Hauts-de-France",
+      "Île-de-France", "Normandie", "Nouvelle-Aquitaine", "Occitanie",
+      "Pays de la Loire", "Provence-Alpes-Côte d'Azur",
+      "Guadeloupe", "Martinique", "Guyane", "La Réunion", "Mayotte",
+    ],
+  },
+  {
+    name: "Belgique",
+    zip: "be",
+    regionLabel: "Province",
+    zipLen: 4,
+    regions: [
+      "Bruxelles-Capitale", "Brabant wallon", "Hainaut", "Liège", "Luxembourg",
+      "Namur", "Anvers", "Brabant flamand", "Flandre-Occidentale",
+      "Flandre-Orientale", "Limbourg",
+    ],
+  },
+  {
+    name: "Suisse",
+    zip: "ch",
+    regionLabel: "Canton",
+    zipLen: 4,
+    regions: [
+      "Genève", "Vaud", "Valais", "Neuchâtel", "Fribourg", "Jura", "Berne",
+      "Bâle-Ville", "Bâle-Campagne", "Zurich", "Lucerne", "Tessin", "Argovie",
+      "Saint-Gall", "Grisons", "Soleure", "Thurgovie", "Schwytz", "Zoug",
+      "Schaffhouse", "Appenzell Rhodes-Extérieures", "Appenzell Rhodes-Intérieures",
+      "Glaris", "Nidwald", "Obwald", "Uri",
+    ],
+  },
+  {
+    name: "Allemagne",
+    zip: "de",
+    regionLabel: "Land",
+    zipLen: 5,
+    regions: [
+      "Bade-Wurtemberg", "Bavière", "Berlin", "Brandebourg", "Brême",
+      "Hambourg", "Hesse", "Basse-Saxe", "Mecklembourg-Poméranie-Occidentale",
+      "Rhénanie-du-Nord-Westphalie", "Rhénanie-Palatinat", "Sarre", "Saxe",
+      "Saxe-Anhalt", "Schleswig-Holstein", "Thuringe",
+    ],
+  },
+  {
+    name: "Espagne",
+    zip: "es",
+    regionLabel: "Communauté autonome",
+    zipLen: 5,
+    regions: [
+      "Andalousie", "Aragon", "Asturies", "Îles Baléares", "Canaries",
+      "Cantabrie", "Castille-et-León", "Castille-La Manche", "Catalogne",
+      "Communauté de Madrid", "Communauté valencienne", "Estrémadure", "Galice",
+      "La Rioja", "Murcie", "Navarre", "Pays basque", "Ceuta", "Melilla",
+    ],
+  },
+  {
+    name: "Italie",
+    zip: "it",
+    regionLabel: "Région",
+    zipLen: 5,
+    regions: [
+      "Abruzzes", "Basilicate", "Calabre", "Campanie", "Émilie-Romagne",
+      "Frioul-Vénétie Julienne", "Latium", "Ligurie", "Lombardie", "Marches",
+      "Molise", "Piémont", "Pouilles", "Sardaigne", "Sicile", "Toscane",
+      "Trentin-Haut-Adige", "Ombrie", "Vallée d'Aoste", "Vénétie",
     ],
   },
   {
@@ -32,50 +88,10 @@ export const COUNTRIES: CountryData[] = [
     regionLabel: "Province",
     zipLen: 3,
     regions: [
-      "Alberta", "British Columbia", "Manitoba", "New Brunswick",
-      "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia",
-      "Nunavut", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan",
+      "Québec", "Alberta", "Colombie-Britannique", "Île-du-Prince-Édouard",
+      "Manitoba", "Nouveau-Brunswick", "Nouvelle-Écosse", "Nunavut", "Ontario",
+      "Saskatchewan", "Terre-Neuve-et-Labrador", "Territoires du Nord-Ouest",
       "Yukon",
-    ],
-  },
-  {
-    name: "India",
-    zip: "in",
-    regionLabel: "State",
-    zipLen: 6,
-    regions: [
-      "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-      "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
-      "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
-      "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
-      "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-      "Andaman and Nicobar Islands", "Chandigarh",
-      "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir",
-      "Ladakh", "Lakshadweep", "Puducherry",
-    ],
-  },
-  {
-    name: "Germany",
-    zip: "de",
-    regionLabel: "State",
-    zipLen: 5,
-    regions: [
-      "Baden-Württemberg", "Bavaria", "Berlin", "Brandenburg", "Bremen",
-      "Hamburg", "Hesse", "Lower Saxony", "Mecklenburg-Vorpommern",
-      "North Rhine-Westphalia", "Rhineland-Palatinate", "Saarland", "Saxony",
-      "Saxony-Anhalt", "Schleswig-Holstein", "Thuringia",
-    ],
-  },
-  {
-    name: "France",
-    zip: "fr",
-    regionLabel: "Region",
-    zipLen: 5,
-    regions: [
-      "Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Brittany",
-      "Centre-Val de Loire", "Corsica", "Grand Est", "Hauts-de-France",
-      "Île-de-France", "Normandy", "Nouvelle-Aquitaine", "Occitanie",
-      "Pays de la Loire", "Provence-Alpes-Côte d'Azur",
     ],
   },
 ];

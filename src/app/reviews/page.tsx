@@ -189,18 +189,18 @@ export default function ReviewsPage() {
             className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-black/60 transition-colors hover:text-black"
           >
             <ArrowLeft className="size-4" />
-            Back
+            Retour
           </button>
           <div className="mx-auto max-w-3xl text-center">
             <h1
               className="font-serif font-normal tracking-tight text-black"
               style={{ fontSize: "clamp(2.25rem,5vw,3.25rem)", lineHeight: 1.05 }}
             >
-              Trusted by Shopify Merchants
+              Plébiscité par les marchands Shopify
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-base md:text-lg text-black/70 leading-relaxed font-medium">
-              See what real store owners are saying about using Clickpost Order Editing to
-              streamline their post-purchase experience. 52 reviews from the
+              Découvrez ce que de vrais e-commerçants disent de Clickpost Order Editing pour
+              fluidifier leur expérience post-achat. Plus de 70 avis sur le
               Shopify App Store.
             </p>
 
@@ -212,7 +212,7 @@ export default function ReviewsPage() {
                 ))}
               </div>
               <span className="text-base md:text-lg font-bold text-black/80">
-                5.0 on Shopify App Store
+                5,0 sur le Shopify App Store
               </span>
             </div>
           </div>
@@ -228,10 +228,10 @@ export default function ReviewsPage() {
               className="font-sans font-extrabold tracking-tight text-black"
               style={{ fontSize: "clamp(2.25rem,5vw,3.25rem)", lineHeight: 1.05 }}
             >
-              Customer Reviews
+              Avis clients
             </h2>
             <p className="mt-2 text-sm text-black/50 font-medium">
-              52 five-star merchant reviews — synced from our public App Store listing.
+              Plus de 70 avis marchands 5 étoiles sur notre fiche publique. Avis publiés en anglais sur le Shopify App Store.
             </p>
           </div>
 
@@ -262,7 +262,7 @@ export default function ReviewsPage() {
                 size="lg"
                 className="rounded-full bg-black text-white hover:bg-black/90 px-8 py-6 text-sm font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
               >
-                Show more reviews
+                Voir plus d’avis
               </Button>
             </div>
           )}

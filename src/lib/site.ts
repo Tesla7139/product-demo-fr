@@ -30,7 +30,7 @@ function reviewText(storeName: string): string | null {
 export const site = {
   name: "Clickpost", // brand wordmark (logo slot left intentionally empty in UI)
   product: "Order Editing & Upsell",
-  tagline: "Let shoppers fix their own orders.",
+  tagline: "Vos clients corrigent eux-mêmes leurs commandes.",
   phone: "+1 (000) 000-0000", // TODO: replace with real number
   email: "hello@clickpost.ai", // TODO: confirm
 };
@@ -40,12 +40,12 @@ export type NavLink = { label: string; href: string; desc?: string };
 export type NavItem = { label: string; href: string; items?: NavLink[] };
 
 export const mainNav: NavItem[] = [
-  { label: "Product Tour", href: "/#demo" },
+  { label: "Visite produit", href: "/#demo" },
   {
-    label: "Customer Love",
+    label: "Avis clients",
     href: "/reviews",
     items: [
-      { label: "Reviews", href: "/reviews", desc: "52 five-star merchant reviews" },
+      { label: "Avis", href: "/reviews", desc: "70+ avis marchands 5 étoiles" },
     ],
   },
 ];
@@ -63,79 +63,79 @@ export const integrations: Integration[] = [
     name: "Klaviyo",
     icon: Mail,
     category: "Tech",
-    desc: "Klaviyo and Order Editing sync customer events for personalized email automation.",
+    desc: "Klaviyo et Order Editing synchronisent les événements clients pour des e-mails automatisés et personnalisés.",
   },
   {
     name: "Gorgias",
     icon: Users,
     category: "Tech",
-    desc: "Gorgias integration displays order editing info directly in your support tickets.",
+    desc: "L'intégration Gorgias affiche les modifications de commande directement dans vos tickets support.",
   },
   {
     name: "Zendesk",
     icon: Users,
     category: "Tech",
-    desc: "Zendesk integration provides order context within your support platform.",
+    desc: "L'intégration Zendesk apporte le contexte de la commande dans votre outil de support.",
   },
   {
     name: "AfterSell",
     icon: TrendingUp,
     category: "Tech",
-    desc: "AfterSell and Order Editing combine post-purchase upsells with order modifications.",
+    desc: "AfterSell et Order Editing combinent upsells post-achat et modifications de commande.",
   },
   {
     name: "AfterShip",
     icon: Truck,
     category: "Tech",
-    desc: "AfterShip syncs tracking updates and flags deliveries with issues.",
+    desc: "AfterShip synchronise le suivi des colis et signale les livraisons à problème.",
   },
   {
     name: "Loop Returns",
     icon: RefreshCw,
     category: "Tech",
-    desc: "Loop Returns integration lets customers exchange items directly.",
+    desc: "L'intégration Loop Returns permet aux clients d'échanger un article en direct.",
   },
   {
     name: "Rebuy",
     icon: Store,
     category: "Tech",
-    desc: "Rebuy powers smart product recommendations in the post-purchase editor.",
+    desc: "Rebuy alimente des recommandations produits intelligentes dans l'éditeur post-achat.",
   },
   {
     name: "Recharge",
     icon: SlidersHorizontal,
     category: "Tech",
-    desc: "Recharge allows customers to edit subscription orders seamlessly.",
+    desc: "Recharge permet aux clients de modifier leurs commandes d'abonnement en toute simplicité.",
   },
   {
     name: "SAP ERP",
     icon: SlidersHorizontal,
     category: "ERP",
-    desc: "SAP integration pushes order corrections to your enterprise resource planning system.",
+    desc: "L'intégration SAP envoie les corrections de commande vers votre ERP.",
   },
   {
     name: "ShipStation",
     icon: Truck,
     category: "Shipping",
-    desc: "ShipStation syncs fulfillment statuses and shipping label adjustments.",
+    desc: "ShipStation synchronise les statuts de préparation et les ajustements d'étiquettes d'expédition.",
   },
   {
     name: "Shopify Flow",
     icon: GitBranch,
     category: "iPaaS",
-    desc: "Trigger workflows automatically when an order is edited or cancelled.",
+    desc: "Déclenchez des workflows automatiquement dès qu'une commande est modifiée ou annulée.",
   },
   {
     name: "Unicommerce",
     icon: Truck,
     category: "WMS",
-    desc: "Keep the warehouse in sync so it always ships the corrected order.",
+    desc: "Gardez l'entrepôt synchronisé : il expédie toujours la commande corrigée.",
   },
   {
     name: "Easycom",
     icon: Package,
     category: "3PL",
-    desc: "Push edited orders straight into your fulfillment pipeline.",
+    desc: "Envoyez les commandes modifiées directement dans votre chaîne logistique.",
   },
 ];
 
@@ -272,14 +272,14 @@ export const customerLogos: CustomerLogo[] = [
 // Love. Keyed by exact brand name.
 export type BrandInfo = { tier?: string; country?: string };
 export const brandInfo: Record<string, BrandInfo> = {
-  "Doonails": { tier: "$100M+ brand", country: "Germany" },
-  "Curl Warehouse": { tier: "7-figure brand", country: "Canada" },
-  "VanillaPura": { tier: "7-figure brand", country: "Utah, USA" },
-  "GHAR SOAPS": { tier: "8-figure brand", country: "UAE" },
-  "MIRAGGIO": { tier: "8-figure brand" },
-  "Mateina": { tier: "Andrew Huberman's favourite", country: "Canada" },
-  "Mars By GHC": { tier: "7-figure brand" },
-  "Renue By Science": { country: "USA" },
+  "Doonails": { tier: "Marque à 100 M$+", country: "Allemagne" },
+  "Curl Warehouse": { tier: "CA à 7 chiffres", country: "Canada" },
+  "VanillaPura": { tier: "CA à 7 chiffres", country: "Utah, États-Unis" },
+  "GHAR SOAPS": { tier: "CA à 8 chiffres", country: "Émirats arabes unis" },
+  "MIRAGGIO": { tier: "CA à 8 chiffres" },
+  "Mateina": { tier: "La préférée d'Andrew Huberman", country: "Canada" },
+  "Mars By GHC": { tier: "CA à 7 chiffres" },
+  "Renue By Science": { country: "États-Unis" },
 };
 
 // number of blank placeholder marks to show while `customerLogos` is empty
@@ -323,45 +323,45 @@ export type Feature = {
 
 export const features: Feature[] = [
   {
-    eyebrow: "Editing",
-    title: "Self-service order edits",
-    blurb: "Shoppers fix orders on the thank-you and order-status page — no ticket needed.",
-    bullets: ["Swap items & variants", "Adjust quantities", "Update contact details"],
+    eyebrow: "Modification",
+    title: "Modifications de commande en libre-service",
+    blurb: "Vos clients corrigent leur commande sur la page de remerciement et de suivi — sans ouvrir de ticket.",
+    bullets: ["Changer d'article ou de variante", "Ajuster les quantités", "Mettre à jour les coordonnées"],
     icon: Pencil,
   },
   {
-    eyebrow: "Address",
-    title: "Address validation, built in",
-    blurb: "Catch undeliverable addresses before fulfillment with Maps-powered checks.",
-    bullets: ["Live address suggestions", "Flag risky deliveries", "Fewer failed shipments"],
+    eyebrow: "Adresse",
+    title: "Validation d'adresse intégrée",
+    blurb: "Repérez les adresses non livrables avant l'expédition grâce aux vérifications Google Maps.",
+    bullets: ["Suggestions d'adresse en direct", "Alerte sur les livraisons à risque", "Moins d'échecs de livraison"],
     icon: MapPin,
   },
   {
-    eyebrow: "Cancellations",
-    title: "Instant cancellations & refunds",
-    blurb: "Let customers cancel within your window — refunds and store credit run automatically.",
-    bullets: ["Automated refunds", "Store-credit option", "Configurable windows"],
+    eyebrow: "Annulations",
+    title: "Annulations et remboursements instantanés",
+    blurb: "Vos clients annulent dans le délai que vous fixez — remboursement ou avoir générés automatiquement.",
+    bullets: ["Remboursements automatiques", "Option avoir boutique", "Délais configurables"],
     icon: XCircle,
   },
   {
     eyebrow: "Upsell",
-    title: "Post-purchase upsells",
-    blurb: "Recommend the right add-on right after checkout and lift average order value.",
-    bullets: ["One-tap add-on", "Smart recommendations", "No re-checkout friction"],
+    title: "Upsells post-achat",
+    blurb: "Proposez le bon complément juste après le paiement et augmentez le panier moyen.",
+    bullets: ["Ajout en un clic", "Recommandations intelligentes", "Sans repasser par le paiement"],
     icon: TrendingUp,
   },
   {
-    eyebrow: "Sync",
-    title: "Stays in sync with fulfillment",
-    blurb: "Every edit syncs to your 3PL / WMS so the warehouse always ships the right thing.",
-    bullets: ["3PL / WMS sync", "Real-time updates", "No double handling"],
+    eyebrow: "Synchronisation",
+    title: "Toujours synchronisé avec la logistique",
+    blurb: "Chaque modification est envoyée à votre 3PL / WMS : l'entrepôt expédie toujours le bon colis.",
+    bullets: ["Synchro 3PL / WMS", "Mises à jour en temps réel", "Aucune double saisie"],
     icon: RefreshCw,
   },
   {
-    eyebrow: "Control",
-    title: "Full control & audit trail",
-    blurb: "Set editing windows, bulk-manage orders, and review a complete log of every change.",
-    bullets: ["Editing windows", "Bulk editing", "Complete edit log"],
+    eyebrow: "Contrôle",
+    title: "Contrôle total et historique complet",
+    blurb: "Définissez les délais de modification, gérez les commandes en masse et consultez l'historique de chaque changement.",
+    bullets: ["Délais de modification", "Modification en masse", "Journal complet des modifications"],
     icon: SlidersHorizontal,
   },
 ];
@@ -370,52 +370,53 @@ export const features: Feature[] = [
 export const segments = [
   {
     icon: Store,
-    title: "D2C & Shopify brands",
-    blurb: "Give shoppers control and cut your support load from day one.",
+    title: "Marques D2C et Shopify",
+    blurb: "Donnez la main à vos clients et allégez votre support dès le premier jour.",
   },
   {
     icon: Boxes,
-    title: "High-volume merchants",
-    blurb: "Automate thousands of edits a month without growing the support team.",
+    title: "Marchands à fort volume",
+    blurb: "Automatisez des milliers de modifications par mois sans agrandir l'équipe support.",
   },
   {
     icon: Truck,
-    title: "Brands using 3PL / WMS",
-    blurb: "Edits flow straight to fulfillment, so the warehouse ships what was ordered.",
+    title: "Marques avec 3PL / WMS",
+    blurb: "Les modifications partent directement en logistique : l'entrepôt expédie ce qui a été commandé.",
   },
 ];
 
 // ---- Metrics (placeholder/illustrative figures) ----
 export const metrics = [
-  { value: 42, suffix: "%", label: "Fewer support tickets", prefix: "" },
-  { value: 18, suffix: "%", label: "Higher average order value", prefix: "+" },
-  { value: 5.0, suffix: "★", label: "Rated on Shopify (52 reviews)", prefix: "", decimals: 1 },
+  { value: 42, suffix: " %", label: "De tickets support en moins", prefix: "−" },
+  { value: 18, suffix: " %", label: "De panier moyen en plus", prefix: "+" },
+  { value: 5.0, suffix: " ★", label: "Note sur Shopify (70+ avis)", prefix: "", decimals: 1 },
 ];
 
 // ---- Pricing tiers ----
+// Shopify bills app subscriptions in USD, so plan prices stay in dollars.
 export const pricing = [
   {
     name: "Starter",
-    price: "Free",
-    detail: "0–500 orders/mo",
-    features: ["25 free edits / month", "Then $1 / edit", "Core editing & cancellations"],
-    cta: "Start free",
+    price: "Gratuit",
+    detail: "0 à 500 commandes/mois",
+    features: ["25 modifications offertes / mois", "Puis 1 $ / modification", "Modifications et annulations"],
+    cta: "Commencer gratuitement",
     highlighted: false,
   },
   {
     name: "Growth",
-    price: "$49",
-    detail: "per month · 500–5,000 orders/mo",
-    features: ["Unlimited edits", "Post-purchase upsells", "Address validation"],
-    cta: "Start 14-day trial",
+    price: "49 $",
+    detail: "par mois · 500 à 5 000 commandes/mois",
+    features: ["Modifications illimitées", "Upsells post-achat", "Validation d'adresse"],
+    cta: "Essai gratuit de 14 jours",
     highlighted: true,
   },
   {
     name: "Scale",
-    price: "$129",
-    detail: "per month · 5,000–20,000 orders/mo",
-    features: ["Everything in Growth", "Dedicated account manager", "Priority support"],
-    cta: "Start 14-day trial",
+    price: "129 $",
+    detail: "par mois · 5 000 à 20 000 commandes/mois",
+    features: ["Tout le plan Growth", "Account manager dédié", "Support prioritaire"],
+    cta: "Essai gratuit de 14 jours",
     highlighted: false,
   },
 ];
@@ -423,45 +424,49 @@ export const pricing = [
 // ---- FAQ (original copy) ----
 export const faqs = [
   {
-    q: "How fast can I go live?",
-    a: "Install from the Shopify App Store, enable the app embed, and set your editing window. Most stores are live in minutes — no developer required.",
+    q: "En combien de temps puis-je être opérationnel ?",
+    a: "Installez l'app depuis le Shopify App Store, activez l'app embed et fixez votre délai de modification. La plupart des boutiques sont en ligne en quelques minutes, sans développeur.",
   },
   {
-    q: "What can shoppers edit themselves?",
-    a: "Items, variants, quantities, shipping address, and contact details — plus self-service cancellations with automated refunds or store credit, all within the window you define.",
+    q: "Que peuvent modifier mes clients eux-mêmes ?",
+    a: "Articles, variantes, quantités, adresse de livraison et coordonnées — ainsi que l'annulation en libre-service avec remboursement automatique ou avoir, dans le délai que vous définissez.",
   },
   {
-    q: "Does it work with my 3PL or WMS?",
-    a: "Yes. Edits sync to your fulfillment stack in real time so the warehouse always ships the correct, updated order.",
+    q: "Est-ce compatible avec mon 3PL ou mon WMS ?",
+    a: "Oui. Les modifications sont synchronisées en temps réel avec votre logistique : l'entrepôt expédie toujours la commande à jour.",
   },
   {
-    q: "How do post-purchase upsells work?",
-    a: "After checkout, the app surfaces a relevant add-on that the shopper can accept in one tap — no re-entering payment — which lifts average order value.",
+    q: "Est-ce conforme au RGPD et au droit de rétractation européen ?",
+    a: "Oui. Clickpost est conforme au RGPD, certifié ISO 27001 / 27701 et SOC 2. L'app propose aussi un formulaire de rétractation pour que vos clients européens exercent leur droit en quelques clics.",
   },
   {
-    q: "How much does it cost?",
-    a: "Start free for up to 500 orders/month. Paid plans begin at $49/month with a 14-day free trial. See the pricing section above for details.",
+    q: "Comment fonctionnent les upsells post-achat ?",
+    a: "Après le paiement, l'app propose un complément pertinent que le client accepte en un clic — sans ressaisir ses informations de paiement — ce qui fait grimper le panier moyen.",
+  },
+  {
+    q: "Combien ça coûte ?",
+    a: "C'est gratuit jusqu'à 500 commandes par mois. Les plans payants démarrent à 49 $/mois (facturés en dollars par Shopify), avec 14 jours d'essai gratuit. Détails dans la section tarifs ci-dessus.",
   },
 ];
 
 // ---- Footer ----
 export const footerColumns = [
   {
-    title: "Legal",
+    title: "Mentions légales",
     links: [
-      { label: "Privacy Policy", href: "https://www.clickpost.ai/privacy-policy" },
-      { label: "Cookie Policy", href: "https://www.clickpost.ai/cookie-policy" },
-      { label: "Compliance Statement", href: "https://www.clickpost.ai/gdpr-compliance-statement" },
-      { label: "Terms & Conditions", href: "https://www.clickpost.ai/terms-and-conditions" },
-      { label: "Security Profile", href: "https://app.sprinto.com/trust-center/view/88f7aa29-f137-4d49-b596-69c89d260e85" },
+      { label: "Politique de confidentialité", href: "https://www.clickpost.ai/privacy-policy" },
+      { label: "Politique cookies", href: "https://www.clickpost.ai/cookie-policy" },
+      { label: "Conformité RGPD", href: "https://www.clickpost.ai/gdpr-compliance-statement" },
+      { label: "Conditions générales", href: "https://www.clickpost.ai/terms-and-conditions" },
+      { label: "Profil de sécurité", href: "https://app.sprinto.com/trust-center/view/88f7aa29-f137-4d49-b596-69c89d260e85" },
     ],
   },
   {
-    title: "Company",
+    title: "Entreprise",
     links: [
-      { label: "About Us", href: "https://www.clickpost.ai/about-us" },
-      { label: "Infosec", href: "https://trust.clickpost.ai/" },
-      { label: "Careers", href: "https://www.clickpost.ai/careers" },
+      { label: "À propos", href: "https://www.clickpost.ai/about-us" },
+      { label: "Sécurité de l'information", href: "https://trust.clickpost.ai/" },
+      { label: "Carrières", href: "https://www.clickpost.ai/careers" },
     ],
   },
 ];
@@ -492,28 +497,28 @@ export type DemoStore = {
 // Sample catalog — used when a store's real products can't be read (non-Shopify
 // sites, blocked endpoints). A realistic beauty + fashion mix with product images
 // and prices so the demo always looks like a live storefront (INR-priced, since
-// most fallbacks are Indian D2C stores; the currency follows store.currency).
+// EUR-priced for the French/European site; the currency follows store.currency).
 const UNSPLASH = (id: string) => `https://images.unsplash.com/photo-${id}?w=600&q=80&auto=format&fit=crop`;
 export const mockStore: DemoStore = {
-  brandName: "Northwind Goods",
+  brandName: "Maison Lumière",
   brandColor: "#1f7a5a",
-  currency: "USD",
+  currency: "EUR",
   products: [
-    { id: "p1", title: "Everyday Glow Makeup Set", variant: "Full kit", price: 29, qty: 1, image: UNSPLASH("1596462502278-27bfdc403348") },
-    { id: "p2", title: "Flowy Evening Gown", variant: "Red · M", price: 54, qty: 1, image: UNSPLASH("1595777457583-95e059d581b8") },
-    { id: "p3", title: "Vitamin C Face Serum", variant: "30 ml", price: 19, qty: 1, image: UNSPLASH("1631730359585-38a4935cbec4") },
-    { id: "p4", title: "Structured Leather Handbag", variant: "Coral", price: 69, qty: 1, image: UNSPLASH("1584917865442-de89df76afd3") },
-    { id: "p5", title: "Nourishing Body Lotion", variant: "200 ml", price: 14, qty: 1, image: UNSPLASH("1620916566398-39f1143ab7be") },
-    { id: "p6", title: "Round Metal Sunglasses", variant: "Gold", price: 24, qty: 1, image: UNSPLASH("1511499767150-a48a237f0083") },
+    { id: "p1", title: "Coffret maquillage Éclat du quotidien", variant: "Kit complet", price: 29, qty: 1, image: UNSPLASH("1596462502278-27bfdc403348") },
+    { id: "p2", title: "Robe de soirée fluide", variant: "Rouge · M", price: 54, qty: 1, image: UNSPLASH("1595777457583-95e059d581b8") },
+    { id: "p3", title: "Sérum visage à la vitamine C", variant: "30 ml", price: 19, qty: 1, image: UNSPLASH("1631730359585-38a4935cbec4") },
+    { id: "p4", title: "Sac à main structuré en cuir", variant: "Corail", price: 69, qty: 1, image: UNSPLASH("1584917865442-de89df76afd3") },
+    { id: "p5", title: "Lait corps nourrissant", variant: "200 ml", price: 14, qty: 1, image: UNSPLASH("1620916566398-39f1143ab7be") },
+    { id: "p6", title: "Lunettes de soleil rondes en métal", variant: "Doré", price: 24, qty: 1, image: UNSPLASH("1511499767150-a48a237f0083") },
   ],
 };
 
 // Globe arc events ("orders saved" narrative) — placeholder data
 export const globeEvents = [
-  { label: "Address corrected", city: "Austin, TX" },
-  { label: "Order edited", city: "Lisbon" },
-  { label: "Upsell accepted", city: "Berlin" },
-  { label: "Cancellation avoided", city: "Mumbai" },
-  { label: "Variant swapped", city: "Toronto" },
-  { label: "Address corrected", city: "Sydney" },
+  { label: "Adresse corrigée", city: "Paris" },
+  { label: "Commande modifiée", city: "Lyon" },
+  { label: "Upsell accepté", city: "Bruxelles" },
+  { label: "Annulation évitée", city: "Genève" },
+  { label: "Variante échangée", city: "Montréal" },
+  { label: "Adresse corrigée", city: "Marseille" },
 ];

@@ -64,7 +64,7 @@ const VerticalCutReveal = forwardRef<VerticalCutRevealRef, TextProps>(
 
     const splitIntoCharacters = (text: string): string[] => {
       if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
-        const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
+        const segmenter = new Intl.Segmenter("fr", { granularity: "grapheme" });
         return Array.from(segmenter.segment(text), ({ segment }) => segment);
       }
       return Array.from(text);

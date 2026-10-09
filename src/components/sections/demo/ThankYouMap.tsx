@@ -25,7 +25,7 @@ export function ThankYouMap({ city, region }: { city: string; region?: string })
 
         {/* shipping address card */}
         <div className="absolute left-1/2 top-5 -translate-x-1/2 rounded-lg bg-white px-6 py-3 text-center shadow-[0_6px_20px_-8px_rgba(0,0,0,0.35)]">
-          <div className="text-[12px] text-neutral-500">Shipping address</div>
+          <div className="text-[12px] text-neutral-500">Adresse de livraison</div>
           <div className="text-[15px] font-bold text-neutral-900">
             {city}{region ? `, ${region}` : ""}
           </div>
@@ -44,10 +44,10 @@ export function ThankYouMap({ city, region }: { city: string; region?: string })
 
       {/* order confirmed */}
       <div className="p-4">
-        <h4 className="text-[16px] font-bold text-neutral-900">Your order is confirmed</h4>
-        <p className="mt-1 text-[13.5px] text-neutral-500">You&apos;ll receive a confirmation email soon</p>
+        <h4 className="text-[16px] font-bold text-neutral-900">Votre commande est confirmée</h4>
+        <p className="mt-1 text-[13.5px] text-neutral-500">Vous recevrez bientôt un e-mail de confirmation</p>
         <button className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#5a31f4] px-5 py-2.5 text-[13.5px] font-semibold text-white transition-all hover:brightness-110 active:scale-[0.99]">
-          Download to track with
+          Suivez votre colis avec
           <span className="font-extrabold lowercase">shop</span>
         </button>
       </div>

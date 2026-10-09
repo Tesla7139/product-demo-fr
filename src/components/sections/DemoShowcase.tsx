@@ -19,15 +19,16 @@ export function DemoShowcase() {
             className="flex flex-col items-center text-center lg:items-start lg:text-left"
           >
             <motion.p variants={fadeUp} className="text-eyebrow mb-4 text-primary">
-              See it in action
+              En action
             </motion.p>
             <motion.h2 variants={fadeUp} className="text-h2 max-w-md text-balance text-foreground">
-              Self-serve order editing, start to finish
+              La modification de commande en libre-service, de A à Z
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-4 max-w-md text-muted-foreground">
-              Customers fix their own addresses, swap items, and accept upsells — right on your
-              branded confirmation page. Every change syncs to your 3PL in real time, so orders ship
-              right the first time and your team never touches a ticket.
+              Vos clients corrigent leur adresse, échangent un article et acceptent un upsell —
+              directement sur votre page de confirmation, à vos couleurs. Chaque modification est
+              synchronisée en temps réel avec votre 3PL : la commande part juste du premier coup, et
+              votre équipe n’ouvre aucun ticket.
             </motion.p>
           </motion.div>
 

@@ -5,9 +5,10 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import type { DemoStore } from "@/lib/site";
 import { DemoImg } from "./DemoImg";
+import { money2 } from "@/lib/format";
 
 const ACCENT = "#155FFF";
-const money = (n: number) => `$${n.toFixed(2)}`;
+const money = (n: number) => money2(n);
 
 /** One-tap post-purchase upsell shown right after confirmation (no re-payment). */
 export function OneTapUpsell({
@@ -43,23 +44,23 @@ export function OneTapUpsell({
         {/* LEFT — explanation */}
         <div>
           <div className="text-eyebrow" style={{ color: ACCENT }}>
-            One-tap upsell · {name}
+            Upsell en un clic · {name}
           </div>
           <h2
             className="mt-2 font-serif font-normal tracking-tight text-foreground"
             style={{ fontSize: "clamp(1.5rem,2.4vw,2.1rem)", lineHeight: 1.1 }}
           >
-            Turn the thank-you page into your best offer
+            Faites de votre page de remerciement votre meilleure offre
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Right after checkout, show an exclusive deal customers add with a single tap — charged
-            to the card they just used. No new checkout, no re-entering details.
+            Juste après le paiement, proposez une offre exclusive que vos clients ajoutent en un clic,
+            débitée sur la carte qu’ils viennent d’utiliser. Pas de nouveau paiement, rien à ressaisir.
           </p>
           <ul className="mt-5 flex flex-col gap-2.5">
             {[
-              "One tap — no re-payment or re-checkout",
-              "A countdown creates real urgency",
-              "Set the discount and rules you want",
+              "Un clic : ni nouveau paiement, ni nouveau tunnel de commande",
+              "Un compte à rebours crée une vraie urgence",
+              "Choisissez la remise et les règles qui vous conviennent",
             ].map((b) => (
               <li key={b} className="flex items-center gap-2.5 text-sm text-foreground/90">
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -81,7 +82,7 @@ export function OneTapUpsell({
               <span className="size-2.5 rounded-full bg-[#28c840]" />
             </div>
             <div className="mx-auto rounded-md bg-white px-3 py-1 text-[11px] text-neutral-500 ring-1 ring-neutral-200">
-              {(name || "yourstore").toLowerCase().replace(/\s+/g, "")}.com/order
+              {(name || "votreboutique").toLowerCase().replace(/\s+/g, "")}.fr/commande
             </div>
           </div>
 
@@ -95,17 +96,17 @@ export function OneTapUpsell({
                 <Check className="size-3.5" strokeWidth={3} />
               </span>
               <span className="font-semibold text-neutral-900">Confirmation #0WPS9KCW8</span>
-              <span className="text-neutral-500">· You’ve paid for your order</span>
+              <span className="text-neutral-500">· Votre commande est payée</span>
             </div>
 
             {/* before you go */}
             <div className="my-4 flex items-center gap-4">
               <span className="h-px flex-1 bg-border" />
-              <span className="text-base font-semibold text-neutral-900">{name}, before you go!</span>
+              <span className="text-base font-semibold text-neutral-900">{name}, avant de partir !</span>
               <span className="h-px flex-1 bg-border" />
             </div>
             <div className="rounded-lg bg-neutral-50 py-2 text-center text-[13px] text-neutral-600">
-              Add this for a limited time{" "}
+              Ajoutez-le pour une durée limitée{" "}
               <span className="font-semibold tabular-nums text-red-500">{timer}</span>
             </div>
 
@@ -117,10 +118,10 @@ export function OneTapUpsell({
 
               <div className="flex flex-col">
                 <div className="text-xs font-medium uppercase tracking-wide text-neutral-400">
-                  Offer 1 of 1
+                  Offre 1 sur 1
                 </div>
                 <h3 className="mt-1 text-xl font-semibold text-neutral-900">
-                  {offer?.title ?? "Add-on product"}
+                  {offer?.title ?? "Produit complémentaire"}
                 </h3>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-neutral-400 line-through">{money(full)}</span>
@@ -129,12 +130,12 @@ export function OneTapUpsell({
 
                 <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-sm">
                   <div className="flex justify-between text-neutral-600">
-                    <span>Shipping</span>
-                    <span className="font-medium text-neutral-900">Free</span>
+                    <span>Livraison</span>
+                    <span className="font-medium text-neutral-900">Offerte</span>
                   </div>
                   <div className="flex justify-between text-neutral-600">
-                    <span>Taxes</span>
-                    <span className="font-medium text-neutral-900">Free</span>
+                    <span>TVA</span>
+                    <span className="font-medium text-neutral-900">Incluse</span>
                   </div>
                 </div>
 
@@ -144,7 +145,7 @@ export function OneTapUpsell({
                     className="w-full rounded-lg py-3 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.99]"
                     style={{ background: ACCENT }}
                   >
-                    Add to order · {money(deal)} USD
+                    Ajouter à la commande · {money(deal)}
                   </button>
                   {/* finger-tap hint */}
                   <div className="pointer-events-none absolute -bottom-3 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center">
@@ -153,7 +154,7 @@ export function OneTapUpsell({
                       transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
                       className="text-xl"
                       role="img"
-                      aria-label="tap"
+                      aria-label="appuyer"
                     >
                       👆
                     </motion.span>
@@ -163,10 +164,10 @@ export function OneTapUpsell({
                     className="mt-6 w-full rounded-lg py-2.5 text-sm font-semibold transition-colors hover:bg-neutral-50"
                     style={{ color: ACCENT }}
                   >
-                    Skip Offer
+                    Passer l’offre
                   </button>
                   <p className="mt-2 text-center text-xs text-neutral-400">
-                    One tap to add — no card or re-checkout needed.
+                    Un clic suffit : pas de carte à ressaisir, pas de nouveau paiement.
                   </p>
                 </div>
               </div>

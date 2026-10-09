@@ -4,8 +4,7 @@ import { Check } from "lucide-react";
 import type { DemoStore, DemoProduct } from "@/lib/site";
 import { DemoImg } from "./DemoImg";
 
-const money = (n: number, currency = "USD") =>
-  new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+import { money, DEFAULT_CURRENCY } from "@/lib/format";
 
 function ProductImg({ src, alt }: { src?: string | null; alt: string }) {
   return <DemoImg src={src} alt={alt} className="size-full object-cover" />;
@@ -33,7 +32,7 @@ export function ThankYouProducts({
   gridRef?: React.RefObject<HTMLDivElement | null>;
   addBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
-  const fmt = (n: number) => money(n, store.currency || "USD");
+  const fmt = (n: number) => money(n, store.currency || DEFAULT_CURRENCY);
   const deal = (n: number) => Math.max(1, Math.round(n * 0.5)); // post-purchase offer = 50% off
 
   if (layout === "page") {
@@ -42,9 +41,9 @@ export function ThankYouProducts({
         {/* products brought to the top */}
         <div ref={gridRef} className="border-b border-border p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-[15px] font-bold text-neutral-900">Complete your order</h3>
+            <h3 className="text-[15px] font-bold text-neutral-900">Complétez votre commande</h3>
             <span className="text-[11px] font-medium uppercase tracking-wide text-neutral-400">
-              Recommended for you
+              Recommandé pour vous
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -64,7 +63,7 @@ export function ThankYouProducts({
                   className="mt-2 w-full rounded-md py-1.5 text-xs font-semibold text-white transition-all hover:brightness-110"
                   style={{ background: brand }}
                 >
-                  Add · {fmt(deal(p.price))}
+                  Ajouter · {fmt(deal(p.price))}
                 </button>
               </div>
             ))}
@@ -80,8 +79,8 @@ export function ThankYouProducts({
             <Check className="size-4" strokeWidth={3} />
           </span>
           <div>
-            <div className="text-xs text-neutral-500">Order #JDTNH5Z6N confirmed</div>
-            <div className="text-[15px] font-bold text-neutral-900">Thank you, Tucker!</div>
+            <div className="text-xs text-neutral-500">Commande n° JDTNH5Z6N confirmée</div>
+            <div className="text-[15px] font-bold text-neutral-900">Merci, Camille !</div>
           </div>
         </div>
       </div>
@@ -91,7 +90,7 @@ export function ThankYouProducts({
   // row layout (in-editing cross-sell)
   return (
     <div ref={gridRef} className="rounded-xl border border-border p-3">
-      <h4 className="mb-2 text-sm font-bold text-neutral-900">You may also like these products</h4>
+      <h4 className="mb-2 text-sm font-bold text-neutral-900">Vous aimerez aussi</h4>
       <div className="-mx-1 flex items-stretch gap-3 overflow-x-auto px-1 pb-1">
         {products.map((p, i) => (
           <div key={i} className="flex w-28 shrink-0 flex-col">
@@ -109,7 +108,7 @@ export function ThankYouProducts({
               className="mt-1.5 w-full rounded-md py-1.5 text-xs font-semibold text-white"
               style={{ background: brand }}
             >
-              Add · {fmt(deal(p.price))}
+              Ajouter · {fmt(deal(p.price))}
             </button>
           </div>
         ))}

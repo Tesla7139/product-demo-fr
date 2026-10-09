@@ -3,8 +3,7 @@
 import type { DemoStore, DemoProduct } from "@/lib/site";
 import { DemoImg } from "./DemoImg";
 
-const money = (n: number, currency = "USD") =>
-  new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+import { money, DEFAULT_CURRENCY } from "@/lib/format";
 
 /** A single discounted "Too good to miss!" featured deal. */
 export function TooGoodToMiss({
@@ -18,15 +17,15 @@ export function TooGoodToMiss({
   product: DemoProduct;
   onAdd: (p: DemoProduct) => void;
 }) {
-  const fmt = (n: number) => money(n, store.currency || "USD");
+  const fmt = (n: number) => money(n, store.currency || DEFAULT_CURRENCY);
   const deal = Math.max(1, Math.round(product.price * 0.5));
 
   return (
     <div className="rounded-xl border border-border p-4">
-      <h4 className="mb-3 text-[15px] font-bold text-neutral-900">Too good to miss!</h4>
+      <h4 className="mb-3 text-[15px] font-bold text-neutral-900">Trop beau pour passer à côté !</h4>
       <div className="flex gap-4">
         <div className="relative size-24 shrink-0 overflow-hidden rounded-lg bg-neutral-50">
-          <span className="absolute left-1 top-1 z-10 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-500">50% OFF</span>
+          <span className="absolute left-1 top-1 z-10 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-500">-50 %</span>
           <DemoImg src={product.image} className="size-full object-cover" />
         </div>
         <div className="min-w-0 flex-1">
@@ -46,7 +45,7 @@ export function TooGoodToMiss({
               className="min-w-0 flex-1 rounded-md py-2 text-[13px] font-semibold text-white transition-all hover:brightness-110"
               style={{ background: brand }}
             >
-              Add · {fmt(deal)}
+              Ajouter · {fmt(deal)}
             </button>
           </div>
         </div>

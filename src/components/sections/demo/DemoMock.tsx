@@ -19,6 +19,7 @@ import {
 import type { DemoStore, DemoProduct } from "@/lib/site";
 import { COUNTRIES, countryByName, lookupPostal } from "@/lib/regions";
 import { readableBrand, dedupeByTitle, dedupeExactTitle } from "@/lib/utils";
+import { money, money2, DEFAULT_CURRENCY } from "@/lib/format";
 import { DemoImg } from "./DemoImg";
 import { ThankYouMap } from "./ThankYouMap";
 import { OrderDetails } from "./OrderDetails";
@@ -35,16 +36,13 @@ export type Addr = { first: string; last: string; line1: string; city: string; s
 
 // Single source of truth for the demo customer, so every surface (editing window,
 // EU withdrawal order-status page, etc.) shows the same order details.
-export const DEFAULT_EMAIL = "tucker.briggs01@gmail.com";
-export const DEFAULT_PHONE = "+1 760-637-2644";
-export const DEFAULT_COUNTRY = "United States";
-export const DEFAULT_ADDR: Addr = { first: "Tucker", last: "Briggs", line1: "4563 Coronado Dr", city: "Oceanside", state: "California", zip: "92057" };
-/** Address-validation mode: Tucker's current address is flagged, then corrected on validate. */
-const FLAGGED_ADDR: Addr = DEFAULT_ADDR;
-const VERIFIED_ADDR: Addr = { first: "Tucker", last: "Briggs", line1: "4563 Coronado Drive", city: "Oceanside", state: "California", zip: "92057-3812" };
-
-const money = (n: number, currency = "USD") =>
-  new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+export const DEFAULT_EMAIL = "camille.dubois@gmail.com";
+export const DEFAULT_PHONE = "+33 6 12 34 56 78";
+export const DEFAULT_COUNTRY = "France";
+export const DEFAULT_ADDR: Addr = { first: "Camille", last: "Dubois", line1: "18 rue des Lilas", city: "Lyon", state: "Auvergne-Rhône-Alpes", zip: "69003" };
+/** Address-validation mode: Camille's abbreviated street is flagged, then corrected on validate. */
+const FLAGGED_ADDR: Addr = { ...DEFAULT_ADDR, line1: "18 r des Lilas" };
+const VERIFIED_ADDR: Addr = { ...DEFAULT_ADDR, line1: "18 Rue des Lilas" };
 
 let counter = 0;
 const uid = () => `li-${counter++}`;
@@ -121,7 +119,7 @@ export function DemoMock({
   onPaid?: () => void;
 }) {
   const brand = readableBrand(store.brandColor);
-  const fmt = (n: number) => money(n, store.currency || "USD");
+  const fmt = (n: number) => money(n, store.currency || DEFAULT_CURRENCY);
 
   // The order starts with two distinct items (so a quantity edit can also remove one);
   // remaining products become the in-page cross-sell suggestions.
@@ -146,7 +144,7 @@ export function DemoMock({
   });
   const [open, setOpen] = useState<Section | null>(initialOpen);
   const [addrValidated, setAddrValidated] = useState(false);
-  const [country, setCountry] = useState("United States");
+  const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [validating, setValidating] = useState(false);
   const zipTouched = useRef(false); // only auto-detect once the user actually edits the postal code
   const lastDetected = useRef(""); // postal code we last resolved (avoid re-firing)
@@ -239,9 +237,9 @@ export function DemoMock({
   }, []);
   const mins = Math.floor(secondsLeft / 60);
   const secs = secondsLeft % 60;
-  const countdown = `${mins} minute${mins === 1 ? "" : "s"} and ${secs
+  const countdown = `${mins} minute${mins > 1 ? "s" : ""} et ${secs
     .toString()
-    .padStart(2, "0")} seconds`;
+    .padStart(2, "0")} seconde${secs > 1 ? "s" : ""}`;
 
   const subtotal = useMemo(() => items.reduce((s, i) => s + priceOf(i) * i.qty, 0), [items]);
   const savings = useMemo(
@@ -249,6 +247,7 @@ export function DemoMock({
     [items]
   );
   const due = cancelled ? 0 : Math.max(0, subtotal - paid);
+  const itemCount = items.reduce((n, i) => n + i.qty, 0);
 
   // Free-shipping threshold: set just above the starting cart, so adding one upsell
   // item unlocks it and the shipping fee is removed from the order.
@@ -320,30 +319,30 @@ export function DemoMock({
 
   const removeItem = (id: string) => {
     setItems((prev) => (prev.length > 1 ? prev.filter((i) => i.uid !== id) : prev));
-    flash("Item removed");
+    flash("Article supprimé");
   };
 
   const addUpsell = (p: DemoProduct, discounted = true) => {
     const charge = discounted ? Math.max(1, Math.round(p.price * 0.5)) : p.price;
     onUpsellAdded?.();
-    setProcessing("Syncing with your order…");
+    setProcessing("Synchronisation avec votre commande…");
     window.setTimeout(() => {
       setItems((prev) => [
         ...prev,
         { ...p, uid: uid(), qty: 1, postPurchase: discounted, dealPrice: discounted ? charge : undefined },
       ]);
       setProcessing(null);
-      flash(`${p.title.split(" ").slice(0, 3).join(" ")} added — ${fmt(charge)} pending`);
+      flash(`${p.title.split(" ").slice(0, 3).join(" ")} ajouté — ${fmt(charge)} en attente`);
     }, 1300);
   };
 
   const payBalance = () => {
     const amount = due;
-    setProcessing("Collecting payment…");
+    setProcessing("Paiement en cours…");
     window.setTimeout(() => {
       setPaid(subtotal);
       setProcessing(null);
-      flash(`Balance paid — ${fmt(amount)} charged`);
+      flash(`Solde réglé — ${fmt(amount)} débités`);
     }, 1300);
   };
 
@@ -370,10 +369,10 @@ export function DemoMock({
               </span>
               <div>
                 <div className="text-xs text-neutral-500">
-                  {pageContext === "orderstatus" ? "Order #JDTNH5Z6N" : "Confirmation #JDTNH5Z6N"}
+                  {pageContext === "orderstatus" ? "Commande n°\u00A0JDTNH5Z6N" : "Confirmation n°\u00A0JDTNH5Z6N"}
                 </div>
                 <div className="text-lg font-bold text-neutral-900">
-                  {pageContext === "orderstatus" ? "Your order status" : "Thank you, Tucker!"}
+                  {pageContext === "orderstatus" ? "Suivi de votre commande" : `Merci, ${DEFAULT_ADDR.first}\u00A0!`}
                 </div>
               </div>
             </div>
@@ -387,15 +386,15 @@ export function DemoMock({
                   <div className="flex items-start gap-3">
                     <Truck className="mt-0.5 size-4 text-neutral-700" />
                     <div>
-                      <div className="text-sm font-bold text-neutral-900">On its way</div>
-                      <div className="text-xs text-neutral-400">18 Jun</div>
+                      <div className="text-sm font-bold text-neutral-900">En cours de livraison</div>
+                      <div className="text-xs text-neutral-400">18 juin</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 pl-[3px]">
                     <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-neutral-400" />
                     <div className="pl-[7px]">
-                      <div className="text-sm font-bold text-neutral-900">Confirmed</div>
-                      <div className="text-xs text-neutral-400">18 Jun</div>
+                      <div className="text-sm font-bold text-neutral-900">Confirmée</div>
+                      <div className="text-xs text-neutral-400">18 juin</div>
                     </div>
                   </div>
                 </div>
@@ -414,57 +413,57 @@ export function DemoMock({
                 <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-neutral-100">
                   <X className="size-6 text-neutral-500" />
                 </div>
-                <p className="font-semibold text-neutral-900">Order cancelled</p>
+                <p className="font-semibold text-neutral-900">Commande annulée</p>
                 <p className="mt-1 text-sm text-neutral-500">
-                  A refund of {fmt(subtotal)} has been issued.
+                  Un remboursement de {fmt(subtotal)} a été effectué.
                 </p>
                 <button
                   onClick={() => setCancelled(false)}
                   className="mt-3 text-sm font-semibold"
                   style={{ color: brand }}
                 >
-                  Undo
+                  Annuler l&apos;annulation
                 </button>
               </div>
             ) : (
               <div className="rounded-xl border border-border p-3">
                 <h3 className="mb-2 text-base font-bold text-neutral-900">
-                  Make changes to your order
+                  Modifier votre commande
                 </h3>
 
                 {/* edit window banner */}
                 <div ref={tourRefs?.countdown} className="mb-3 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-neutral-700">
                   <TriangleAlert className="size-4 shrink-0 text-amber-500" />
                   <span>
-                    You can make changes to order for another{" "}
+                    Vous pouvez encore modifier votre commande pendant{" "}
                     <span className="font-semibold text-red-500 tabular-nums">{countdown}</span>
                   </span>
                 </div>
 
                 <div ref={tourRefs?.sections} className="flex flex-col gap-2">
-                  <AccordionRow icon={UserRound} label="Change Contact Information" isOpen={open === "contact"} onClick={() => toggle("contact")} locked={addressValidation}>
-                    <Field label="Email" value={email} onChange={setEmail} />
-                    <Field label="Phone" value={phone} onChange={setPhone} />
-                    <CheckboxRow brand={brand} label="Update Profile" />
-                    <PrimaryButton onClick={() => { flash("Contact information updated"); setOpen(null); }}>
-                      Change Contact Information
+                  <AccordionRow icon={UserRound} label="Modifier vos coordonnées" isOpen={open === "contact"} onClick={() => toggle("contact")} locked={addressValidation}>
+                    <Field label="E-mail" value={email} onChange={setEmail} />
+                    <Field label="Téléphone" value={phone} onChange={setPhone} />
+                    <CheckboxRow brand={brand} label="Mettre à jour mon profil" />
+                    <PrimaryButton onClick={() => { flash("Coordonnées mises à jour"); setOpen(null); }}>
+                      Enregistrer mes coordonnées
                     </PrimaryButton>
                   </AccordionRow>
 
                   <div ref={tourRefs?.shippingRow}>
                     <AccordionRow
                       icon={MapPin}
-                      label="Edit Shipping Address"
+                      label="Modifier l'adresse de livraison"
                       isOpen={open === "shipping"}
                       onClick={() => toggle("shipping")}
                       badge={
                         addrFlagged ? (
                           <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-white">
-                            <TriangleAlert className="size-3 shrink-0" /> Address check required
+                            <TriangleAlert className="size-3 shrink-0" /> Adresse à vérifier
                           </span>
                         ) : addrValidated ? (
                           <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white">
-                            <Check className="size-3 shrink-0" strokeWidth={3} /> Address verified
+                            <Check className="size-3 shrink-0" strokeWidth={3} /> Adresse vérifiée
                           </span>
                         ) : undefined
                       }
@@ -472,22 +471,22 @@ export function DemoMock({
                       <div ref={tourRefs?.addressBlock} className="flex flex-col gap-2.5">
                         <div ref={tourRefs?.addressForm} className="flex flex-col gap-2.5">
                           <SelectInput
-                            label="Country"
+                            label="Pays"
                             value={country}
                             onChange={(v) => { setCountry(v); setAddr((a) => ({ ...a, state: countryByName(v).regions[0] })); }}
                             options={COUNTRIES.map((c) => c.name)}
                             emphasize={formEmphasis}
                           />
                           <div className="grid grid-cols-2 gap-2.5">
-                            <Field label="First Name" value={addr.first} onChange={(v) => setAddr({ ...addr, first: v })} emphasize={formEmphasis} />
-                            <Field label="Last Name" value={addr.last} onChange={(v) => setAddr({ ...addr, last: v })} emphasize={formEmphasis} />
+                            <Field label="Prénom" value={addr.first} onChange={(v) => setAddr({ ...addr, first: v })} emphasize={formEmphasis} />
+                            <Field label="Nom" value={addr.last} onChange={(v) => setAddr({ ...addr, last: v })} emphasize={formEmphasis} />
                           </div>
-                          <Field label="Address 1" value={addr.line1} onChange={(v) => setAddr({ ...addr, line1: v })} emphasize={emphasis.line1 || formEmphasis} invalid={addrFlagged} valid={addrValidated} error={addrFlagged ? "Street address could not be fully validated. Please review." : undefined} />
-                          <Field label="Address 2" value="" onChange={() => {}} />
+                          <Field label="Adresse" value={addr.line1} onChange={(v) => setAddr({ ...addr, line1: v })} emphasize={emphasis.line1 || formEmphasis} invalid={addrFlagged} valid={addrValidated} error={addrFlagged ? "Adresse incomplète ou non reconnue. Merci de la vérifier." : undefined} />
+                          <Field label="Complément d'adresse" value="" onChange={() => {}} />
                           <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3">
-                            <Field label="City" value={addr.city} onChange={(v) => setAddr({ ...addr, city: v })} emphasize={emphasis.city || formEmphasis} invalid={addrFlagged} valid={addrValidated} />
+                            <Field label="Ville" value={addr.city} onChange={(v) => setAddr({ ...addr, city: v })} emphasize={emphasis.city || formEmphasis} invalid={addrFlagged} valid={addrValidated} />
                             <SelectInput label={countryByName(country).regionLabel} value={addr.state} onChange={(v) => setAddr({ ...addr, state: v })} options={countryByName(country).regions} emphasize={emphasis.city || formEmphasis} />
-                            <Field label="Postal Code" value={addr.zip} onChange={(v) => { zipTouched.current = true; setAddr({ ...addr, zip: v }); }} emphasize={emphasis.zip || formEmphasis} invalid={addrFlagged} valid={addrValidated} error={addrFlagged ? "Postal code could not be validated." : undefined} />
+                            <Field label="Code postal" value={addr.zip} onChange={(v) => { zipTouched.current = true; setAddr({ ...addr, zip: v }); }} emphasize={emphasis.zip || formEmphasis} invalid={addrFlagged} valid={addrValidated} error={addrFlagged ? "Le code postal n'a pas pu être validé." : undefined} />
                           </div>
                         </div>
                         <div ref={tourRefs?.saveBtn}>
@@ -497,11 +496,11 @@ export function DemoMock({
                             onClick={async () => {
                               if (!addrFlagged) {
                                 // 2nd tap: close the section and confirm
-                                setOpen(null); flash("Shipping address updated"); onShippingSaved?.(); return;
+                                setOpen(null); flash("Adresse de livraison mise à jour"); onShippingSaved?.(); return;
                               }
                               // 1st tap: validate. Guided tour uses the scripted correction…
                               if (scriptedValidation) {
-                                setAddr(VERIFIED_ADDR); setAddrValidated(true); flash("Address verified & deliverable"); onShippingSaved?.(); return;
+                                setAddr(VERIFIED_ADDR); setAddrValidated(true); flash("Adresse vérifiée et livrable"); onShippingSaved?.(); return;
                               }
                               // …manual use runs a free live postal-code lookup (Zippopotam).
                               setValidating(true);
@@ -509,16 +508,16 @@ export function DemoMock({
                               setValidating(false);
                               if (!hit) {
                                 // postal code doesn't exist for the selected country → NOT deliverable
-                                flash(`Couldn't verify ${addr.zip || "that postal code"} in ${country}.`);
+                                flash(`Impossible de vérifier ${addr.zip ? `le code postal ${addr.zip}` : "ce code postal"} (${country}).`);
                                 return; // stay flagged; do NOT mark verified
                               }
                               const cityWrong = hit.city && hit.city.toLowerCase() !== addr.city.trim().toLowerCase();
                               const stateWrong = hit.region && hit.region.toLowerCase() !== addr.state.trim().toLowerCase();
                               if (cityWrong || stateWrong) {
                                 setAddr((a) => ({ ...a, city: hit.city || a.city, state: hit.region || a.state }));
-                                flash(`Corrected to ${[hit.city, hit.region].filter(Boolean).join(", ")}`);
+                                flash(`Adresse corrigée\u00A0: ${[hit.city, hit.region].filter(Boolean).join(", ")}`);
                               } else {
-                                flash("Address verified & deliverable");
+                                flash("Adresse vérifiée et livrable");
                               }
                               setAddrValidated(true);
                               onShippingSaved?.();
@@ -526,7 +525,7 @@ export function DemoMock({
                             className="mt-1 w-full rounded-md py-3 text-sm font-semibold text-white transition-all hover:brightness-125 active:scale-[0.99] disabled:opacity-70"
                             style={{ background: "#111827" }}
                           >
-                            {validating ? "Validating…" : addrFlagged ? "Use validated address" : "Update Shipping Address"}
+                            {validating ? "Vérification…" : addrFlagged ? "Utiliser l'adresse validée" : "Mettre à jour l'adresse"}
                           </button>
                         </div>
                       </div>
@@ -534,7 +533,7 @@ export function DemoMock({
                   </div>
 
                   <div ref={tourRefs?.orderRow}>
-                  <AccordionRow icon={Pencil} label="Update your order" isOpen={open === "order"} onClick={() => toggle("order")} locked={addressValidation}>
+                  <AccordionRow icon={Pencil} label="Modifier les articles" isOpen={open === "order"} onClick={() => toggle("order")} locked={addressValidation}>
                     <div className="flex flex-col divide-y divide-border">
                       {items.map((item, i) => (
                         <div
@@ -550,7 +549,7 @@ export function DemoMock({
                           <button
                             onClick={() => removeItem(item.uid)}
                             disabled={items.length <= 1}
-                            aria-label={`Remove ${item.title}`}
+                            aria-label={`Supprimer ${item.title}`}
                             className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-neutral-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-border disabled:hover:bg-transparent disabled:hover:text-neutral-400"
                           >
                             <Trash2 className="size-3.5" />
@@ -561,53 +560,53 @@ export function DemoMock({
                     <div ref={tourRefs?.orderBtn}>
                       <PrimaryButton onClick={() => {
                         const changed = orderSig(items) !== initialOrderSig.current;
-                        if (!changed) { flash("No changes to your order yet"); return; }
+                        if (!changed) { flash("Aucune modification pour l'instant"); return; }
                         initialOrderSig.current = orderSig(items);
-                        flash("Order updated");
+                        flash("Commande mise à jour");
                         onOrderUpdated?.();
                       }}>
-                        Update your order
+                        Mettre à jour la commande
                       </PrimaryButton>
                     </div>
                   </AccordionRow>
                   </div>
 
-                  <AccordionRow icon={Tag} label="Apply Discount Code" isOpen={open === "discount"} onClick={() => toggle("discount")} locked={addressValidation}>
+                  <AccordionRow icon={Tag} label="Appliquer un code promo" isOpen={open === "discount"} onClick={() => toggle("discount")} locked={addressValidation}>
                     <div className="flex gap-2">
                       <input
                         value={discount}
                         onChange={(e) => setDiscount(e.target.value)}
-                        placeholder="Discount code"
+                        placeholder="Code promo"
                         className="h-11 flex-1 rounded-md border border-border px-3 text-sm focus:outline-none"
                       />
                       <button
-                        onClick={() => discount && flash("Discount applied")}
+                        onClick={() => discount && flash("Code promo appliqué")}
                         className="h-11 rounded-md border border-border bg-neutral-100 px-5 text-sm font-medium text-neutral-500"
                       >
-                        Apply
+                        Appliquer
                       </button>
                     </div>
                     <p className="mt-2 text-xs text-neutral-500">
-                      Enter a valid discount code to apply savings to your order.
+                      Saisissez un code promo valide pour en profiter sur votre commande.
                     </p>
                   </AccordionRow>
 
-                  <AccordionRow icon={X} label="Cancel Your Order" isOpen={open === "cancel"} onClick={() => toggle("cancel")} locked={addressValidation}>
+                  <AccordionRow icon={X} label="Annuler la commande" isOpen={open === "cancel"} onClick={() => toggle("cancel")} locked={addressValidation}>
                     <p className="text-sm text-neutral-600">
-                      {`Cancel your order for ${fmt(subtotal)} and choose how you'd like to be refunded.`}
+                      {`Annulez votre commande de ${fmt(subtotal)} et choisissez votre mode de remboursement.`}
                     </p>
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => { setCancelled(true); setOpen(null); flash(`Refund of ${fmt(subtotal)} to original payment`); }}
+                        onClick={() => { setCancelled(true); setOpen(null); flash(`${fmt(subtotal)} remboursés sur votre moyen de paiement`); }}
                         className="rounded-md border border-red-200 py-2.5 text-[13px] font-semibold text-red-500 transition-colors hover:bg-red-50"
                       >
-                        Refund to original payment
+                        Remboursement
                       </button>
                       <button
-                        onClick={() => { setCancelled(true); setOpen(null); flash(`${fmt(subtotal)} store credit issued`); }}
+                        onClick={() => { setCancelled(true); setOpen(null); flash(`Avoir de ${fmt(subtotal)} émis`); }}
                         className="rounded-md border border-border py-2.5 text-[13px] font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
                       >
-                        Store credit
+                        Avoir boutique
                       </button>
                     </div>
                   </AccordionRow>
@@ -639,7 +638,7 @@ export function DemoMock({
             {/* order details summary */}
             {!cancelled && (
               <div className="mt-3">
-                <OrderDetails addr={addr} email={email} phone={phone} country={DEFAULT_COUNTRY} amount={`${fmt(cancelled ? 0 : subtotal + shipping)} ${store.currency || "USD"}`} />
+                <OrderDetails addr={addr} email={email} phone={phone} country={DEFAULT_COUNTRY} amount={money2(cancelled ? 0 : subtotal + shipping, store.currency || DEFAULT_CURRENCY)} />
               </div>
             )}
             </>
@@ -662,7 +661,7 @@ export function DemoMock({
                     {item.postPurchase && item.dealPrice != null && (
                       <div className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
                         <Tag className="size-2.5" />
-                        POSTPURCHASE (-{fmt((item.price - item.dealPrice) * item.qty)})
+                        POSTACHAT (-{fmt((item.price - item.dealPrice) * item.qty)})
                       </div>
                     )}
                   </div>
@@ -680,17 +679,17 @@ export function DemoMock({
               ))}
             </div>
             <div className="mt-5 space-y-1.5 border-t border-border pt-4 text-sm">
-              <Row label={`Subtotal · ${items.reduce((n, i) => n + i.qty, 0)} items`} value={fmt(subtotal)} />
+              <Row label={`Sous-total · ${itemCount} article${itemCount > 1 ? "s" : ""}`} value={fmt(subtotal)} />
               {freeShip ? (
                 <div className="flex items-center justify-between text-neutral-600">
-                  <span>Shipping</span>
+                  <span>Livraison</span>
                   <span className="flex items-center gap-1.5">
                     <span className="text-neutral-400 line-through">{fmt(shipFee)}</span>
-                    <span className="font-bold text-emerald-600">FREE</span>
+                    <span className="font-bold text-emerald-600">OFFERTE</span>
                   </span>
                 </div>
               ) : (
-                <Row label="Shipping" value={fmt(shipping)} />
+                <Row label="Livraison" value={fmt(shipping)} />
               )}
             </div>
             <div className="mt-3 flex items-baseline justify-between border-t border-border pt-3">
@@ -702,7 +701,7 @@ export function DemoMock({
             {savings > 0 && !cancelled && (
               <div className="mt-2 flex items-center gap-1.5 text-[12px] font-bold text-emerald-600">
                 <Tag className="size-3" />
-                Total savings {fmt(savings)}
+                Vous économisez {fmt(savings)}
               </div>
             )}
 
@@ -711,11 +710,11 @@ export function DemoMock({
             {due > 0 && (
               <div ref={tourRefs?.payPanel} className="mt-3 rounded-xl bg-amber-50 p-3">
                 <div className="flex items-baseline justify-between text-[13px]">
-                  <span className="font-medium text-neutral-700">Balance due</span>
+                  <span className="font-medium text-neutral-700">Reste à payer</span>
                   <span className="font-bold text-neutral-900">{fmt(due)}</span>
                 </div>
                 <p className="mt-1 text-[11px] leading-snug text-neutral-500">
-                  You added to your order. Pay the difference to confirm the changes.
+                  Vous avez ajouté des articles. Réglez la différence pour confirmer les modifications.
                 </p>
                 <button
                   ref={tourRefs?.payBtn}
@@ -723,7 +722,7 @@ export function DemoMock({
                   className="mt-2.5 w-full rounded-md py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-125 active:scale-[0.99]"
                   style={{ background: "#111827" }}
                 >
-                  Pay {fmt(due)}
+                  Payer {fmt(due)}
                 </button>
               </div>
             )}
@@ -745,7 +744,7 @@ export function DemoMock({
               animate={{ scale: 1, y: 0 }}
               className="relative w-[80%] max-w-sm rounded-xl bg-white p-8 text-center shadow-soft-xl"
             >
-              <p className="mb-4 text-left text-lg font-bold text-neutral-900">Processing…</p>
+              <p className="mb-4 text-left text-lg font-bold text-neutral-900">Traitement en cours…</p>
               <Loader2 className="mx-auto size-9 animate-spin" style={{ color: brand }} />
               <p className="mt-4 text-sm text-neutral-600">{processing}</p>
             </motion.div>
@@ -969,7 +968,7 @@ function OneTapPanel({
     return () => clearInterval(id);
   }, []);
   const timer = `${Math.floor(secs / 60)}:${(secs % 60).toString().padStart(2, "0")}`;
-  const moneyFmt = (n: number) => `$${n.toFixed(2)}`;
+  const moneyFmt = (n: number) => money2(n, store.currency || DEFAULT_CURRENCY);
 
   return (
     <div className="flex flex-col gap-3">
@@ -978,13 +977,13 @@ function OneTapPanel({
         <span className="flex size-6 items-center justify-center rounded-full border-2" style={{ borderColor: brand, color: brand }}>
           <Check className="size-3.5" strokeWidth={3} />
         </span>
-        <span className="font-semibold text-neutral-900">Confirmation #0WPS9KCW8</span>
-        <span className="text-neutral-400">· You&apos;ve paid</span>
+        <span className="font-semibold text-neutral-900">Confirmation n°&nbsp;0WPS9KCW8</span>
+        <span className="text-neutral-400">· Paiement effectué</span>
       </div>
 
       {/* "before you go" banner */}
       <div className="flex items-center gap-3 rounded-lg bg-neutral-50 py-2.5 text-center text-[13px] text-neutral-700">
-        <span className="flex-1 text-center font-semibold">Tucker, before you go!</span>
+        <span className="flex-1 text-center font-semibold">{DEFAULT_ADDR.first}, une dernière chose&nbsp;!</span>
         <span className="mr-3 font-semibold tabular-nums text-red-500">{timer}</span>
       </div>
 
@@ -996,9 +995,9 @@ function OneTapPanel({
 
         <div className="flex flex-col justify-between py-1">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wide text-neutral-400">Offer 1 of 1</div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-neutral-400">Offre 1 sur 1</div>
             <div className="mt-1 text-[14px] font-semibold leading-snug text-neutral-900">
-              {offer?.title ?? "Add-on product"}
+              {offer?.title ?? "Produit complémentaire"}
             </div>
             <div className="mt-1.5 flex items-baseline gap-1.5">
               <span className="text-[12px] text-neutral-400 line-through">{moneyFmt(full)}</span>
@@ -1012,17 +1011,17 @@ function OneTapPanel({
               className="w-full rounded-lg py-2.5 text-[13px] font-semibold text-white shadow-md transition-all hover:brightness-110"
               style={{ background: brand }}
             >
-              Add to order · {moneyFmt(deal)}
+              Ajouter à la commande · {moneyFmt(deal)}
             </button>
             <button className="w-full py-1.5 text-[12px] font-medium text-neutral-400 hover:text-neutral-600">
-              Skip offer
+              Non merci
             </button>
           </div>
         </div>
       </div>
 
       <p className="text-center text-[11px] text-neutral-400">
-        One tap to add — no card or re-checkout needed.
+        Un clic pour ajouter — sans ressaisir votre carte ni repasser par le paiement.
       </p>
     </div>
   );

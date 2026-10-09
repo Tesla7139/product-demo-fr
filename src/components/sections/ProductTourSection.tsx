@@ -10,15 +10,15 @@ export function ProductTourSection() {
       <Container>
         {/* section header */}
         <div className="mb-14 text-center">
-          <p className="text-eyebrow mb-3 text-primary">Interactive demo</p>
+          <p className="text-eyebrow mb-3 text-primary">Démo interactive</p>
           <h2
             className="font-sans font-extrabold uppercase tracking-tight text-foreground"
             style={{ fontSize: "clamp(2rem, 3.6vw, 3rem)", lineHeight: 0.98 }}
           >
-            See every feature live
+            Toutes les fonctionnalités, en direct
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-            Pick any product tab and interact with a live demo — no sign-up required.
+            Choisissez un onglet et testez la démo en direct — sans inscription.
           </p>
         </div>
 
