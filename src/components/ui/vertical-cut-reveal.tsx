@@ -11,6 +11,7 @@ import {
 } from "react";
 import { type AnimationOptions, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLocaleMeta } from "@/i18n/I18nProvider";
 
 interface TextProps {
   children: React.ReactNode;
@@ -59,12 +60,13 @@ const VerticalCutReveal = forwardRef<VerticalCutRevealRef, TextProps>(
     ref
   ) => {
     const containerRef = useRef<HTMLSpanElement>(null);
+    const { intl } = useLocaleMeta();
     const text = typeof children === "string" ? children : children?.toString() || "";
     const [isAnimating, setIsAnimating] = useState(false);
 
     const splitIntoCharacters = (text: string): string[] => {
       if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
-        const segmenter = new Intl.Segmenter("fr", { granularity: "grapheme" });
+        const segmenter = new Intl.Segmenter(intl, { granularity: "grapheme" });
         return Array.from(segmenter.segment(text), ({ segment }) => segment);
       }
       return Array.from(text);

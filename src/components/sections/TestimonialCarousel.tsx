@@ -4,30 +4,13 @@ import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Container } from "@/components/primitives/Container";
-
-// Placeholder testimonials — original sample copy, replace with real ones.
-const testimonials = [
-  {
-    quote:
-      "Notre équipe support ne croule plus sous les e-mails de changement d’adresse. Les clients corrigent tout eux-mêmes.",
-    name: "Client exemple",
-    role: "Responsable expérience client · Marque fictive",
-  },
-  {
-    quote:
-      "Les upsells post-achat ont vraiment fait grimper notre panier moyen, sans toucher au tunnel de commande.",
-    name: "Client exemple",
-    role: "Fondatrice · Société fictive",
-  },
-  {
-    quote:
-      "Les modifications partent directement chez notre 3PL : l’entrepôt expédie toujours la bonne commande. Fini le chaos.",
-    name: "Client exemple",
-    role: "Responsable des opérations · Marque fictive",
-  },
-];
+import { useDict, useFormat } from "@/i18n/I18nProvider";
 
 export function TestimonialCarousel() {
+  // placeholder sample testimonials (original copy) — replace with real ones
+  const tt = useDict().sections.testimonials;
+  const { fill } = useFormat();
+  const testimonials = tt.items;
   const [i, setI] = useState(0);
   const [dir, setDir] = useState(1);
 
@@ -36,7 +19,7 @@ export function TestimonialCarousel() {
       setDir(next > i || (i === testimonials.length - 1 && next === 0) ? 1 : -1);
       setI((next + testimonials.length) % testimonials.length);
     },
-    [i]
+    [i, testimonials.length]
   );
 
   useEffect(() => {
@@ -45,7 +28,7 @@ export function TestimonialCarousel() {
       setI((v) => (v + 1) % testimonials.length);
     }, 5000);
     return () => clearInterval(id);
-  }, []);
+  }, [testimonials.length]);
 
   const t = testimonials[i];
 
@@ -86,7 +69,7 @@ export function TestimonialCarousel() {
                   <button
                     key={idx}
                     onClick={() => go(idx)}
-                    aria-label={`Aller au témoignage ${idx + 1}`}
+                    aria-label={fill(tt.goTo, { n: idx + 1 })}
                     className={`h-2 rounded-full transition-all ${
                       idx === i ? "w-6 bg-primary" : "w-2 bg-border"
                     }`}
@@ -96,14 +79,14 @@ export function TestimonialCarousel() {
               <div className="flex gap-2">
                 <button
                   onClick={() => go(i - 1)}
-                  aria-label="Précédent"
+                  aria-label={tt.previous}
                   className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <ChevronLeft className="size-4" />
                 </button>
                 <button
                   onClick={() => go(i + 1)}
-                  aria-label="Suivant"
+                  aria-label={tt.next}
                   className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <ChevronRight className="size-4" />

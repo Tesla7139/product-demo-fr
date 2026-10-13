@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { mockStore, type DemoProduct, type DemoStore } from "@/lib/site";
-import { DEFAULT_CURRENCY } from "@/lib/format";
+import { mockStoreFor, type DemoProduct, type DemoStore } from "@/lib/site";
+import { useDict, useLocale, useLocaleMeta } from "@/i18n/I18nProvider";
 
 type Status = "idle" | "loading" | "ready";
 
@@ -24,6 +24,9 @@ export function useDemoData() {
   const [status, setStatus] = useState<Status>("idle");
   const [store, setStore] = useState<DemoStore | null>(null);
   const [submittedUrl, setSubmittedUrl] = useState("");
+  const locale = useLocale();
+  const meta = useLocaleMeta();
+  const t = useDict();
 
   const generate = useCallback(async (url: string) => {
     setSubmittedUrl(url);
@@ -47,16 +50,20 @@ export function useDemoData() {
     const elapsed = Date.now() - started;
     if (elapsed < 4000) await new Promise((r) => setTimeout(r, 4000 - elapsed));
 
+    const mockStore = mockStoreFor(locale, t.demo);
+    const currency = branding?.currency || currencyFromUrl(url) || mockStore.currency || meta.currency;
+    // Sample prices are scaled for SEK/PLN; undo that when the store has another currency.
+    const scale = currency === meta.currency ? 1 : 1 / meta.priceScale;
     setStore({
       ...mockStore,
       brandName: branding?.brandName || deriveBrandName(url) || mockStore.brandName,
       brandColor: branding?.brandColor || mockStore.brandColor,
       logo: branding?.logo || null,
-      currency: branding?.currency || currencyFromUrl(url) || mockStore.currency || DEFAULT_CURRENCY,
-      products: fillProducts(branding?.products),
+      currency,
+      products: fillProducts(branding?.products, mockStore.products, scale),
     });
     setStatus("ready");
-  }, []);
+  }, [locale, meta, t]);
 
   const reset = useCallback(() => {
     setStatus("idle");
@@ -72,11 +79,13 @@ export function useDemoData() {
 // 2 real ones plus sample items to fill the space. Real products are kept ahead of
 // samples, and titles are de-duped so a sample never repeats a real product.
 const SAMPLE_TARGET = 6;
-function fillProducts(captured?: DemoProduct[]): DemoProduct[] {
+function fillProducts(captured: DemoProduct[] | undefined, samples: DemoProduct[], scale: number): DemoProduct[] {
   const real = captured ?? [];
   if (real.length >= SAMPLE_TARGET) return real;
   const seen = new Set(real.map((p) => p.title.trim().toLowerCase()));
-  const fillers = mockStore.products.filter((p) => !seen.has(p.title.trim().toLowerCase()));
+  const fillers = samples
+    .filter((p) => !seen.has(p.title.trim().toLowerCase()))
+    .map((p) => (scale === 1 ? p : { ...p, price: Math.round(p.price * scale) }));
   return [...real, ...fillers].slice(0, SAMPLE_TARGET);
 }
 
@@ -90,6 +99,10 @@ function currencyFromUrl(url: string): string | null {
     [/\.(com\.au|au)$/, "AUD"],
     [/\.ca$/, "CAD"],
     [/\.ch$/, "CHF"],
+    [/\.se$/, "SEK"],
+    [/\.pl$/, "PLN"],
+    [/\.dk$/, "DKK"],
+    [/\.no$/, "NOK"],
     [/\.(de|fr|it|es|nl|ie|eu|pt|at|be|lu|fi)$/, "EUR"],
     [/\.(sg)$/, "SGD"],
     [/\.(ae)$/, "AED"],
@@ -97,7 +110,7 @@ function currencyFromUrl(url: string): string | null {
   ];
   for (const [re, cur] of byTld) if (re.test(host)) return cur;
   // Unknown / generic TLD (.com, .co, .shop …): don't assume USD — fall through so
-  // the caller's European default (EUR, via DEFAULT_CURRENCY) applies. Real Shopify stores still get
+  // the visitor's own currency (per language) applies. Real Shopify stores still get
   // their true currency from cart.js upstream, so this only affects unreadable sites.
   return null;
 }

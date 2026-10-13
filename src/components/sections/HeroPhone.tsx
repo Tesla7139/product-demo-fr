@@ -20,20 +20,30 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { money2 } from "@/lib/format";
+import { useDict, useFormat, useLocaleMeta } from "@/i18n/I18nProvider";
+import { countryByCode } from "@/lib/regions";
 
 const BRAND = "#2f5bff";
-const money = (n: number) => money2(n);
 
 /* scene timeline (auto-advancing, looping) */
 const SCENES = ["confirmed", "editing", "address", "upsell", "analytics"] as const;
 const DURATIONS = [2000, 3000, 4800, 3600, 4600];
 
-const UPSELLS = [
-  { title: "Cabas du quotidien", price: 64 },
-  { title: "Basket trail 2.0", price: 128 },
-  { title: "Bonnet en laine", price: 32 },
-];
+/** Sample prices (EUR/USD units, scaled per language); titles come from the dictionary. */
+const MAIN_PRICE = 89;
+const UPSELL_PRICES = [64, 128, 32];
+/** Floating metric figures in the analytics scene. */
+const UPSELL_REVENUE = 4320;
+const UPSELLS_ACCEPTED = 128;
+const TICKETS_DEFLECTED = 412;
+const AOV_LIFT = 0.18;
+const ORDER_ID = "JDTNH5Z6N";
+
+/** Sample price in the visitor's currency units. */
+function useScaledPrice() {
+  const { priceScale } = useLocaleMeta();
+  return (n: number) => Math.round(n * priceScale);
+}
 
 const SPARKLES = [
   { x: "10%", y: "20%", d: 0 },
@@ -45,6 +55,9 @@ const SPARKLES = [
 ];
 
 export function HeroPhone() {
+  const t = useDict().mocks.heroPhone;
+  const meta = useLocaleMeta();
+  const { money, num, fill } = useFormat();
   const [step, setStep] = useState(0);
   const [flash, setFlash] = useState(false);
 
@@ -61,12 +74,13 @@ export function HeroPhone() {
   }, []);
   const mm = Math.floor(secondsLeft / 60);
   const ss = (secondsLeft % 60).toString().padStart(2, "0");
-  const countdown = `${mm} minute${mm > 1 ? "s" : ""} et ${ss} secondes`;
+  const plural = new Intl.PluralRules(meta.intl).select(mm);
+  const countdown = fill(plural === "one" ? t.countdown.one : t.countdown.other, { m: mm, s: ss });
 
   // scene advance + loop
   useEffect(() => {
-    const t = setTimeout(() => setStep((s) => (s + 1) % SCENES.length), DURATIONS[step]);
-    return () => clearTimeout(t);
+    const id = setTimeout(() => setStep((s) => (s + 1) % SCENES.length), DURATIONS[step]);
+    return () => clearTimeout(id);
   }, [step]);
 
   const scene = SCENES[step];
@@ -121,9 +135,9 @@ export function HeroPhone() {
       <AnimatePresence>
         {scene === "analytics" && (
           <>
-            <FloatCard className="-left-5 top-2" delay={0.15} icon={TrendingUp} value="4 320 €" label="Revenus d’upsell" tint />
-            <FloatCard className="-right-6 top-16" delay={0.3} icon={Zap} value="128" label="Upsells acceptés" />
-            <FloatCard className="-right-2 -bottom-4" delay={0.45} icon={Check} value="412" label="Tickets support évités" />
+            <FloatCard className="-left-5 top-2" delay={0.15} icon={TrendingUp} value={money(UPSELL_REVENUE * meta.priceScale)} label={t.metrics.upsellRevenue} tint />
+            <FloatCard className="-right-6 top-16" delay={0.3} icon={Zap} value={num(UPSELLS_ACCEPTED)} label={t.metrics.upsellsAccepted} />
+            <FloatCard className="-right-2 -bottom-4" delay={0.45} icon={Check} value={num(TICKETS_DEFLECTED)} label={t.metrics.ticketsDeflected} />
           </>
         )}
       </AnimatePresence>
@@ -159,6 +173,7 @@ export function HeroPhone() {
 /* ------------------------------ browser shell ----------------------------- */
 
 function BrowserFrame({ children }: { children: React.ReactNode }) {
+  const t = useDict();
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_36px_70px_-28px_rgba(15,15,40,0.45)]">
       {/* chrome bar */}
@@ -170,7 +185,7 @@ function BrowserFrame({ children }: { children: React.ReactNode }) {
         </div>
         <div className="mx-auto flex w-[55%] items-center justify-center gap-1.5 rounded-md bg-white px-3 py-1 text-[11px] text-neutral-500 ring-1 ring-neutral-200">
           <Lock className="size-3 text-neutral-400" />
-          votreboutique.fr/commande
+          <span className="truncate">{t.demo.store.domain}{t.mocks.browser.orderPath}</span>
         </div>
       </div>
       {/* body */}
@@ -189,6 +204,8 @@ const bodyMotion = {
 /* --------------------------------- bodies --------------------------------- */
 
 function ConfirmedBody() {
+  const t = useDict();
+  const { fill } = useFormat();
   return (
     <motion.div {...bodyMotion} className="flex h-full flex-col items-center justify-center px-8 text-center">
       <motion.span
@@ -201,15 +218,18 @@ function ConfirmedBody() {
         <Check className="size-7" strokeWidth={3} />
       </motion.span>
       <div className="mt-3 text-[10px] font-medium uppercase tracking-wide text-neutral-400">
-        Confirmation #JDTNH5Z6N
+        {fill(t.mocks.heroPhone.confirmation, { id: ORDER_ID })}
       </div>
-      <div className="mt-1 text-lg font-bold text-neutral-900">Commande confirmée</div>
-      <p className="mt-1 text-[12px] text-neutral-500">Merci, Camille ! Votre reçu arrive par e-mail.</p>
+      <div className="mt-1 text-lg font-bold text-neutral-900">{t.mocks.heroPhone.orderConfirmed}</div>
+      <p className="mt-1 text-[12px] text-neutral-500">{fill(t.mocks.heroPhone.thankYouReceipt, { name: t.demo.persona.first })}</p>
     </motion.div>
   );
 }
 
 function EditingBody({ countdown }: { countdown: string }) {
+  const t = useDict();
+  const h = t.mocks.heroPhone;
+  const { fill } = useFormat();
   return (
     <motion.div {...bodyMotion} className="flex h-full flex-col p-4">
       <div className="mb-2.5 flex items-center gap-2.5">
@@ -220,42 +240,46 @@ function EditingBody({ countdown }: { countdown: string }) {
           <Check className="size-3.5" strokeWidth={3} />
         </span>
         <div className="min-w-0">
-          <div className="text-[9px] text-neutral-500">#JDTNH5Z6N</div>
-          <div className="truncate text-[13px] font-bold text-neutral-900">Merci, Camille !</div>
+          <div className="text-[9px] text-neutral-500">#{ORDER_ID}</div>
+          <div className="truncate text-[13px] font-bold text-neutral-900">{fill(h.thankYou, { name: t.demo.persona.first })}</div>
         </div>
       </div>
 
-      <h3 className="mb-2 text-[12px] font-bold text-neutral-900">Modifiez votre commande</h3>
+      <h3 className="mb-2 text-[12px] font-bold text-neutral-900">{h.editTitle}</h3>
 
       <div className="mb-2.5 flex items-start gap-1.5 rounded-lg bg-amber-50 px-2.5 py-2 text-[10px] leading-snug text-neutral-700">
         <TriangleAlert className="mt-0.5 size-3 shrink-0 text-amber-500" />
         <span>
-          Vous pouvez encore modifier votre commande pendant{" "}
+          {h.editWindow}{" "}
           <span className="font-semibold tabular-nums text-red-500">{countdown}</span>
         </span>
       </div>
 
       <div className="flex flex-1 flex-col justify-center gap-1.5">
-        <Opt icon={UserRound} label="Modifier les coordonnées" />
-        <Opt icon={MapPin} label="Modifier l’adresse de livraison" highlight />
-        <Opt icon={Pencil} label="Modifier les articles" />
-        <Opt icon={Tag} label="Appliquer un code promo" />
-        <Opt icon={X} label="Annuler la commande" />
+        <Opt icon={UserRound} label={h.options.contact} />
+        <Opt icon={MapPin} label={h.options.address} highlight />
+        <Opt icon={Pencil} label={h.options.items} />
+        <Opt icon={Tag} label={h.options.discount} />
+        <Opt icon={X} label={h.options.cancel} />
       </div>
     </motion.div>
   );
 }
 
 function AddressBody({ onSaved }: { onSaved: () => void }) {
+  const t = useDict();
+  const h = t.mocks.heroPhone;
+  const persona = t.demo.persona;
+  const regionLabel = t.common.regionKinds[countryByCode(persona.country).regionKind];
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [zip, setZip] = useState("");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const A = "18 rue des Lilas";
-    const C = "Lyon";
-    const Z = "69003";
+    const A = persona.line1;
+    const C = persona.city;
+    const Z = persona.zip;
     let ai = 0;
     let ci = 0;
     let zi = 0;
@@ -273,21 +297,21 @@ function AddressBody({ onSaved }: { onSaved: () => void }) {
       clearInterval(typer);
       clearTimeout(save);
     };
-  }, [onSaved]);
+  }, [onSaved, persona.line1, persona.city, persona.zip]);
 
   return (
     <motion.div {...bodyMotion} className="relative flex h-full flex-col p-4">
       <div className="mb-3 flex items-center gap-2">
         <ArrowLeft className="size-4 text-neutral-500" />
-        <span className="text-[13px] font-bold text-neutral-900">Modifier l’adresse de livraison</span>
+        <span className="text-[13px] font-bold text-neutral-900">{h.addressTitle}</span>
       </div>
 
-      <Field label="Adresse" value={address} typing={!saved && address.length < 16} />
+      <Field label={h.fields.address} value={address} typing={!saved && address.length < persona.line1.length} />
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <Field label="Ville" value={city} />
-        <Field label="Code postal" value={zip} />
+        <Field label={h.fields.city} value={city} />
+        <Field label={h.fields.zip} value={zip} />
       </div>
-      <Field label="Région" value="Auvergne-Rhône-Alpes" className="mt-2" />
+      <Field label={regionLabel} value={persona.state} className="mt-2" />
 
       <button
         className="mt-auto flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-[12px] font-semibold text-white transition-colors"
@@ -295,10 +319,10 @@ function AddressBody({ onSaved }: { onSaved: () => void }) {
       >
         {saved ? (
           <>
-            <Check className="size-4" strokeWidth={3} /> Adresse enregistrée
+            <Check className="size-4" strokeWidth={3} /> {h.addressSaved}
           </>
         ) : (
-          "Enregistrer l’adresse"
+          h.saveAddress
         )}
       </button>
 
@@ -323,6 +347,10 @@ function AddressBody({ onSaved }: { onSaved: () => void }) {
 }
 
 function UpsellBody() {
+  const h = useDict().mocks.heroPhone;
+  const { money2 } = useFormat();
+  const price = useScaledPrice();
+  const upsells = h.upsells.map((title, i) => ({ title, price: price(UPSELL_PRICES[i] ?? 0) }));
   const [phase, setPhase] = useState<"offer" | "processing" | "added">("offer");
   useEffect(() => {
     const a = setTimeout(() => setPhase("processing"), 1600);
@@ -336,14 +364,14 @@ function UpsellBody() {
   return (
     <motion.div {...bodyMotion} className="relative flex h-full flex-col p-4">
       <div className="flex items-center gap-1.5 text-[13px] font-bold text-neutral-900">
-        <Plus className="size-4 text-primary" /> Vous aimerez aussi
+        <Plus className="size-4 text-primary" /> {h.upsellTitle}
       </div>
       <p className="mb-3 mt-0.5 text-[10px] text-neutral-500">
-        Souvent achetés ensemble, expédiés dans le même colis.
+        {h.upsellSub}
       </p>
 
       <div className="grid flex-1 grid-cols-3 gap-2.5">
-        {UPSELLS.map((p, i) => {
+        {upsells.map((p, i) => {
           const isAdded = i === 0 && phase === "added";
           return (
             <div key={p.title} className="flex flex-col rounded-xl border border-neutral-200 p-2">
@@ -351,13 +379,13 @@ function UpsellBody() {
               <div className="line-clamp-2 text-[11px] font-medium leading-tight text-neutral-800">
                 {p.title}
               </div>
-              <div className="mt-0.5 text-[11px] text-neutral-500">{money(p.price)}</div>
+              <div className="mt-0.5 text-[11px] text-neutral-500">{money2(p.price)}</div>
               <button
                 className="mt-auto flex items-center justify-center gap-1 rounded-md py-1.5 text-[10px] font-semibold text-white"
                 style={{ background: isAdded ? "#16a34a" : BRAND }}
               >
                 {isAdded ? <Check className="size-3" /> : <Plus className="size-3" />}
-                {isAdded ? "Ajouté" : "Ajouter"}
+                <span className="min-w-0 truncate">{isAdded ? h.added : h.add}</span>
               </button>
             </div>
           );
@@ -374,7 +402,7 @@ function UpsellBody() {
           >
             <div className="flex flex-col items-center gap-2 rounded-2xl bg-white px-5 py-4 shadow-soft-xl">
               <Loader2 className="size-6 animate-spin" style={{ color: BRAND }} />
-              <span className="text-[11px] font-medium text-neutral-600">Mise à jour de votre commande…</span>
+              <span className="text-[11px] font-medium text-neutral-600">{h.syncing}</span>
             </div>
           </motion.div>
         )}
@@ -384,24 +412,31 @@ function UpsellBody() {
 }
 
 function AnalyticsBody() {
+  const h = useDict().mocks.heroPhone;
+  const meta = useLocaleMeta();
+  const { num } = useFormat();
   const [on, setOn] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setOn(true), 250);
-    return () => clearTimeout(t);
+    const id = setTimeout(() => setOn(true), 250);
+    return () => clearTimeout(id);
   }, []);
   const bars = [38, 52, 46, 64, 58, 78, 96];
   return (
     <motion.div {...bodyMotion} className="flex h-full flex-col p-4">
-      <div className="text-[13px] font-bold text-neutral-900">Vos résultats ce mois-ci</div>
-      <p className="mb-3 mt-0.5 text-[10px] text-neutral-500">Mis à jour en temps réel</p>
+      <div className="text-[13px] font-bold text-neutral-900">{h.analyticsTitle}</div>
+      <p className="mb-3 mt-0.5 text-[10px] text-neutral-500">{h.analyticsSub}</p>
 
       <div className="mb-3 grid grid-cols-2 gap-2">
-        <MiniStat label="Revenus générés" value="4,3 k€" tint />
-        <MiniStat label="Hausse du panier moyen" value="+18 %" />
+        <MiniStat
+          label={h.revenueAdded}
+          value={num(UPSELL_REVENUE * meta.priceScale, { style: "currency", currency: meta.currency, notation: "compact", maximumFractionDigits: 1 })}
+          tint
+        />
+        <MiniStat label={h.aovLift} value={num(AOV_LIFT, { style: "percent", signDisplay: "always" })} />
       </div>
 
       <div className="flex flex-1 flex-col rounded-2xl border border-neutral-200 p-3">
-        <div className="mb-2 text-[10px] font-bold text-neutral-900">Revenus d’upsell / semaine</div>
+        <div className="mb-2 text-[10px] font-bold text-neutral-900">{h.weeklyRevenue}</div>
         <div className="flex flex-1 items-end gap-1.5">
           {bars.map((h, i) => (
             <motion.div
@@ -422,34 +457,38 @@ function AnalyticsBody() {
 /* -------------------------------- sidebar --------------------------------- */
 
 function Sidebar({ added }: { added: boolean }) {
-  const subtotal = 89 + (added ? 64 : 0);
+  const h = useDict().mocks.heroPhone;
+  const { money2 } = useFormat();
+  const price = useScaledPrice();
+  const subtotal = price(MAIN_PRICE) + (added ? price(UPSELL_PRICES[0]) : 0);
   return (
     <aside className="flex flex-col bg-neutral-50 p-3.5">
-      <div className="mb-3 text-[11px] font-bold text-neutral-900">Récapitulatif de commande</div>
+      <div className="mb-3 text-[11px] font-bold text-neutral-900">{h.summary}</div>
       <div className="flex flex-col gap-2.5">
-        <SummaryItem title="Pull col rond en mérinos" qty={1} price={89} />
+        <SummaryItem title={h.mainItem} qty={1} price={price(MAIN_PRICE)} />
         <AnimatePresence>
           {added && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="overflow-hidden">
-              <SummaryItem title="Cabas du quotidien" qty={1} price={64} highlight />
+              <SummaryItem title={h.upsells[0]} qty={1} price={price(UPSELL_PRICES[0])} highlight />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       <div className="mt-auto space-y-1 border-t border-neutral-200 pt-2.5 text-[11px]">
-        <Row label="Sous-total" value={money(subtotal)} />
-        <Row label="Livraison" value="OFFERTE" />
+        <Row label={h.subtotal} value={money2(subtotal)} />
+        <Row label={h.shipping} value={h.shippingFree} />
       </div>
       <div className="mt-2 flex items-baseline justify-between border-t border-neutral-200 pt-2">
-        <span className="text-[12px] font-bold text-neutral-900">Total</span>
-        <span className="text-[14px] font-bold text-neutral-900">{money(subtotal)}</span>
+        <span className="text-[12px] font-bold text-neutral-900">{h.total}</span>
+        <span className="text-[14px] font-bold text-neutral-900">{money2(subtotal)}</span>
       </div>
     </aside>
   );
 }
 
 function SummaryItem({ title, qty, price, highlight }: { title: string; qty: number; price: number; highlight?: boolean }) {
+  const { money2 } = useFormat();
   return (
     <div className="flex items-center gap-2.5">
       <div className="relative">
@@ -461,7 +500,8 @@ function SummaryItem({ title, qty, price, highlight }: { title: string; qty: num
       <div className={`min-w-0 flex-1 text-[10px] font-medium ${highlight ? "text-primary" : "text-neutral-800"}`}>
         {title}
       </div>
-      <div className="text-[10px] font-semibold text-neutral-900">{money(price)}</div>
+      <div className="text-[10px] font-semibold text-neutral-900">{money2(price)}</div>
+
     </div>
   );
 }

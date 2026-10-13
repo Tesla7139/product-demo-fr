@@ -5,7 +5,8 @@ import { Star, ArrowLeft } from "lucide-react";
 import { Container } from "@/components/primitives/Container";
 import { ReviewCard } from "@/components/ui/ReviewCard";
 import { reviews, type Review } from "@/lib/reviews";
-import { customerLogos, brandInfo } from "@/lib/site";
+import { customerLogos } from "@/lib/site";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
 import { Button } from "@/components/ui/button";
 
 // Brands featured in the home brand strip — the popular ones. Their reviews are
@@ -76,7 +77,9 @@ function scoreReview(r: Review) {
   return s;
 }
 
-const rankedReviews: Review[] = (() => {
+type BrandInfoMap = Record<string, { tier?: string; country?: string }>;
+
+function rankReviews(brandInfo: BrandInfoMap): Review[] {
   const sorted = [...reviews].sort((a, b) => scoreReview(b) - scoreReview(a));
   // Diversity pass: pull the best review for each distinct reason to the front.
   const seen = new Set<string>();
@@ -102,15 +105,18 @@ const rankedReviews: Review[] = (() => {
   const withCountry = byStrip.filter((r) => !!brandInfo[r.name]?.country);
   const withoutCountry = byStrip.filter((r) => !brandInfo[r.name]?.country);
   return [...withCountry, ...withoutCountry];
-})();
-
-const displayedReviews: Review[] = rankedReviews.slice(0, MAX_REVIEWS_COUNT);
+}
 
 // How many top rows stay pinned in ranked order (the popular brand-strip names).
 const PINNED_ROWS = 3;
 const GAP = 24; // matches the flex `gap-6` between cards
 
 export default function ReviewsPage() {
+  const dict = useDict();
+  const t = dict.pages.reviews;
+  const { num, fill } = useFormat();
+  const brandInfo = dict.site.brandInfo;
+  const displayedReviews = useMemo(() => rankReviews(brandInfo).slice(0, MAX_REVIEWS_COUNT), [brandInfo]);
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const [cols, setCols] = useState(3);
   // Real, measured card heights (id -> px). Estimate is only a first-paint fallback.
@@ -189,19 +195,17 @@ export default function ReviewsPage() {
             className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-black/60 transition-colors hover:text-black"
           >
             <ArrowLeft className="size-4" />
-            Retour
+            {t.back}
           </button>
           <div className="mx-auto max-w-3xl text-center">
             <h1
               className="font-serif font-normal tracking-tight text-black"
               style={{ fontSize: "clamp(2.25rem,5vw,3.25rem)", lineHeight: 1.05 }}
             >
-              Plébiscité par les marchands Shopify
+              {t.title}
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-base md:text-lg text-black/70 leading-relaxed font-medium">
-              Découvrez ce que de vrais e-commerçants disent de Clickpost Order Editing pour
-              fluidifier leur expérience post-achat. Plus de 70 avis sur le
-              Shopify App Store.
+              {t.intro}
             </p>
 
             {/* Star Rating Badge */}
@@ -212,7 +216,7 @@ export default function ReviewsPage() {
                 ))}
               </div>
               <span className="text-base md:text-lg font-bold text-black/80">
-                5,0 sur le Shopify App Store
+                {fill(t.rating, { rating: num(5, { minimumFractionDigits: 1 }) })}
               </span>
             </div>
           </div>
@@ -228,10 +232,11 @@ export default function ReviewsPage() {
               className="font-sans font-extrabold tracking-tight text-black"
               style={{ fontSize: "clamp(2.25rem,5vw,3.25rem)", lineHeight: 1.05 }}
             >
-              Avis clients
+              {t.wallTitle}
             </h2>
             <p className="mt-2 text-sm text-black/50 font-medium">
-              Plus de 70 avis marchands 5 étoiles sur notre fiche publique. Avis publiés en anglais sur le Shopify App Store.
+              {t.wallSubtitle}
+              {t.languageNote && ` ${t.languageNote}`}
             </p>
           </div>
 
@@ -262,7 +267,7 @@ export default function ReviewsPage() {
                 size="lg"
                 className="rounded-full bg-black text-white hover:bg-black/90 px-8 py-6 text-sm font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
               >
-                Voir plus d’avis
+                {t.showMore}
               </Button>
             </div>
           )}

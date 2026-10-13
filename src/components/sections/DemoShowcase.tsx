@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import { Container } from "@/components/primitives/Container";
 import { HeroPhone } from "./HeroPhone";
 import { fadeUp, staggerContainer } from "@/lib/motion";
+import { useDict } from "@/i18n/I18nProvider";
 
 export function DemoShowcase() {
+  const t = useDict().sections.demoShowcase;
   return (
     <section className="relative overflow-hidden py-20 md:py-28">
       <Container>
@@ -19,16 +21,13 @@ export function DemoShowcase() {
             className="flex flex-col items-center text-center lg:items-start lg:text-left"
           >
             <motion.p variants={fadeUp} className="text-eyebrow mb-4 text-primary">
-              En action
+              {t.eyebrow}
             </motion.p>
             <motion.h2 variants={fadeUp} className="text-h2 max-w-md text-balance text-foreground">
-              La modification de commande en libre-service, de A à Z
+              {t.title}
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-4 max-w-md text-muted-foreground">
-              Vos clients corrigent leur adresse, échangent un article et acceptent un upsell —
-              directement sur votre page de confirmation, à vos couleurs. Chaque modification est
-              synchronisée en temps réel avec votre 3PL : la commande part juste du premier coup, et
-              votre équipe n’ouvre aucun ticket.
+              {t.body}
             </motion.p>
           </motion.div>
 

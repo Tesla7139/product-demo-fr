@@ -1,7 +1,11 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useDict } from "@/i18n/I18nProvider";
 
 /** "Available on Shopify App Store" badge — links to the app listing. */
 export function ShopifyAppStoreBadge({ href, className }: { href: string; className?: string }) {
+  const t = useDict();
   return (
     <a
       href={href}
@@ -11,7 +15,7 @@ export function ShopifyAppStoreBadge({ href, className }: { href: string; classN
         "inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#1a1a1a] px-4 py-2.5 transition-transform hover:scale-[1.02] active:scale-[0.99]",
         className
       )}
-      aria-label="Disponible sur le Shopify App Store"
+      aria-label={t.tour.badges.availableOnAria}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- local Shopify bag icon, inverted to white */}
       <img
@@ -21,7 +25,7 @@ export function ShopifyAppStoreBadge({ href, className }: { href: string; classN
         style={{ filter: "invert(1)" }}
       />
       <span className="flex flex-col text-left leading-none">
-        <span className="text-[9px] font-medium tracking-wide text-white/80">Disponible sur le</span>
+        <span className="text-[9px] font-medium tracking-wide text-white/80">{t.tour.badges.availableOn}</span>
         <span className="mt-0.5 text-[15px] font-bold leading-none text-white">Shopify App Store</span>
       </span>
     </a>

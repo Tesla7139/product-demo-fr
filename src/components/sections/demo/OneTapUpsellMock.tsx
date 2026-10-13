@@ -6,12 +6,17 @@ import { Check, ChevronDown } from "lucide-react";
 import type { DemoStore, DemoProduct } from "@/lib/site";
 import { readableBrand, dedupeExactTitle } from "@/lib/utils";
 import { DemoImg } from "./DemoImg";
-import { money, DEFAULT_CURRENCY } from "@/lib/format";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
+
+const ORDER_ID = "0WP59XCW8";
 
 export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, addBtnRef, offerRef, onAdded }: { store: DemoStore; onComplete?: (added: DemoProduct[]) => void; onViewOrder?: () => void; accentColor?: string; addBtnRef?: React.RefObject<HTMLButtonElement | null>; offerRef?: React.RefObject<HTMLDivElement | null>; onAdded?: () => void }) {
   const brand = readableBrand(store.brandColor || accentColor);
-  const currency = store.currency || DEFAULT_CURRENCY;
-  const fmt = (n: number) => money(n, currency);
+  const dict = useDict();
+  const t = dict.mocks.oneTapUpsellMock;
+  const { money, fill } = useFormat();
+  const shopper = dict.demo.persona.first;
+  const fmt = (n: number) => money(n, store.currency || undefined);
   const priced = store.products.filter((p) => (p.price ?? 0) > 0);
   // keep colour variants so there's enough variety for 3 distinct offers
   const pool = dedupeExactTitle(priced.length ? priced : store.products);
@@ -72,7 +77,7 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
     if (!isLast) goNext();
     else onComplete?.(addedRef.current);
   };
-  const declineLabel = "Passer l’offre";
+  const declineLabel = t.skip;
 
   return (
     <div className="mx-auto w-full bg-white">
@@ -88,20 +93,20 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
               <Check className="size-4" strokeWidth={3} />
             </span>
             <div>
-              <div className="text-xs text-neutral-500">Confirmation #0WP59XCW8</div>
-              <div className="text-lg font-bold text-neutral-900">Merci, Camille !</div>
+              <div className="text-xs text-neutral-500">{fill(t.confirmation, { id: ORDER_ID })}</div>
+              <div className="text-lg font-bold text-neutral-900">{fill(t.thankYou, { name: shopper })}</div>
             </div>
           </div>
           <button onClick={onViewOrder} className="mt-2 text-[12px] font-medium text-neutral-900">
-            Voir la confirmation de commande &rsaquo;
+            {t.viewConfirmation}
           </button>
         </div>
 
         {/* before-you-go header */}
         <div className="border-b border-border px-6 py-2.5 text-center">
-          <div className="text-[16px] font-bold text-neutral-900">Camille, avant de partir !</div>
+          <div className="text-[16px] font-bold text-neutral-900">{fill(t.beforeYouGo, { name: shopper })}</div>
           <div className="mt-1 text-[12.5px] text-neutral-600">
-            Votre commande est confirmée, mais vous pouvez encore ajouter ceci pendant une durée limitée{" "}
+            {t.limitedTime}{" "}
             <span className="font-bold tabular-nums text-red-500">{timer}</span>
           </div>
         </div>
@@ -118,7 +123,7 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
           {/* product image — with the urgency line on top */}
           <div className="flex flex-col items-center justify-center gap-2 bg-neutral-50 p-3">
             <p className="text-center font-serif text-[13px] font-semibold italic leading-snug text-red-500">
-              Ne la manquez pas : cette offre expire dès que vous quittez cette page !
+              {t.dontMissOut}
             </p>
             <DemoImg src={offer?.image} alt={offer?.title ?? ""} className="h-[150px] w-full object-contain" />
           </div>
@@ -126,9 +131,9 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
           {/* offer details */}
           <div className="flex flex-col justify-between px-5 py-4">
             <div>
-              <div className="text-[12px] text-neutral-400">Offre {offerIdx + 1} sur {total}</div>
+              <div className="text-[12px] text-neutral-400">{fill(t.offerOf, { n: offerIdx + 1, total })}</div>
               <h3 className="mt-1 text-[20px] font-bold leading-tight text-neutral-900">
-                {offer?.title ?? "Produit complémentaire"}
+                {offer?.title ?? t.addOnProduct}
               </h3>
               <div className="mt-1.5 flex items-baseline gap-2">
                 <span className="text-[15px] text-neutral-400 line-through">{fmt(full)}</span>
@@ -144,7 +149,7 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
                     style={{ borderColor: showSizes ? brand : "#d1d5db" }}
                   >
                     <div className="text-left">
-                      <div className="text-[10px] text-neutral-400">Taille</div>
+                      <div className="text-[10px] text-neutral-400">{t.size}</div>
                       <div className="font-medium">{selectedVariant?.title} — {fmt(selectedVariant?.price ?? deal)}</div>
                     </div>
                     <ChevronDown className={`size-4 text-neutral-400 transition-transform ${showSizes ? "rotate-180" : ""}`} />
@@ -169,12 +174,12 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
 
               <div className="mt-3 space-y-1 border-t border-border pt-3 text-[13px]">
                 <div className="flex justify-between text-neutral-600">
-                  <span>Livraison</span>
-                  <span className="font-semibold text-neutral-900">Offerte</span>
+                  <span>{t.shipping}</span>
+                  <span className="font-semibold text-neutral-900">{t.shippingValue}</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
-                  <span>TVA</span>
-                  <span className="font-semibold text-neutral-900">Incluse</span>
+                  <span>{t.taxes}</span>
+                  <span className="font-semibold text-neutral-900">{t.taxesValue}</span>
                 </div>
               </div>
             </div>
@@ -188,9 +193,10 @@ export function OneTapUpsellMock({ store, onComplete, onViewOrder, accentColor, 
                 style={{ background: "#111827" }}
               >
                 {justAdded ? (
-                  <><Check className="size-4" strokeWidth={3} /> Ajouté à votre commande</>
+                  <><Check className="size-4" strokeWidth={3} /> {t.addedToOrder}</>
                 ) : (
-                  <>Ajouter à la commande · {fmt(deal)}</>
+                  <>{fill(t.addToOrder, { price: fmt(deal) })}</>
+
                 )}
               </button>
               <button

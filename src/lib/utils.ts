@@ -58,18 +58,14 @@ export function readableBrand(color?: string | null): string {
 const EN_MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
 
 /**
- * Shopify review export dates ("JUNE 9, 2026") → French display ("9 juin 2026").
- * Formatted in UTC so server and client render the same string.
+ * Parse a Shopify review export date ("JUNE 9, 2026") into a UTC-midnight Date,
+ * ready for useFormat().date / format.date (which format in UTC). Returns the
+ * input unchanged when it doesn't match, so callers still show something.
  */
-export function reviewDateFr(d: string, month: "long" | "short" = "long"): string {
+export function parseReviewDate(d: string): Date | string {
   const m = d.trim().match(/^([A-Za-z]+)\s+(\d+),\s*(\d{4})$/);
   if (!m) return d;
   const mi = EN_MONTHS.indexOf(m[1].toLowerCase());
   if (mi < 0) return d;
-  return new Date(Date.UTC(+m[3], mi, +m[2])).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month,
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  return new Date(Date.UTC(+m[3], mi, +m[2]));
 }

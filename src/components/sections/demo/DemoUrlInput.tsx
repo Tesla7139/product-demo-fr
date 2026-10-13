@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useAnimationControls } from "framer-motion";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDict } from "@/i18n/I18nProvider";
 
 export function DemoUrlInput({
   url,
@@ -21,6 +22,7 @@ export function DemoUrlInput({
   /** bump this counter to shake + focus the input (e.g. from the "Product Tour" nav link) */
   shake?: number;
 }) {
+  const t = useDict().tour.demoUrlInput;
   const controls = useAnimationControls();
   const inputRef = useRef<HTMLInputElement>(null);
   const [highlight, setHighlight] = useState(false);
@@ -33,15 +35,15 @@ export function DemoUrlInput({
       transition: { duration: 0.55, ease: "easeInOut" },
     });
     setHighlight(true);
-    const t = setTimeout(() => setHighlight(false), 1800);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setHighlight(false), 1800);
+    return () => clearTimeout(timer);
   }, [shake, controls]);
 
   return (
     <div className={cn("w-full", align === "center" && "mx-auto max-w-xl")}>
       <form onSubmit={onSubmit} className="w-full">
         <label htmlFor="store-url" className="sr-only">
-          URL de votre boutique
+          {t.label}
         </label>
         <motion.div
           animate={controls}
@@ -59,7 +61,7 @@ export function DemoUrlInput({
             inputMode="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="ex. votre-boutique.fr"
+            placeholder={t.placeholder}
             className="h-10 flex-1 bg-transparent pl-4 pr-2 text-[0.85rem] text-foreground placeholder:text-muted-foreground/70 outline-none focus:outline-none focus-visible:outline-none [&:focus-visible]:outline-none lg:h-14 lg:pl-6 lg:text-[1.05rem]"
             style={{ outline: "none", boxShadow: "none" }}
           />
@@ -72,11 +74,11 @@ export function DemoUrlInput({
             {loading ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                <span className="max-lg:hidden">Génération…</span>
+                <span className="max-lg:hidden">{t.generating}</span>
               </>
             ) : (
               <>
-                <span className="max-lg:hidden">Voir en direct</span>
+                <span className="max-lg:hidden">{t.seeItLive}</span>
                 <ArrowRight className="size-4" />
               </>
             )}

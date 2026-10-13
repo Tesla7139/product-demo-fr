@@ -8,6 +8,7 @@ import { GuidedEditor } from "./GuidedEditor";
 import { CustomerLogos } from "@/components/sections/CustomerLogos";
 import { StaggerTestimonials } from "@/components/ui/stagger-testimonials";
 import { Footer } from "@/components/layout/Footer";
+import { useDict, useFormat, useHref } from "@/i18n/I18nProvider";
 
 type Status = "idle" | "loading" | "ready";
 type Step = "welcome" | "editing";
@@ -27,6 +28,7 @@ export function DemoExperience({
   submittedUrl?: string;
   onClose: () => void;
 }) {
+  const t = useDict().tour.demoExperience;
   const [step, setStep] = useState<Step>("welcome");
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function DemoExperience({
   }, [open]);
 
   const brand = store?.brandColor || ACCENT;
-  const name  = store?.brandName  || "Votre boutique";
+  const name  = store?.brandName  || t.fallbackName;
   const domain = cleanDomain(submittedUrl);
 
   return (
@@ -57,7 +59,7 @@ export function DemoExperience({
         >
           <button
             onClick={onClose}
-            aria-label="Fermer l’aperçu"
+            aria-label={t.closePreview}
             className="fixed right-4 top-3 z-[120] flex size-9 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-soft-md transition-colors hover:bg-neutral-50"
           >
             <X className="size-5" />
@@ -98,13 +100,16 @@ function cleanDomain(url: string): string {
 const READY = "#10b981"; // green "ready" accent
 
 function LoadingView({ label }: { label: string }) {
+  const t = useDict().tour.demoExperience.loading;
+  const tickets = useDict().tour.demoExperience.tickets;
+  const { fill } = useFormat();
   const [done, setDone] = useState(false);
   const accent = done ? READY : WARM;
 
   useEffect(() => {
     // flip to the green "ready" state just before the parent opens the welcome splash
-    const t = setTimeout(() => setDone(true), 3500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDone(true), 3500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -117,12 +122,12 @@ function LoadingView({ label }: { label: string }) {
         {/* active item card */}
         <div className="rounded-2xl bg-white p-4 shadow-soft-md">
           <div className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: done ? READY : "#8a8fb3" }}>
-            {done ? "Prêt" : "Chargement de votre marque"}
+            {done ? t.ready : t.brandLoading}
           </div>
           <div className="mt-1 flex items-center gap-2">
             <span className={`size-2.5 shrink-0 rounded-full ${done ? "" : "animate-pulse"}`} style={{ background: accent }} />
             <span className="truncate text-[15px] font-bold text-foreground">
-              {done ? `${label} est prête` : `Création de ${label}`}
+              {done ? fill(t.isReady, { label }) : fill(t.building, { label })}
             </span>
           </div>
         </div>
@@ -152,21 +157,19 @@ function LoadingView({ label }: { label: string }) {
               ) : (
                 <span className="size-2 animate-pulse rounded-full" style={{ background: accent }} />
               )}
-              {done ? "Votre boutique est prête" : "Derniers réglages de marque"}
+              {done ? t.storeReady : t.finalizing}
             </span>
             <span className="hidden text-[12px] font-bold uppercase tracking-[0.16em] text-muted-foreground sm:block">
-              {done ? "C’est prêt" : "Mise en forme des moments clés"}
+              {done ? t.allSet : t.styling}
             </span>
           </div>
 
           {/* heading + copy */}
           <h2 className="mt-7 font-serif text-4xl text-foreground md:text-5xl">
-            {done ? `${label} est prête` : `Préparation de votre démo ${label}`}
+            {done ? fill(t.isReady, { label }) : fill(t.preparing, { label })}
           </h2>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
-            {done
-              ? "C’est prêt. Ouverture de votre aperçu personnalisé…"
-              : "Nous ouvrons la démo tout de suite et finalisons les derniers détails de votre marque en arrière-plan."}
+            {done ? t.openingNow : t.openingSoon}
           </p>
 
           {/* progress bar */}
@@ -183,7 +186,7 @@ function LoadingView({ label }: { label: string }) {
           {/* support tickets — scroll downward; the ones shoppers won't need to open */}
           <div className="mt-8 flex-1">
             <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-              Les tickets que vos clients n’auront plus à ouvrir
+              {t.ticketsHeading}
             </p>
             <div
               className="marquee-group relative h-[calc(100%-2rem)] min-h-[180px] overflow-hidden"
@@ -197,20 +200,20 @@ function LoadingView({ label }: { label: string }) {
                 animate={{ y: ["0%", "-50%"] }}
                 transition={{ duration: 8, ease: "linear", repeat: Infinity }}
               >
-                {[...TICKETS, ...TICKETS].map((t, i) => (
+                {[...tickets, ...tickets].map((tk, i) => (
                   <div
                     key={i}
-                    aria-hidden={i >= TICKETS.length}
+                    aria-hidden={i >= tickets.length}
                     className="rounded-xl bg-background-muted/70 px-4 py-2.5"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2">
-                        <span className="size-2 shrink-0 rounded-full" style={{ background: t.hot ? "#f59e0b" : "#c2c7d2" }} />
-                        <span className="truncate text-[13px] font-semibold text-foreground">{t.subject}</span>
+                        <span className="size-2 shrink-0 rounded-full" style={{ background: HOT_TICKETS[i % tickets.length] ? "#f59e0b" : "#c2c7d2" }} />
+                        <span className="truncate text-[13px] font-semibold text-foreground">{tk.subject}</span>
                       </div>
-                      <span className="shrink-0 text-[11px] text-muted-foreground">{t.time}</span>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">{tk.time}</span>
                     </div>
-                    <div className="mt-0.5 pl-4 text-[12px] text-muted-foreground">{t.email}</div>
+                    <div className="mt-0.5 pl-4 text-[12px] text-muted-foreground">{tk.email}</div>
                   </div>
                 ))}
               </motion.div>
@@ -222,15 +225,8 @@ function LoadingView({ label }: { label: string }) {
   );
 }
 
-const TICKETS = [
-  { subject: "Je peux changer la date de livraison ?",      email: "anne.kervella@orange.fr", time: "il y a 22 min", hot: false },
-  { subject: "Mauvais article, trop tard pour changer ?",   email: "thomas.bernard@gmail.com", time: "il y a 25 min", hot: true },
-  { subject: "Erreur dans mon e-mail au paiement",          email: "nina.s@free.fr",          time: "il y a 31 min", hot: false },
-  { subject: "J’aimerais ajouter un article à ma commande", email: "julien.m@gmail.com",      time: "il y a 34 min", hot: true },
-  { subject: "Mauvaise taille, je peux l’échanger ?",       email: "lea.f@outlook.fr",        time: "il y a 39 min", hot: false },
-  { subject: "J’ai oublié mon code promo",                  email: "marc.d@gmail.com",        time: "il y a 42 min", hot: false },
-  { subject: "Je veux annuler ma commande",                 email: "sarah.p@laposte.net",     time: "il y a 47 min", hot: true },
-];
+// Ticket text lives in t.tour.demoExperience.tickets; these flag the "hot" ones by index.
+const HOT_TICKETS = [false, true, false, true, false, false, true];
 
 /* ----------------------------- Welcome ----------------------------- */
 function WelcomeView({ store, brand, name, domain, onContinue }: { store: DemoStore; brand: string; name: string; domain: string; onContinue: () => void }) {
@@ -238,7 +234,9 @@ function WelcomeView({ store, brand, name, domain, onContinue }: { store: DemoSt
   // prefer the store's logo (cleaner than a random product photo); fall back to a product image
   const storeLogo = store.logo || null;
   const productImg = store.products.find((p) => p.image)?.image || null;
-  const dom = domain || `${name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.fr`;
+  const t = useDict().tour.demoExperience;
+  const { fill } = useFormat();
+  const dom = domain || fill(t.domainPattern, { name: name.toLowerCase().replace(/[^a-z0-9]+/g, "") });
   // "dive into the laptop": on click, the laptop screen zooms up to fill the
   // viewport, then we hand off to the editing scene.
   const [entering, setEntering] = useState(false);
@@ -261,16 +259,16 @@ function WelcomeView({ store, brand, name, domain, onContinue }: { store: DemoSt
           transition={{ duration: 0.35, ease: "easeOut" }}
           className="w-full max-w-md text-center lg:text-left"
         >
-          <span className="text-2xl italic tracking-wide text-muted-foreground sm:text-3xl" style={{ fontFamily: fraunces, fontWeight: 400 }}>Bienvenue chez</span>
+          <span className="text-2xl italic tracking-wide text-muted-foreground sm:text-3xl" style={{ fontFamily: fraunces, fontWeight: 400 }}>{t.welcome.welcomeTo}</span>
           <div className="mt-1 text-6xl leading-[0.92] tracking-tight text-foreground md:text-7xl" style={{ fontFamily: fraunces, fontWeight: 900, fontStyle: "italic", letterSpacing: "-0.02em" }}>
             {name}
           </div>
-          <p className="mt-3 text-base font-light tracking-wide text-muted-foreground sm:text-lg">votre aperçu personnalisé</p>
+          <p className="mt-3 text-base font-light tracking-wide text-muted-foreground sm:text-lg">{t.welcome.brandedPreview}</p>
           <span
             className="mt-7 inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
             style={{ background: ACCENT }}
           >
-            Cliquez n’importe où pour découvrir
+            {t.welcome.clickAnywhere}
             <ArrowRight className="size-4" />
           </span>
         </motion.div>
@@ -323,6 +321,8 @@ function WelcomeView({ store, brand, name, domain, onContinue }: { store: DemoSt
 
 /* ----------------------------- Editing ----------------------------- */
 function EditingView({ store }: { store: DemoStore }) {
+  const t = useDict().tour.demoExperience.reviews;
+  const href = useHref();
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
@@ -339,19 +339,19 @@ function EditingView({ store }: { store: DemoStore }) {
         <section className="border-t border-border/60 pt-14 pb-4">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl" style={{ fontFamily: "var(--font-inter), sans-serif" }}>
-            Plébiscité par les marques en pleine croissance
+            {t.heading}
           </h2>
-          <p className="mt-2 text-[15px] text-muted-foreground">Ce que les marchands Shopify disent de Clickpost.</p>
+          <p className="mt-2 text-[15px] text-muted-foreground">{t.subheading}</p>
         </div>
         <div className="mt-6">
           <StaggerTestimonials />
         </div>
         <div className="mt-6 flex justify-center">
           <a
-            href="/reviews"
+            href={href("/reviews")}
             className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-6 py-3 text-sm font-semibold text-foreground shadow-soft-md transition-colors hover:bg-neutral-50"
           >
-            Voir les 70+ avis
+            {t.seeAll}
             <ArrowRight className="size-4" />
           </a>
         </div>

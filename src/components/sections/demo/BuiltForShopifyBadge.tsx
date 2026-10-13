@@ -1,6 +1,11 @@
+"use client";
+
+import { useDict } from "@/i18n/I18nProvider";
+
 /** Official-style "Built for Shopify" badge — light-blue pill + cyan diamond.
  *  `compact` shrinks it so it can sit inline alongside the app icon. */
 export function BuiltForShopifyBadge({ compact = false }: { compact?: boolean }) {
+  const t = useDict();
   return (
     <span
       className={`inline-flex items-center rounded-lg bg-[#d5ecf6] font-semibold text-neutral-900 ${
@@ -15,7 +20,7 @@ export function BuiltForShopifyBadge({ compact = false }: { compact?: boolean })
         <path d="M9 8 L15 8 L12 21 Z" fill="#4bbfe0" />
         <path d="M15 8 L20 8 L12 21 Z" fill="#3fb4d6" />
       </svg>
-      Conçu pour Shopify
+      {t.tour.badges.builtForShopify}
     </span>
   );
 }

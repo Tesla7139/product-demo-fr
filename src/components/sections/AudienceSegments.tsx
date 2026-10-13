@@ -4,13 +4,16 @@ import { Container } from "@/components/primitives/Container";
 import { SectionHeading } from "@/components/primitives/SectionHeading";
 import { RevealGroup, RevealChild } from "@/components/primitives/AnimatedReveal";
 import { ArrowRight } from "lucide-react";
-import { segments } from "@/lib/site";
+import { segmentsFor } from "@/lib/site";
+import { useDict } from "@/i18n/I18nProvider";
 
 export function AudienceSegments() {
+  const t = useDict();
+  const segments = segmentsFor(t.site);
   return (
     <section id="segments" className="py-20 md:py-28">
       <Container>
-        <SectionHeading eyebrow="Pour qui ?" title="Pensé pour votre façon de vendre" />
+        <SectionHeading eyebrow={t.sections.audienceSegments.eyebrow} title={t.sections.audienceSegments.title} />
         <RevealGroup className="mt-14 grid gap-6 md:grid-cols-3">
           {segments.map(({ icon: Icon, title, blurb }) => (
             <RevealChild key={title}>
@@ -24,7 +27,7 @@ export function AudienceSegments() {
                   href="#features"
                   className="inline-flex items-center gap-1 text-sm font-semibold text-primary"
                 >
-                  En savoir plus
+                  {t.sections.audienceSegments.learnMore}
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </a>
               </article>

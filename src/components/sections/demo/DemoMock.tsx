@@ -17,9 +17,9 @@ import {
   X,
 } from "lucide-react";
 import type { DemoStore, DemoProduct } from "@/lib/site";
-import { COUNTRIES, countryByName, lookupPostal } from "@/lib/regions";
+import { COUNTRIES, countryByCode, countryName, orderedCountries, lookupPostal } from "@/lib/regions";
 import { readableBrand, dedupeByTitle, dedupeExactTitle } from "@/lib/utils";
-import { money, money2, DEFAULT_CURRENCY } from "@/lib/format";
+import { useDict, useFormat, useLocaleMeta } from "@/i18n/I18nProvider";
 import { DemoImg } from "./DemoImg";
 import { ThankYouMap } from "./ThankYouMap";
 import { OrderDetails } from "./OrderDetails";
@@ -34,15 +34,27 @@ const priceOf = (i: LineItem) => (i.postPurchase && i.dealPrice != null ? i.deal
 type Section = "contact" | "shipping" | "order" | "discount" | "cancel";
 export type Addr = { first: string; last: string; line1: string; city: string; state: string; zip: string };
 
-// Single source of truth for the demo customer, so every surface (editing window,
-// EU withdrawal order-status page, etc.) shows the same order details.
-export const DEFAULT_EMAIL = "camille.dubois@gmail.com";
-export const DEFAULT_PHONE = "+33 6 12 34 56 78";
-export const DEFAULT_COUNTRY = "France";
-export const DEFAULT_ADDR: Addr = { first: "Camille", last: "Dubois", line1: "18 rue des Lilas", city: "Lyon", state: "Auvergne-Rhône-Alpes", zip: "69003" };
-/** Address-validation mode: Camille's abbreviated street is flagged, then corrected on validate. */
-const FLAGGED_ADDR: Addr = { ...DEFAULT_ADDR, line1: "18 r des Lilas" };
-const VERIFIED_ADDR: Addr = { ...DEFAULT_ADDR, line1: "18 Rue des Lilas" };
+/**
+ * Single source of truth for the demo customer (from the language's dictionary),
+ * so every surface (editing window, EU withdrawal order-status page, etc.) shows
+ * the same order details. `country` is an ISO code.
+ */
+export function usePersona() {
+  const p = useDict().demo.persona;
+  return useMemo(
+    () => ({
+      addr: { first: p.first, last: p.last, line1: p.line1, city: p.city, state: p.state, zip: p.zip } as Addr,
+      email: p.email,
+      phone: p.phone,
+      country: p.country,
+    }),
+    [p]
+  );
+}
+
+/** Pick the singular/plural dictionary word for a count in the current language. */
+const plural = (intl: string, n: number, one: string, other: string) =>
+  new Intl.PluralRules(intl).select(n) === "one" ? one : other;
 
 let counter = 0;
 const uid = () => `li-${counter++}`;
@@ -119,7 +131,16 @@ export function DemoMock({
   onPaid?: () => void;
 }) {
   const brand = readableBrand(store.brandColor);
-  const fmt = (n: number) => money(n, store.currency || DEFAULT_CURRENCY);
+  const dict = useDict();
+  const t = dict.checkout.demoMock;
+  const meta = useLocaleMeta();
+  const { money, money2, date, fill } = useFormat();
+  const persona = usePersona();
+  const fmt = (n: number) => money(n, store.currency ?? undefined);
+  /** Validation mode: the flagged address is corrected on validate. */
+  const flaggedAddr: Addr = { ...persona.addr, line1: dict.demo.validation.flaggedLine1 };
+  const verifiedAddr: Addr = { ...persona.addr, line1: dict.demo.validation.verifiedLine1, zip: dict.demo.validation.verifiedZip };
+  const shipDate = date("2026-06-18", { day: "numeric", month: "short" });
 
   // The order starts with two distinct items (so a quantity edit can also remove one);
   // remaining products become the in-page cross-sell suggestions.
@@ -144,7 +165,7 @@ export function DemoMock({
   });
   const [open, setOpen] = useState<Section | null>(initialOpen);
   const [addrValidated, setAddrValidated] = useState(false);
-  const [country, setCountry] = useState(DEFAULT_COUNTRY);
+  const [country, setCountry] = useState(meta.country);
   const [validating, setValidating] = useState(false);
   const zipTouched = useRef(false); // only auto-detect once the user actually edits the postal code
   const lastDetected = useRef(""); // postal code we last resolved (avoid re-firing)
@@ -170,9 +191,9 @@ export function DemoMock({
   }, [forceOneTap]);
 
   // editable field state (sample-prefilled — this is a UI demo)
-  const [email, setEmail] = useState(DEFAULT_EMAIL);
-  const [phone, setPhone] = useState(DEFAULT_PHONE);
-  const [addr, setAddr] = useState<Addr>(addressValidation ? FLAGGED_ADDR : DEFAULT_ADDR);
+  const [email, setEmail] = useState(persona.email);
+  const [phone, setPhone] = useState(persona.phone);
+  const [addr, setAddr] = useState<Addr>(addressValidation ? flaggedAddr : persona.addr);
   const [discount, setDiscount] = useState("");
 
   // report which section is open (so an outer panel can explain it)
@@ -237,9 +258,12 @@ export function DemoMock({
   }, []);
   const mins = Math.floor(secondsLeft / 60);
   const secs = secondsLeft % 60;
-  const countdown = `${mins} minute${mins > 1 ? "s" : ""} et ${secs
-    .toString()
-    .padStart(2, "0")} seconde${secs > 1 ? "s" : ""}`;
+  const countdown = fill(t.countdown, {
+    minutes: mins,
+    minuteUnit: plural(meta.intl, mins, t.minute, t.minutes),
+    seconds: secs.toString().padStart(2, "0"),
+    secondUnit: plural(meta.intl, secs, t.second, t.seconds),
+  });
 
   const subtotal = useMemo(() => items.reduce((s, i) => s + priceOf(i) * i.qty, 0), [items]);
   const savings = useMemo(
@@ -285,7 +309,7 @@ export function DemoMock({
       if (cancelled || lastDetected.current === zip) return;
       // try the selected country first, then the others — so typing any PIN also
       // auto-detects the right country (e.g. an Indian PIN while "US" is selected).
-      const order = [country, ...COUNTRIES.map((c) => c.name).filter((n) => n !== country)];
+      const order = [country, ...COUNTRIES.map((c) => c.code).filter((n) => n !== country)];
       for (const cn of order) {
         const hit = await lookupPostal(cn, addr.zip);
         if (cancelled) return;
@@ -319,30 +343,30 @@ export function DemoMock({
 
   const removeItem = (id: string) => {
     setItems((prev) => (prev.length > 1 ? prev.filter((i) => i.uid !== id) : prev));
-    flash("Article supprimé");
+    flash(t.itemRemoved);
   };
 
   const addUpsell = (p: DemoProduct, discounted = true) => {
     const charge = discounted ? Math.max(1, Math.round(p.price * 0.5)) : p.price;
     onUpsellAdded?.();
-    setProcessing("Synchronisation avec votre commande…");
+    setProcessing(t.syncing);
     window.setTimeout(() => {
       setItems((prev) => [
         ...prev,
         { ...p, uid: uid(), qty: 1, postPurchase: discounted, dealPrice: discounted ? charge : undefined },
       ]);
       setProcessing(null);
-      flash(`${p.title.split(" ").slice(0, 3).join(" ")} ajouté — ${fmt(charge)} en attente`);
+      flash(fill(t.upsellAdded, { item: p.title.split(" ").slice(0, 3).join(" "), amount: fmt(charge) }));
     }, 1300);
   };
 
   const payBalance = () => {
     const amount = due;
-    setProcessing("Paiement en cours…");
+    setProcessing(t.collecting);
     window.setTimeout(() => {
       setPaid(subtotal);
       setProcessing(null);
-      flash(`Solde réglé — ${fmt(amount)} débités`);
+      flash(fill(t.balancePaid, { amount: fmt(amount) }));
     }, 1300);
   };
 
@@ -369,10 +393,10 @@ export function DemoMock({
               </span>
               <div>
                 <div className="text-xs text-neutral-500">
-                  {pageContext === "orderstatus" ? "Commande n°\u00A0JDTNH5Z6N" : "Confirmation n°\u00A0JDTNH5Z6N"}
+                  {fill(pageContext === "orderstatus" ? t.orderNo : t.confirmationNo, { id: "JDTNH5Z6N" })}
                 </div>
                 <div className="text-lg font-bold text-neutral-900">
-                  {pageContext === "orderstatus" ? "Suivi de votre commande" : `Merci, ${DEFAULT_ADDR.first}\u00A0!`}
+                  {pageContext === "orderstatus" ? t.orderStatusTitle : fill(t.thanks, { name: dict.demo.persona.first })}
                 </div>
               </div>
             </div>
@@ -386,15 +410,15 @@ export function DemoMock({
                   <div className="flex items-start gap-3">
                     <Truck className="mt-0.5 size-4 text-neutral-700" />
                     <div>
-                      <div className="text-sm font-bold text-neutral-900">En cours de livraison</div>
-                      <div className="text-xs text-neutral-400">18 juin</div>
+                      <div className="text-sm font-bold text-neutral-900">{t.onItsWay}</div>
+                      <div className="text-xs text-neutral-400">{shipDate}</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 pl-[3px]">
                     <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-neutral-400" />
                     <div className="pl-[7px]">
-                      <div className="text-sm font-bold text-neutral-900">Confirmée</div>
-                      <div className="text-xs text-neutral-400">18 juin</div>
+                      <div className="text-sm font-bold text-neutral-900">{t.confirmed}</div>
+                      <div className="text-xs text-neutral-400">{shipDate}</div>
                     </div>
                   </div>
                 </div>
@@ -413,57 +437,58 @@ export function DemoMock({
                 <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-neutral-100">
                   <X className="size-6 text-neutral-500" />
                 </div>
-                <p className="font-semibold text-neutral-900">Commande annulée</p>
+                <p className="font-semibold text-neutral-900">{t.orderCancelled}</p>
                 <p className="mt-1 text-sm text-neutral-500">
-                  Un remboursement de {fmt(subtotal)} a été effectué.
+                  {fill(t.refundIssued, { amount: fmt(subtotal) })}
                 </p>
                 <button
                   onClick={() => setCancelled(false)}
                   className="mt-3 text-sm font-semibold"
                   style={{ color: brand }}
                 >
-                  Annuler l&apos;annulation
+                  {t.undo}
                 </button>
               </div>
             ) : (
               <div className="rounded-xl border border-border p-3">
                 <h3 className="mb-2 text-base font-bold text-neutral-900">
-                  Modifier votre commande
+                  {t.editTitle}
                 </h3>
 
                 {/* edit window banner */}
                 <div ref={tourRefs?.countdown} className="mb-3 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-neutral-700">
                   <TriangleAlert className="size-4 shrink-0 text-amber-500" />
                   <span>
-                    Vous pouvez encore modifier votre commande pendant{" "}
+                    {t.editWindow.before}
                     <span className="font-semibold text-red-500 tabular-nums">{countdown}</span>
+                    {t.editWindow.after}
                   </span>
                 </div>
 
                 <div ref={tourRefs?.sections} className="flex flex-col gap-2">
-                  <AccordionRow icon={UserRound} label="Modifier vos coordonnées" isOpen={open === "contact"} onClick={() => toggle("contact")} locked={addressValidation}>
-                    <Field label="E-mail" value={email} onChange={setEmail} />
-                    <Field label="Téléphone" value={phone} onChange={setPhone} />
-                    <CheckboxRow brand={brand} label="Mettre à jour mon profil" />
-                    <PrimaryButton onClick={() => { flash("Coordonnées mises à jour"); setOpen(null); }}>
-                      Enregistrer mes coordonnées
+                  <AccordionRow icon={UserRound} label={t.contactLabel} isOpen={open === "contact"} onClick={() => toggle("contact")} locked={addressValidation}>
+                    <Field label={t.email} value={email} onChange={setEmail} />
+                    <Field label={t.phone} value={phone} onChange={setPhone} />
+                    <CheckboxRow brand={brand} label={t.updateProfile} />
+                    <PrimaryButton onClick={() => { flash(t.contactSaved); setOpen(null); }}>
+                      {t.contactSave}
                     </PrimaryButton>
                   </AccordionRow>
 
                   <div ref={tourRefs?.shippingRow}>
                     <AccordionRow
                       icon={MapPin}
-                      label="Modifier l'adresse de livraison"
+                      label={t.shippingLabel}
                       isOpen={open === "shipping"}
                       onClick={() => toggle("shipping")}
                       badge={
                         addrFlagged ? (
                           <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-white">
-                            <TriangleAlert className="size-3 shrink-0" /> Adresse à vérifier
+                            <TriangleAlert className="size-3 shrink-0" /> {t.badgeCheckRequired}
                           </span>
                         ) : addrValidated ? (
                           <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white">
-                            <Check className="size-3 shrink-0" strokeWidth={3} /> Adresse vérifiée
+                            <Check className="size-3 shrink-0" strokeWidth={3} /> {t.badgeVerified}
                           </span>
                         ) : undefined
                       }
@@ -471,22 +496,22 @@ export function DemoMock({
                       <div ref={tourRefs?.addressBlock} className="flex flex-col gap-2.5">
                         <div ref={tourRefs?.addressForm} className="flex flex-col gap-2.5">
                           <SelectInput
-                            label="Pays"
+                            label={t.country}
                             value={country}
-                            onChange={(v) => { setCountry(v); setAddr((a) => ({ ...a, state: countryByName(v).regions[0] })); }}
-                            options={COUNTRIES.map((c) => c.name)}
+                            onChange={(v) => { setCountry(v); setAddr((a) => ({ ...a, state: countryByCode(v).regions[0] })); }}
+                            options={orderedCountries(meta.country).map((c) => ({ value: c.code, label: countryName(c.code, meta.intl) }))}
                             emphasize={formEmphasis}
                           />
                           <div className="grid grid-cols-2 gap-2.5">
-                            <Field label="Prénom" value={addr.first} onChange={(v) => setAddr({ ...addr, first: v })} emphasize={formEmphasis} />
-                            <Field label="Nom" value={addr.last} onChange={(v) => setAddr({ ...addr, last: v })} emphasize={formEmphasis} />
+                            <Field label={t.firstName} value={addr.first} onChange={(v) => setAddr({ ...addr, first: v })} emphasize={formEmphasis} />
+                            <Field label={t.lastName} value={addr.last} onChange={(v) => setAddr({ ...addr, last: v })} emphasize={formEmphasis} />
                           </div>
-                          <Field label="Adresse" value={addr.line1} onChange={(v) => setAddr({ ...addr, line1: v })} emphasize={emphasis.line1 || formEmphasis} invalid={addrFlagged} valid={addrValidated} error={addrFlagged ? "Adresse incomplète ou non reconnue. Merci de la vérifier." : undefined} />
-                          <Field label="Complément d'adresse" value="" onChange={() => {}} />
+                          <Field label={t.address1} value={addr.line1} onChange={(v) => setAddr({ ...addr, line1: v })} emphasize={emphasis.line1 || formEmphasis} invalid={addrFlagged} valid={addrValidated} error={addrFlagged ? t.addressError : undefined} />
+                          <Field label={t.address2} value="" onChange={() => {}} />
                           <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3">
-                            <Field label="Ville" value={addr.city} onChange={(v) => setAddr({ ...addr, city: v })} emphasize={emphasis.city || formEmphasis} invalid={addrFlagged} valid={addrValidated} />
-                            <SelectInput label={countryByName(country).regionLabel} value={addr.state} onChange={(v) => setAddr({ ...addr, state: v })} options={countryByName(country).regions} emphasize={emphasis.city || formEmphasis} />
-                            <Field label="Code postal" value={addr.zip} onChange={(v) => { zipTouched.current = true; setAddr({ ...addr, zip: v }); }} emphasize={emphasis.zip || formEmphasis} invalid={addrFlagged} valid={addrValidated} error={addrFlagged ? "Le code postal n'a pas pu être validé." : undefined} />
+                            <Field label={t.city} value={addr.city} onChange={(v) => setAddr({ ...addr, city: v })} emphasize={emphasis.city || formEmphasis} invalid={addrFlagged} valid={addrValidated} />
+                            <SelectInput label={dict.common.regionKinds[countryByCode(country).regionKind]} value={addr.state} onChange={(v) => setAddr({ ...addr, state: v })} options={countryByCode(country).regions.map((r) => ({ value: r, label: r }))} emphasize={emphasis.city || formEmphasis} />
+                            <Field label={t.postalCode} value={addr.zip} onChange={(v) => { zipTouched.current = true; setAddr({ ...addr, zip: v }); }} emphasize={emphasis.zip || formEmphasis} invalid={addrFlagged} valid={addrValidated} error={addrFlagged ? t.zipError : undefined} />
                           </div>
                         </div>
                         <div ref={tourRefs?.saveBtn}>
@@ -496,11 +521,11 @@ export function DemoMock({
                             onClick={async () => {
                               if (!addrFlagged) {
                                 // 2nd tap: close the section and confirm
-                                setOpen(null); flash("Adresse de livraison mise à jour"); onShippingSaved?.(); return;
+                                setOpen(null); flash(t.shippingUpdated); onShippingSaved?.(); return;
                               }
                               // 1st tap: validate. Guided tour uses the scripted correction…
                               if (scriptedValidation) {
-                                setAddr(VERIFIED_ADDR); setAddrValidated(true); flash("Adresse vérifiée et livrable"); onShippingSaved?.(); return;
+                                setAddr(verifiedAddr); setAddrValidated(true); flash(t.verifiedDeliverable); onShippingSaved?.(); return;
                               }
                               // …manual use runs a free live postal-code lookup (Zippopotam).
                               setValidating(true);
@@ -508,16 +533,16 @@ export function DemoMock({
                               setValidating(false);
                               if (!hit) {
                                 // postal code doesn't exist for the selected country → NOT deliverable
-                                flash(`Impossible de vérifier ${addr.zip ? `le code postal ${addr.zip}` : "ce code postal"} (${country}).`);
+                                flash(fill(addr.zip ? t.zipNotVerified : t.zipNotVerifiedEmpty, { zip: addr.zip, country: countryName(country, meta.intl) }));
                                 return; // stay flagged; do NOT mark verified
                               }
                               const cityWrong = hit.city && hit.city.toLowerCase() !== addr.city.trim().toLowerCase();
                               const stateWrong = hit.region && hit.region.toLowerCase() !== addr.state.trim().toLowerCase();
                               if (cityWrong || stateWrong) {
                                 setAddr((a) => ({ ...a, city: hit.city || a.city, state: hit.region || a.state }));
-                                flash(`Adresse corrigée\u00A0: ${[hit.city, hit.region].filter(Boolean).join(", ")}`);
+                                flash(fill(t.correctedTo, { place: [hit.city, hit.region].filter(Boolean).join(", ") }));
                               } else {
-                                flash("Adresse vérifiée et livrable");
+                                flash(t.verifiedDeliverable);
                               }
                               setAddrValidated(true);
                               onShippingSaved?.();
@@ -525,7 +550,7 @@ export function DemoMock({
                             className="mt-1 w-full rounded-md py-3 text-sm font-semibold text-white transition-all hover:brightness-125 active:scale-[0.99] disabled:opacity-70"
                             style={{ background: "#111827" }}
                           >
-                            {validating ? "Vérification…" : addrFlagged ? "Utiliser l'adresse validée" : "Mettre à jour l'adresse"}
+                            {validating ? t.validating : addrFlagged ? t.useValidated : t.updateAddress}
                           </button>
                         </div>
                       </div>
@@ -533,7 +558,7 @@ export function DemoMock({
                   </div>
 
                   <div ref={tourRefs?.orderRow}>
-                  <AccordionRow icon={Pencil} label="Modifier les articles" isOpen={open === "order"} onClick={() => toggle("order")} locked={addressValidation}>
+                  <AccordionRow icon={Pencil} label={t.orderLabel} isOpen={open === "order"} onClick={() => toggle("order")} locked={addressValidation}>
                     <div className="flex flex-col divide-y divide-border">
                       {items.map((item, i) => (
                         <div
@@ -549,7 +574,7 @@ export function DemoMock({
                           <button
                             onClick={() => removeItem(item.uid)}
                             disabled={items.length <= 1}
-                            aria-label={`Supprimer ${item.title}`}
+                            aria-label={fill(t.removeItem, { item: item.title })}
                             className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-neutral-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-border disabled:hover:bg-transparent disabled:hover:text-neutral-400"
                           >
                             <Trash2 className="size-3.5" />
@@ -560,53 +585,53 @@ export function DemoMock({
                     <div ref={tourRefs?.orderBtn}>
                       <PrimaryButton onClick={() => {
                         const changed = orderSig(items) !== initialOrderSig.current;
-                        if (!changed) { flash("Aucune modification pour l'instant"); return; }
+                        if (!changed) { flash(t.noChanges); return; }
                         initialOrderSig.current = orderSig(items);
-                        flash("Commande mise à jour");
+                        flash(t.orderUpdated);
                         onOrderUpdated?.();
                       }}>
-                        Mettre à jour la commande
+                        {t.updateOrder}
                       </PrimaryButton>
                     </div>
                   </AccordionRow>
                   </div>
 
-                  <AccordionRow icon={Tag} label="Appliquer un code promo" isOpen={open === "discount"} onClick={() => toggle("discount")} locked={addressValidation}>
+                  <AccordionRow icon={Tag} label={t.discountLabel} isOpen={open === "discount"} onClick={() => toggle("discount")} locked={addressValidation}>
                     <div className="flex gap-2">
                       <input
                         value={discount}
                         onChange={(e) => setDiscount(e.target.value)}
-                        placeholder="Code promo"
+                        placeholder={t.discountPlaceholder}
                         className="h-11 flex-1 rounded-md border border-border px-3 text-sm focus:outline-none"
                       />
                       <button
-                        onClick={() => discount && flash("Code promo appliqué")}
+                        onClick={() => discount && flash(t.discountApplied)}
                         className="h-11 rounded-md border border-border bg-neutral-100 px-5 text-sm font-medium text-neutral-500"
                       >
-                        Appliquer
+                        {t.apply}
                       </button>
                     </div>
                     <p className="mt-2 text-xs text-neutral-500">
-                      Saisissez un code promo valide pour en profiter sur votre commande.
+                      {t.discountHint}
                     </p>
                   </AccordionRow>
 
-                  <AccordionRow icon={X} label="Annuler la commande" isOpen={open === "cancel"} onClick={() => toggle("cancel")} locked={addressValidation}>
+                  <AccordionRow icon={X} label={t.cancelLabel} isOpen={open === "cancel"} onClick={() => toggle("cancel")} locked={addressValidation}>
                     <p className="text-sm text-neutral-600">
-                      {`Annulez votre commande de ${fmt(subtotal)} et choisissez votre mode de remboursement.`}
+                      {fill(t.cancelText, { amount: fmt(subtotal) })}
                     </p>
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => { setCancelled(true); setOpen(null); flash(`${fmt(subtotal)} remboursés sur votre moyen de paiement`); }}
+                        onClick={() => { setCancelled(true); setOpen(null); flash(fill(t.refundToast, { amount: fmt(subtotal) })); }}
                         className="rounded-md border border-red-200 py-2.5 text-[13px] font-semibold text-red-500 transition-colors hover:bg-red-50"
                       >
-                        Remboursement
+                        {t.refundBtn}
                       </button>
                       <button
-                        onClick={() => { setCancelled(true); setOpen(null); flash(`Avoir de ${fmt(subtotal)} émis`); }}
+                        onClick={() => { setCancelled(true); setOpen(null); flash(fill(t.creditToast, { amount: fmt(subtotal) })); }}
                         className="rounded-md border border-border py-2.5 text-[13px] font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
                       >
-                        Avoir boutique
+                        {t.creditBtn}
                       </button>
                     </div>
                   </AccordionRow>
@@ -638,7 +663,7 @@ export function DemoMock({
             {/* order details summary */}
             {!cancelled && (
               <div className="mt-3">
-                <OrderDetails addr={addr} email={email} phone={phone} country={DEFAULT_COUNTRY} amount={money2(cancelled ? 0 : subtotal + shipping, store.currency || DEFAULT_CURRENCY)} />
+                <OrderDetails addr={addr} email={email} phone={phone} country={countryName(country, meta.intl)} amount={money2(cancelled ? 0 : subtotal + shipping, store.currency ?? undefined)} />
               </div>
             )}
             </>
@@ -661,7 +686,7 @@ export function DemoMock({
                     {item.postPurchase && item.dealPrice != null && (
                       <div className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
                         <Tag className="size-2.5" />
-                        POSTACHAT (-{fmt((item.price - item.dealPrice) * item.qty)})
+                        {t.postPurchaseTag} (-{fmt((item.price - item.dealPrice) * item.qty)})
                       </div>
                     )}
                   </div>
@@ -679,21 +704,21 @@ export function DemoMock({
               ))}
             </div>
             <div className="mt-5 space-y-1.5 border-t border-border pt-4 text-sm">
-              <Row label={`Sous-total · ${itemCount} article${itemCount > 1 ? "s" : ""}`} value={fmt(subtotal)} />
+              <Row label={fill(plural(meta.intl, itemCount, t.subtotalOne, t.subtotalOther), { count: itemCount })} value={fmt(subtotal)} />
               {freeShip ? (
                 <div className="flex items-center justify-between text-neutral-600">
-                  <span>Livraison</span>
+                  <span>{t.shipping}</span>
                   <span className="flex items-center gap-1.5">
                     <span className="text-neutral-400 line-through">{fmt(shipFee)}</span>
-                    <span className="font-bold text-emerald-600">OFFERTE</span>
+                    <span className="font-bold text-emerald-600">{t.free}</span>
                   </span>
                 </div>
               ) : (
-                <Row label="Livraison" value={fmt(shipping)} />
+                <Row label={t.shipping} value={fmt(shipping)} />
               )}
             </div>
             <div className="mt-3 flex items-baseline justify-between border-t border-border pt-3">
-              <span className="font-bold text-neutral-900">Total</span>
+              <span className="font-bold text-neutral-900">{t.total}</span>
               <span className="text-lg font-bold text-neutral-900">
                 {fmt(cancelled ? 0 : subtotal + shipping)}
               </span>
@@ -701,7 +726,7 @@ export function DemoMock({
             {savings > 0 && !cancelled && (
               <div className="mt-2 flex items-center gap-1.5 text-[12px] font-bold text-emerald-600">
                 <Tag className="size-3" />
-                Vous économisez {fmt(savings)}
+                {fill(t.savings, { amount: fmt(savings) })}
               </div>
             )}
 
@@ -710,11 +735,11 @@ export function DemoMock({
             {due > 0 && (
               <div ref={tourRefs?.payPanel} className="mt-3 rounded-xl bg-amber-50 p-3">
                 <div className="flex items-baseline justify-between text-[13px]">
-                  <span className="font-medium text-neutral-700">Reste à payer</span>
+                  <span className="font-medium text-neutral-700">{t.balanceDue}</span>
                   <span className="font-bold text-neutral-900">{fmt(due)}</span>
                 </div>
                 <p className="mt-1 text-[11px] leading-snug text-neutral-500">
-                  Vous avez ajouté des articles. Réglez la différence pour confirmer les modifications.
+                  {t.balanceHint}
                 </p>
                 <button
                   ref={tourRefs?.payBtn}
@@ -722,7 +747,7 @@ export function DemoMock({
                   className="mt-2.5 w-full rounded-md py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-125 active:scale-[0.99]"
                   style={{ background: "#111827" }}
                 >
-                  Payer {fmt(due)}
+                  {fill(t.pay, { amount: fmt(due) })}
                 </button>
               </div>
             )}
@@ -744,7 +769,7 @@ export function DemoMock({
               animate={{ scale: 1, y: 0 }}
               className="relative w-[80%] max-w-sm rounded-xl bg-white p-8 text-center shadow-soft-xl"
             >
-              <p className="mb-4 text-left text-lg font-bold text-neutral-900">Traitement en cours…</p>
+              <p className="mb-4 text-left text-lg font-bold text-neutral-900">{t.processing}</p>
               <Loader2 className="mx-auto size-9 animate-spin" style={{ color: brand }} />
               <p className="mt-4 text-sm text-neutral-600">{processing}</p>
             </motion.div>
@@ -850,8 +875,9 @@ function Field({ label, value, onChange, emphasize, invalid, valid, error }: { l
  *  scrollable option list for long region lists. Matches the form's field style. */
 function SelectInput({
   label, value, onChange, options, emphasize,
-}: { label: string; value: string; onChange: (v: string) => void; options: string[]; emphasize?: boolean }) {
+}: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; emphasize?: boolean }) {
   const [open, setOpen] = useState(false);
+  const current = options.find((o) => o.value === value)?.label ?? value;
   return (
     <div className="relative">
       <button
@@ -863,7 +889,7 @@ function SelectInput({
         <span className="pointer-events-none absolute left-3 top-1.5 text-[10px] font-medium uppercase tracking-wide text-neutral-400">
           {label}
         </span>
-        <span className="truncate pr-5 text-sm text-neutral-800">{value}</span>
+        <span className="truncate pr-5 text-sm text-neutral-800">{current}</span>
         <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
@@ -871,15 +897,15 @@ function SelectInput({
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden />
           <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-y-auto rounded-md border border-neutral-200 bg-white py-1 shadow-xl">
             {options.map((o) => {
-              const active = o === value;
+              const active = o.value === value;
               return (
                 <button
-                  key={o}
+                  key={o.value}
                   type="button"
-                  onClick={() => { onChange(o); setOpen(false); }}
+                  onClick={() => { onChange(o.value); setOpen(false); }}
                   className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-[13px] transition-colors ${active ? "bg-[#155FFF] text-white" : "text-neutral-800 hover:bg-neutral-50"}`}
                 >
-                  <span className="truncate">{o}</span>
+                  <span className="truncate">{o.label}</span>
                   {active && <Check className="size-3.5 shrink-0" strokeWidth={3} />}
                 </button>
               );
@@ -960,7 +986,11 @@ function OneTapPanel({
   const priced = store.products.filter((p) => (p.price ?? 0) > 0);
   const pool = dedupeByTitle(priced.length ? priced : store.products);
   const offer = pool[1] ?? pool[0];
-  const full = offer?.price ?? 12;
+  const dict = useDict();
+  const t = dict.checkout.oneTap;
+  const meta = useLocaleMeta();
+  const { money2, fill } = useFormat();
+  const full = offer?.price ?? Math.round(12 * meta.priceScale);
   const deal = Math.max(1, Math.round(full * 0.5 * 100) / 100);
   const [secs, setSecs] = useState(9 * 60 + 54);
   useEffect(() => {
@@ -968,7 +998,7 @@ function OneTapPanel({
     return () => clearInterval(id);
   }, []);
   const timer = `${Math.floor(secs / 60)}:${(secs % 60).toString().padStart(2, "0")}`;
-  const moneyFmt = (n: number) => money2(n, store.currency || DEFAULT_CURRENCY);
+  const moneyFmt = (n: number) => money2(n, store.currency ?? undefined);
 
   return (
     <div className="flex flex-col gap-3">
@@ -977,13 +1007,13 @@ function OneTapPanel({
         <span className="flex size-6 items-center justify-center rounded-full border-2" style={{ borderColor: brand, color: brand }}>
           <Check className="size-3.5" strokeWidth={3} />
         </span>
-        <span className="font-semibold text-neutral-900">Confirmation n°&nbsp;0WPS9KCW8</span>
-        <span className="text-neutral-400">· Paiement effectué</span>
+        <span className="font-semibold text-neutral-900">{fill(t.confirmationNo, { id: "0WPS9KCW8" })}</span>
+        <span className="text-neutral-400">· {t.paid}</span>
       </div>
 
       {/* "before you go" banner */}
       <div className="flex items-center gap-3 rounded-lg bg-neutral-50 py-2.5 text-center text-[13px] text-neutral-700">
-        <span className="flex-1 text-center font-semibold">{DEFAULT_ADDR.first}, une dernière chose&nbsp;!</span>
+        <span className="flex-1 text-center font-semibold">{fill(t.beforeYouGo, { name: dict.demo.persona.first })}</span>
         <span className="mr-3 font-semibold tabular-nums text-red-500">{timer}</span>
       </div>
 
@@ -995,9 +1025,9 @@ function OneTapPanel({
 
         <div className="flex flex-col justify-between py-1">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wide text-neutral-400">Offre 1 sur 1</div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-neutral-400">{fill(t.offerOf, { n: 1, total: 1 })}</div>
             <div className="mt-1 text-[14px] font-semibold leading-snug text-neutral-900">
-              {offer?.title ?? "Produit complémentaire"}
+              {offer?.title ?? t.productFallback}
             </div>
             <div className="mt-1.5 flex items-baseline gap-1.5">
               <span className="text-[12px] text-neutral-400 line-through">{moneyFmt(full)}</span>
@@ -1011,17 +1041,17 @@ function OneTapPanel({
               className="w-full rounded-lg py-2.5 text-[13px] font-semibold text-white shadow-md transition-all hover:brightness-110"
               style={{ background: brand }}
             >
-              Ajouter à la commande · {moneyFmt(deal)}
+              {fill(t.addToOrder, { amount: moneyFmt(deal) })}
             </button>
             <button className="w-full py-1.5 text-[12px] font-medium text-neutral-400 hover:text-neutral-600">
-              Non merci
+              {t.skip}
             </button>
           </div>
         </div>
       </div>
 
       <p className="text-center text-[11px] text-neutral-400">
-        Un clic pour ajouter — sans ressaisir votre carte ni repasser par le paiement.
+        {t.hint}
       </p>
     </div>
   );

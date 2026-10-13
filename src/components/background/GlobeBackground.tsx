@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import { hasLocale } from "@/i18n/config";
 
 const GlobeScene = dynamic(() => import("./GlobeScene"), { ssr: false });
 
@@ -26,7 +27,10 @@ function supportsWebGL() {
  */
 export function GlobeBackground() {
   const [enabled, setEnabled] = useState(false);
-  const pathname = usePathname();
+  const rawPath = usePathname();
+  // strip the "/{lang}" prefix so "/fr/reviews" compares as "/reviews"
+  const seg = rawPath.split("/")[1];
+  const pathname = hasLocale(seg) ? rawPath.slice(seg.length + 1) || "/" : rawPath;
   // no globe on the home / demo funnel pages, or the reviews wall
   const onHome =
     pathname === "/" ||

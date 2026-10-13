@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
+import { useDict } from "@/i18n/I18nProvider";
 
 export function AnnouncementBanner() {
   const [open, setOpen] = useState(true);
+  const t = useDict().layout.announcementBanner;
 
   return (
     <AnimatePresence>
@@ -19,19 +21,19 @@ export function AnnouncementBanner() {
         >
           <div className="mx-auto flex max-w-[1240px] items-center justify-center gap-3 px-6 py-2.5 text-sm">
             <span className="font-medium">
-              Nouveau : les upsells post-achat sont disponibles dans CP: Order Editing
+              {t.text}
             </span>
             <a
               href="#demo"
               className="group inline-flex items-center gap-1 font-semibold text-background underline-offset-4 hover:underline"
             >
-              Essayer la démo
+              {t.cta}
               <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
             </a>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Fermer l’annonce"
+              aria-label={t.dismiss}
               className="absolute right-4 top-1/2 -translate-y-1/2 rounded p-1 text-background/70 transition-colors hover:text-background"
             >
               <X className="size-4" />

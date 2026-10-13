@@ -4,29 +4,17 @@ import { motion } from "framer-motion";
 import { ExternalLink, Star } from "lucide-react";
 import { Container } from "@/components/primitives/Container";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
-
-const STATS = [
-  {
-    figure: "6 644",
-    label: "commandes modifiées en autonomie",
-    detail: "Les clients ont corrigé leur adresse, changé de variante et appliqué des codes promo — sans jamais écrire au support.",
-  },
-  {
-    figure: "11 713 $",
-    label: "de revenus d’upsell",
-    detail: "Générés directement sur la page de remerciement. Zéro budget pub. Aucune friction ajoutée au paiement.",
-  },
-  {
-    figure: "200 000+",
-    label: "clients ont vu l’option de modification",
-    detail: "Sur chaque confirmation de commande — autant de tickets support potentiels qui n’ont jamais existé.",
-  },
-];
+import { useDict, useFormat } from "@/i18n/I18nProvider";
 
 const REVIEW =
   "We've been using Clickpost and it's genuinely been super helpful. Customers can handle order edits themselves, and the post-purchase upsells have been a solid bonus for incremental revenue. Setup was straightforward, everything's been running smoothly, and support has been great too.";
 
 export function MarsSpotlight() {
+  const m = useDict().sections.marsSpotlight;
+  const { num, money, date, fill } = useFormat();
+  // real Mars By GHC figures (USD), labels from the dictionary
+  const figures = [num(6644), money(11713, "USD"), fill(m.figurePlus, { n: num(200000) })];
+  const stats = m.stats.map((st, i) => ({ ...st, figure: figures[i] }));
   return (
     <section
       className="relative overflow-hidden py-24 md:py-32"
@@ -49,10 +37,10 @@ export function MarsSpotlight() {
           {/* Badges */}
           <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-white/50">
-              Cas client
+              {m.badge}
             </span>
             <span className="rounded-full bg-amber-400/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-amber-300">
-              CA à 9 chiffres
+              {m.tierBadge}
             </span>
           </motion.div>
 
@@ -66,10 +54,10 @@ export function MarsSpotlight() {
               letterSpacing: "-0.025em",
             }}
           >
-            Mars By GHC a grandi
+            {m.titleLine1}
             <br />
             <span style={{ color: "rgba(255,255,255,0.35)" }}>
-              sans grossir son support.
+              {m.titleLine2}
             </span>
           </motion.h2>
 
@@ -78,8 +66,7 @@ export function MarsSpotlight() {
             className="mt-5 max-w-lg text-[16px] leading-relaxed"
             style={{ color: "rgba(255,255,255,0.55)" }}
           >
-            Une marque Shopify à neuf chiffres a fait de sa page de confirmation un espace en
-            libre-service. Ses clients corrigent eux-mêmes leurs commandes — et les complètent.
+            {m.intro}
           </motion.p>
 
           {/* Stats — horizontal data rows, not pedestals */}
@@ -87,9 +74,9 @@ export function MarsSpotlight() {
             variants={fadeUp}
             className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-white/10 md:grid-cols-3"
           >
-            {STATS.map((s, i) => (
+            {stats.map((s, i) => (
               <div
-                key={s.figure}
+                key={i}
                 className="flex flex-col gap-2 bg-white/[0.03] px-8 py-7 md:px-8"
                 style={i === 1 ? { borderLeft: "1px solid rgba(255,255,255,0.08)", borderRight: "1px solid rgba(255,255,255,0.08)" } : undefined}
               >
@@ -127,7 +114,7 @@ export function MarsSpotlight() {
                 &ldquo;{REVIEW}&rdquo;
               </blockquote>
               <footer className="mt-3 text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.32)" }}>
-                Mars By GHC &mdash; Shopify App Store, janvier 2026
+                {fill(m.reviewSource, { date: date(new Date(Date.UTC(2026, 0, 1)), { month: "long", year: "numeric" }) })}
               </footer>
             </div>
 
@@ -138,7 +125,7 @@ export function MarsSpotlight() {
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[14px] font-semibold text-neutral-900 shadow-lg transition-opacity hover:opacity-90"
               >
-                Lire leur avis
+                {m.readReview}
                 <ExternalLink className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </a>
             </div>

@@ -5,15 +5,18 @@ import { Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { Container } from "@/components/primitives/Container";
 import { SectionHeading } from "@/components/primitives/SectionHeading";
-import { integrations } from "@/lib/site";
+import { integrationsFor } from "@/lib/site";
+import { useDict } from "@/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = ["All", "iPaaS", "ERP", "3PL", "WMS", "Shipping", "Tech"];
-// display labels (category ids above match the data in site.ts)
-const CATEGORY_LABELS: Record<string, string> = { All: "Toutes", Shipping: "Expédition" };
-const catLabel = (c: string) => CATEGORY_LABELS[c] ?? c;
+// category ids match the data in site.ts; display labels come from the dictionary
 
 export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean }) {
+  const t = useDict();
+  const s = t.sections.integrationsGrid;
+  const integrations = integrationsFor(t.site);
+  const catLabel = (c: string) => s.categories[c] ?? c;
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -31,9 +34,9 @@ export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean
         {withHeading && (
           <div className="mb-12">
             <SectionHeading
-              eyebrow="Integrations"
-              title="S’intègre à vos outils"
-              subtitle="Connectez paiement, logistique et marketing en quelques clics."
+              eyebrow={s.eyebrow}
+              title={s.title}
+              subtitle={s.subtitle}
             />
           </div>
         )}
@@ -63,7 +66,7 @@ export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean
             <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/40" />
             <input
               type="text"
-              placeholder="Rechercher une intégration…"
+              placeholder={s.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full rounded-full border border-white/15 bg-white/5 py-1.5 pl-10 pr-4 text-xs text-white placeholder-white/40 outline-none transition-colors focus:border-white/30 focus:bg-white/10"
@@ -140,7 +143,7 @@ export function IntegrationsGrid({ withHeading = true }: { withHeading?: boolean
 
         {filteredIntegrations.length === 0 && (
           <div className="py-12 text-center text-white/50 text-sm">
-            Aucune intégration ne correspond à votre recherche.
+            {s.noResults}
           </div>
         )}
       </Container>

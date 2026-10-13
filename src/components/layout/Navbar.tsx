@@ -4,12 +4,17 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Logo } from "./Logo";
-import { mainNav } from "@/lib/site";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { mainNavFor } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { useDict, useHref } from "@/i18n/I18nProvider";
 
 const SHOPIFY_LISTING = "https://apps.shopify.com/clickpost-order-edit-cancel";
 
 export function Navbar() {
+  const t = useDict();
+  const href = useHref();
+  const mainNav = mainNavFor(t.site);
   const [scrolled, setScrolled] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
 
@@ -21,8 +26,8 @@ export function Navbar() {
   }, []);
 
   // links to the hero demo (#demo) also shake the store-URL input to prompt a link
-  const fireDemoShake = (href: string) => {
-    if (href.endsWith("#demo")) window.dispatchEvent(new CustomEvent("demo:shake"));
+  const fireDemoShake = (path: string) => {
+    if (path.endsWith("#demo")) window.dispatchEvent(new CustomEvent("demo:shake"));
   };
 
   return (
@@ -33,7 +38,7 @@ export function Navbar() {
       )}
     >
       <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6">
-          <nav className="flex w-full items-center gap-5 py-4" aria-label="Navigation principale">
+          <nav className="flex w-full items-center gap-3 py-4 lg:gap-5" aria-label={t.layout.navbar.ariaLabel}>
             <div className="pl-0.5">
               <Logo className="h-5" />
             </div>
@@ -75,7 +80,7 @@ export function Navbar() {
                             {item.items.map((sub) => (
                               <a
                                 key={sub.label}
-                                href={sub.href}
+                                href={href(sub.href)}
                                 className="block rounded-xl px-3 py-2.5 transition-colors hover:bg-background-muted"
                               >
                                 <div className="text-sm font-medium text-foreground">
@@ -94,7 +99,7 @@ export function Navbar() {
                 ) : (
                   <a
                     key={item.label}
-                    href={item.href}
+                    href={href(item.href)}
                     onClick={() => fireDemoShake(item.href)}
                     className="whitespace-nowrap rounded-full px-3 py-2 text-[0.85rem] font-medium text-foreground/85 transition-colors hover:text-foreground"
                   >
@@ -106,24 +111,28 @@ export function Navbar() {
 
             {/* Right actions */}
             <div className="hidden items-center gap-2.5 lg:flex">
+              <LanguageSwitcher align="right" />
               <a
                 href={SHOPIFY_LISTING}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="whitespace-nowrap rounded-full bg-[#155FFF] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98]"
               >
-                Commencer gratuitement
+                {t.layout.navbar.cta}
               </a>
             </div>
 
-            {/* Mobile: single Product Tour link (taps the hero demo + shakes the input) */}
-            <a
-              href="/#demo"
-              onClick={() => fireDemoShake("/#demo")}
-              className="ml-auto inline-flex items-center rounded-full px-4 py-2 text-[0.9rem] font-semibold text-foreground transition-colors hover:text-primary lg:hidden"
-            >
-              Visite produit
-            </a>
+            {/* Mobile: single Product Tour link (taps the hero demo + shakes the input) + language */}
+            <div className="ml-auto flex min-w-0 items-center gap-1 lg:hidden">
+              <a
+                href={href("/#demo")}
+                onClick={() => fireDemoShake("/#demo")}
+                className="min-w-0 truncate rounded-full px-2 py-2 text-[0.9rem] font-semibold text-foreground transition-colors hover:text-primary sm:px-4"
+              >
+                {t.layout.navbar.mobileTour}
+              </a>
+              <LanguageSwitcher align="right" className="shrink-0" />
+            </div>
           </nav>
       </div>
     </motion.header>

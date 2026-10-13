@@ -2,19 +2,21 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Star } from "lucide-react";
-import { cn, reviewDateFr } from "@/lib/utils";
-import { customerLogos, brandInfo } from "@/lib/site";
+import { cn, parseReviewDate } from "@/lib/utils";
+import { customerLogos } from "@/lib/site";
 import { reviews } from "@/lib/reviews";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
 
 const SQRT_5000 = Math.sqrt(5000);
 
-// Real review dates from the Shopify export, keyed by store name ("JUNE 9, 2026" -> "9 juin 2026").
-const DATE_BY_NAME = new Map(reviews.map((r) => [r.name.toLowerCase(), reviewDateFr(r.date, "short")]));
+// Real review dates from the Shopify export, keyed by store name ("JUNE 9, 2026"),
+// formatted per language at render time ("Jun 9, 2026" / "9 juin 2026").
+const DATE_BY_NAME = new Map(reviews.map((r) => [r.name.toLowerCase(), parseReviewDate(r.date)]));
 
 // Real Clickpost reviews only (the ones that have a written review + brand logo).
 const REVIEWS = customerLogos
   .filter((c) => c.review)
-  .map((c, i) => ({ tempId: i, name: c.name, review: c.review as string, src: c.src, date: DATE_BY_NAME.get(c.name.toLowerCase()), info: brandInfo[c.name] }));
+  .map((c, i) => ({ tempId: i, name: c.name, review: c.review as string, src: c.src, date: DATE_BY_NAME.get(c.name.toLowerCase()) }));
 
 
 interface TestimonialCardProps {
@@ -26,6 +28,10 @@ interface TestimonialCardProps {
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({ position, review, handleMove, cardSize }) => {
   const isCenter = position === 0;
+  const t = useDict();
+  const { date: fmtDate } = useFormat();
+  const info = t.site.brandInfo[review.name];
+  const date = review.date ? fmtDate(review.date, { day: "numeric", month: "short", year: "numeric" }) : null;
 
   return (
     <div
@@ -90,15 +96,15 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ position, review, han
         <div className="flex items-baseline justify-between gap-2 font-semibold">
           <span className="truncate">
             {review.name}
-            {review.info?.country && (
-              <span className="font-semibold text-[#D97706]"> · {review.info.country}</span>
+            {info?.country && (
+              <span className="font-semibold text-[#D97706]"> · {info.country}</span>
             )}
           </span>
-          {review.date && <span className="shrink-0">{review.date}</span>}
+          {date && <span className="shrink-0">{date}</span>}
         </div>
-        {review.info?.tier && (
+        {info?.tier && (
           <span className="mt-1.5 inline-flex items-center rounded-full border border-amber-300/70 bg-gradient-to-b from-amber-50 to-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 shadow-sm">
-            {review.info.tier}
+            {info.tier}
           </span>
         )}
       </div>

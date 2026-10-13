@@ -8,6 +8,7 @@ import { Container } from "@/components/primitives/Container";
 import { Marquee } from "@/components/primitives/Marquee";
 import { Button } from "@/components/ui/button";
 import { reviews, type Review } from "@/lib/reviews";
+import { useDict, useFormat, useHref } from "@/i18n/I18nProvider";
 
 // Real brand logos (same assets as the customer brand strip) — matched by name.
 const CUSTOMER_LOGOS: Record<string, string> = {
@@ -28,13 +29,20 @@ function logoFor(name: string): string | null {
   const key = name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
   return CUSTOMER_LOGOS[key] ?? null;
 }
-// "JUNE 9, 2026" (App Store export) -> "9 juin 2026"
+// "JUNE 9, 2026" / "Nov 21, 2023" (App Store export) -> UTC Date, formatted per language
 const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-function frDate(raw: string) {
+function parseReviewDate(raw: string): Date | null {
   const m = raw.trim().match(/^([A-Za-z]+)\.?\s+(\d{1,2}),?\s+(\d{4})$/);
   const mi = m ? MONTHS.indexOf(m[1].slice(0, 3).toLowerCase()) : -1;
-  if (!m || mi < 0) return raw;
-  return new Date(Number(m[3]), mi, Number(m[2])).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  if (!m || mi < 0) return null;
+  return new Date(Date.UTC(Number(m[3]), mi, Number(m[2])));
+}
+function useReviewDate() {
+  const { date } = useFormat();
+  return (raw: string) => {
+    const d = parseReviewDate(raw);
+    return d ? date(d) : raw;
+  };
 }
 function tidyName(name: string) {
   return name.replace(/[-_]/g, " ").split(" ").map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(" ");
@@ -60,6 +68,7 @@ function avatarFor(name: string) {
 
 /* ------------------------- professional review card ------------------------ */
 function ReviewMarqueeCard({ review }: { review: Review }) {
+  const reviewDate = useReviewDate();
   const name = tidyName(review.name);
   const logo = logoFor(review.name);
   const av = avatarFor(review.name);
@@ -78,7 +87,7 @@ function ReviewMarqueeCard({ review }: { review: Review }) {
           </span>
           <div className="min-w-0">
             <div className="truncate text-[14px] font-bold tracking-tight text-neutral-900">{name}</div>
-            <div className="truncate text-[12px] text-neutral-500">{frDate(review.date)}</div>
+            <div className="truncate text-[12px] text-neutral-500">{reviewDate(review.date)}</div>
           </div>
         </div>
         {logo && (
@@ -92,6 +101,7 @@ function ReviewMarqueeCard({ review }: { review: Review }) {
 
 /* ------------------------- compact card for the folder fan ------------------ */
 function MiniCard({ review }: { review: Review }) {
+  const reviewDate = useReviewDate();
   const name = tidyName(review.name);
   const av = avatarFor(review.name);
   return (
@@ -108,7 +118,7 @@ function MiniCard({ review }: { review: Review }) {
         </span>
         <div className="min-w-0">
           <div className="truncate text-[10px] font-bold text-neutral-900">{name}</div>
-          <div className="truncate text-[8px] text-neutral-400">{frDate(review.date)}</div>
+          <div className="truncate text-[8px] text-neutral-400">{reviewDate(review.date)}</div>
         </div>
       </div>
     </div>
@@ -134,6 +144,8 @@ function ReviewRow({ items, reverse, play }: { items: Review[]; reverse?: boolea
 
 /* --------------------------------- section --------------------------------- */
 export function WallOfLoveTeaser() {
+  const w = useDict().sections.wallOfLove;
+  const href = useHref();
   const stageRef = useRef<HTMLDivElement>(null);
   // toggles as the stage scrolls in/out of view → cards fan out, then pack back in
   const open = useInView(stageRef, { amount: 0.45 });
@@ -147,12 +159,12 @@ export function WallOfLoveTeaser() {
     <section className="overflow-hidden border-t border-black/5 bg-[#FAF9F6] py-20 md:py-28">
       <Container>
         <div className="mx-auto mb-10 max-w-3xl text-center">
-          <span className="text-sm font-semibold uppercase tracking-[0.12em] text-primary md:text-base">Avis clients</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.12em] text-primary md:text-base">{w.eyebrow}</span>
           <h2 className="mt-3 font-serif font-normal tracking-tight text-black" style={{ fontSize: "clamp(1.875rem,4vw,2.75rem)", lineHeight: 1.1 }}>
-            Adopté par des marques en pleine croissance
+            {w.title}
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base font-medium text-black/60">
-            Découvrez comment les marchands utilisent Clickpost Order Editing pour automatiser leur service client et récupérer du chiffre d’affaires.
+            {w.subtitle}
           </p>
         </div>
       </Container>
@@ -207,7 +219,7 @@ export function WallOfLoveTeaser() {
             <div className="absolute bottom-0 left-0 flex h-[104px] w-full items-end justify-center rounded-2xl border border-white/15 bg-gradient-to-b from-[#343434] to-[#141414] pb-5 shadow-[inset_0_2px_10px_rgba(255,255,255,0.08)]">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
               <div className="rounded-lg border border-white/10 bg-black px-4 py-2 text-[13px] font-medium tracking-wide text-white/90 backdrop-blur">
-                Avis clients
+                {w.folderLabel}
               </div>
             </div>
           </div>
@@ -217,7 +229,7 @@ export function WallOfLoveTeaser() {
       <Container>
         <div className="mt-12 flex justify-center">
           <Button asChild size="lg" className="cursor-pointer rounded-full bg-black px-8 py-6 text-sm font-semibold text-white shadow-md transition-all hover:bg-black/90 active:scale-95">
-            <Link href="/reviews">Voir les 70+ avis →</Link>
+            <Link href={href("/reviews")}>{w.seeAll}</Link>
           </Button>
         </div>
       </Container>

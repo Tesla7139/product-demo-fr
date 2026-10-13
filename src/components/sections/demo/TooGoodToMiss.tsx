@@ -3,7 +3,10 @@
 import type { DemoStore, DemoProduct } from "@/lib/site";
 import { DemoImg } from "./DemoImg";
 
-import { money, DEFAULT_CURRENCY } from "@/lib/format";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
+
+/** Post-purchase deal discount. */
+const DISCOUNT = 0.5;
 
 /** A single discounted "Too good to miss!" featured deal. */
 export function TooGoodToMiss({
@@ -17,15 +20,17 @@ export function TooGoodToMiss({
   product: DemoProduct;
   onAdd: (p: DemoProduct) => void;
 }) {
-  const fmt = (n: number) => money(n, store.currency || DEFAULT_CURRENCY);
-  const deal = Math.max(1, Math.round(product.price * 0.5));
+  const t = useDict().mocks.tooGoodToMiss;
+  const { money, num, fill } = useFormat();
+  const fmt = (n: number) => money(n, store.currency || undefined);
+  const deal = Math.max(1, Math.round(product.price * (1 - DISCOUNT)));
 
   return (
     <div className="rounded-xl border border-border p-4">
-      <h4 className="mb-3 text-[15px] font-bold text-neutral-900">Trop beau pour passer à côté !</h4>
+      <h4 className="mb-3 text-[15px] font-bold text-neutral-900">{t.title}</h4>
       <div className="flex gap-4">
         <div className="relative size-24 shrink-0 overflow-hidden rounded-lg bg-neutral-50">
-          <span className="absolute left-1 top-1 z-10 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-500">-50 %</span>
+          <span className="absolute left-1 top-1 z-10 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-500">{fill(t.badge, { pct: num(DISCOUNT, { style: "percent" }) })}</span>
           <DemoImg src={product.image} className="size-full object-cover" />
         </div>
         <div className="min-w-0 flex-1">
@@ -45,7 +50,8 @@ export function TooGoodToMiss({
               className="min-w-0 flex-1 rounded-md py-2 text-[13px] font-semibold text-white transition-all hover:brightness-110"
               style={{ background: brand }}
             >
-              Ajouter · {fmt(deal)}
+              {fill(t.add, { price: fmt(deal) })}
+
             </button>
           </div>
         </div>

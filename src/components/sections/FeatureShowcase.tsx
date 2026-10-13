@@ -4,12 +4,14 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { Container } from "@/components/primitives/Container";
 import { SectionHeading } from "@/components/primitives/SectionHeading";
-import { features, type Feature } from "@/lib/site";
+import { featuresFor, type Feature } from "@/lib/site";
+import { useDict } from "@/i18n/I18nProvider";
 import { fadeUp, viewportOnce, transitions } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /** Placeholder product visual. Shaped to the real screenshot; swap later. */
 function FeaturePlaceholder({ icon: Icon, flip }: { icon: Feature["icon"]; flip: boolean }) {
+  const t = useDict();
   return (
     <motion.div
       initial={{ opacity: 0, x: flip ? -28 : 28 }}
@@ -36,7 +38,7 @@ function FeaturePlaceholder({ icon: Icon, flip }: { icon: Feature["icon"]; flip:
         <div className="h-2.5 w-1/2 rounded bg-background-muted" />
       </div>
       <span className="absolute bottom-2 right-3 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/50">
-        Aperçu
+        {t.sections.featureShowcase.placeholder}
       </span>
     </motion.div>
   );
@@ -81,13 +83,16 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
 }
 
 export function FeatureShowcase() {
+  const t = useDict();
+  const s = t.sections.featureShowcase;
+  const features = featuresFor(t.site);
   return (
     <section id="features" className="py-20 md:py-28">
       <Container>
         <SectionHeading
-          eyebrow="La plateforme"
-          title="Tout ce qu’il faut à vos clients pour corriger une commande"
-          subtitle="Six fonctionnalités qui transforment le chaos post-achat en libre-service."
+          eyebrow={s.eyebrow}
+          title={s.title}
+          subtitle={s.subtitle}
         />
         <div className="mt-16 flex flex-col gap-20 md:gap-28">
           {features.map((f, i) => (

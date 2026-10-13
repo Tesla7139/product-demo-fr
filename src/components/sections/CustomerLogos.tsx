@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Marquee } from "@/components/primitives/Marquee";
-import { customerLogos, brandInfo, type CustomerLogo } from "@/lib/site";
+import { customerLogos, type CustomerLogo } from "@/lib/site";
+import { useDict } from "@/i18n/I18nProvider";
 
 /**
  * One brand in the strip. Hovering (or tapping, on touch) expands the card inline
@@ -11,8 +12,9 @@ import { customerLogos, brandInfo, type CustomerLogo } from "@/lib/site";
  * only the one under the cursor expands.
  */
 function LogoItem({ logo }: { logo: CustomerLogo }) {
+  const t = useDict();
   const [open, setOpen] = useState(false);
-  const info = brandInfo[logo.name];
+  const info = t.site.brandInfo[logo.name];
   const reviewer = logo.reviewer.replace(/\s*Team$/i, "");
 
   return (
@@ -63,7 +65,7 @@ function LogoItem({ logo }: { logo: CustomerLogo }) {
             </p>
           ) : (
             <p className="text-[14px] italic leading-relaxed text-muted-foreground">
-              Client Clickpost vérifié — avis bientôt disponible.
+              {t.sections.customerLogos.reviewPending}
             </p>
           )}
           <div className="mt-2 text-[13px] font-bold text-foreground">{reviewer}</div>
@@ -77,6 +79,7 @@ function LogoItem({ logo }: { logo: CustomerLogo }) {
 }
 
 export function CustomerLogos({ embedded = false }: { embedded?: boolean }) {
+  const t = useDict();
   const items = customerLogos.map((logo) => (
     <LogoItem key={logo.src ?? logo.name} logo={logo} />
   ));
@@ -85,7 +88,7 @@ export function CustomerLogos({ embedded = false }: { embedded?: boolean }) {
 
   return (
     <Wrapper
-      aria-label="Marques qui nous font confiance"
+      aria-label={t.sections.customerLogos.ariaLabel}
       className={embedded ? "w-full border-t border-border/60 pt-10 pb-2" : "py-12"}
     >
       {/* slow the drift while the pointer is over the strip (instead of stopping)

@@ -7,6 +7,7 @@ import { DemoUrlInput } from "./demo/DemoUrlInput";
 import { DemoExperience } from "./demo/DemoExperience";
 import { useDemoData } from "@/hooks/useDemoData";
 import { fadeUp, staggerContainer } from "@/lib/motion";
+import { useDict, useHref } from "@/i18n/I18nProvider";
 
 // store URL -> path slug (its domain), e.g. "https://www.gullylabs.com/x" -> "gullylabs.com"
 function slugFor(url: string) {
@@ -14,6 +15,8 @@ function slugFor(url: string) {
 }
 
 export function Hero() {
+  const t = useDict();
+  const href = useHref();
   const { status, store, submittedUrl, generate, reset } = useDemoData();
   const [url, setUrl] = useState("");
   const [open, setOpen] = useState(false);
@@ -27,10 +30,10 @@ export function Hero() {
     return () => window.removeEventListener("demo:shake", onShake);
   }, []);
 
-  // shareable deep link: /product-demo/gullylabs.com auto-opens that store's demo
+  // shareable deep link: /{lang}/product-demo/gullylabs.com auto-opens that store's demo
   // (also supports the legacy ?store= query param)
   useEffect(() => {
-    const m = window.location.pathname.match(/^\/product-demo\/(.+)$/);
+    const m = window.location.pathname.match(/^(?:\/[a-z]{2})?\/product-demo\/(.+)$/);
     const shared = m ? decodeURIComponent(m[1]) : new URLSearchParams(window.location.search).get("store");
     if (shared) {
       setUrl(shared);
@@ -46,7 +49,7 @@ export function Hero() {
     if (!v || status === "loading") return;
     setOpen(true);
     // reflect the store in the address bar so it can be copied/shared directly
-    window.history.replaceState(null, "", `/product-demo/${slugFor(v)}`);
+    window.history.replaceState(null, "", href(`/product-demo/${slugFor(v)}`));
     await generate(v);
   };
 
@@ -54,7 +57,7 @@ export function Hero() {
     setOpen(false);
     reset();
     setUrl("");
-    window.history.replaceState(null, "", "/");
+    window.history.replaceState(null, "", href("/"));
   };
 
   return (
@@ -75,8 +78,9 @@ export function Hero() {
             className="text-balance font-semibold tracking-tight text-foreground"
             style={{ fontFamily: "var(--font-display), sans-serif", fontSize: "clamp(2rem, 5vw, 5.25rem)", lineHeight: 1.04, letterSpacing: "-0.022em" }}
           >
-            Moins de tickets support,{" "}
-            <span className="text-[#155FFF]">des milliers d’euros d’upsell en plus</span>
+            {t.sections.hero.title.before}
+            <span className="text-[#155FFF]">{t.sections.hero.title.highlight}</span>
+            {t.sections.hero.title.after}
           </motion.h1>
 
           <motion.p
@@ -84,7 +88,7 @@ export function Hero() {
             className="mt-4 text-muted-foreground md:mt-6"
             style={{ fontSize: "clamp(1rem, 1.5vw, 1.4rem)" }}
           >
-            Saisissez l’URL de votre boutique : votre démo personnalisée est prête en quelques secondes.
+            {t.sections.hero.subtitle}
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-5 w-full max-w-xl md:mt-7 lg:max-w-2xl">

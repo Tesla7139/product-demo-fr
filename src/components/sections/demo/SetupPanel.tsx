@@ -3,27 +3,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useDict } from "@/i18n/I18nProvider";
 
-const TIME_OPTIONS = [
-  "15 minutes",
-  "30 minutes",
-  "1 heure",
-  "2 heures",
-  "4 heures",
-  "6 heures",
-  "12 heures",
-  "1 jour",
-];
+// Stable ids — labels come from the dictionary (t.tour.setupPanel).
+const TIME_OPTIONS = ["min15", "min30", "h1", "h2", "h4", "h6", "h12", "d1"] as const;
+type TimeOption = (typeof TIME_OPTIONS)[number];
 
-const TABS = ["Délai", "Jusqu’à l’expédition", "Personnalisé"] as const;
+const TABS = ["window", "untilShipped", "custom"] as const;
 
-const EDIT_OPTIONS = [
-  { key: "shipping", label: "Adresse de livraison" },
-  { key: "contact", label: "Coordonnées de contact" },
-  { key: "order", label: "Contenu de la commande" },
-  { key: "discount", label: "Codes promo" },
-  { key: "cancel", label: "Annulation" },
-] as const;
+const EDIT_OPTIONS = ["shipping", "contact", "order", "discount", "cancel"] as const;
 
 /** Merchant "enable order editing" setup card (default window: 15 minutes). */
 export function SetupPanel({
@@ -37,8 +25,9 @@ export function SetupPanel({
   onNext?: () => void;
   className?: string;
 }) {
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Délai");
-  const [timeLimit, setTimeLimit] = useState("15 minutes");
+  const t = useDict().tour.setupPanel;
+  const [tab, setTab] = useState<(typeof TABS)[number]>("window");
+  const [timeLimit, setTimeLimit] = useState<TimeOption>("min15");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [allowed, setAllowed] = useState<Record<string, boolean>>({
     shipping: true,
@@ -53,35 +42,35 @@ export function SetupPanel({
       className={`w-full max-w-md rounded-2xl border border-border bg-white p-6 text-left shadow-soft-xl ${className ?? ""}`}
     >
       <h3 className="text-base font-bold text-neutral-900">
-        Laissez vos clients modifier leur commande après le paiement
+        {t.title}
       </h3>
 
       <div className="mt-4 flex items-center gap-2 rounded-lg bg-emerald-100 px-3 py-3 text-sm font-medium text-emerald-800">
         <Check className="size-4" strokeWidth={3} />
-        La modification de commande est activée pour vos clients.
+        {t.enabled}
       </div>
 
       <h4 className="mt-6 text-sm font-bold text-neutral-900">
-        Choisissez le délai accordé à vos clients pour modifier leur commande
+        {t.selectWindow}
       </h4>
       <div className="mt-3 flex flex-wrap gap-2">
-        {TABS.map((t) => (
+        {TABS.map((id) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={id}
+            onClick={() => setTab(id)}
             className={`rounded-md border px-4 py-2 text-sm font-semibold transition-colors ${
-              tab === t
+              tab === id
                 ? "border-neutral-300 bg-neutral-200 text-neutral-900"
                 : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
             }`}
           >
-            {t}
+            {t.tabs[id]}
           </button>
         ))}
       </div>
 
       <AnimatePresence initial={false}>
-        {tab === "Délai" && (
+        {tab === "window" && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -89,7 +78,7 @@ export function SetupPanel({
             className="overflow-visible"
           >
             <div className="mt-4">
-              <span className="text-sm text-neutral-500">Délai de modification</span>
+              <span className="text-sm text-neutral-500">{t.selectTimeLimit}</span>
               <div className="relative mt-1.5">
                 <button
                   onClick={() => setDropdownOpen((v) => !v)}
@@ -97,7 +86,7 @@ export function SetupPanel({
                     dropdownOpen ? "border-blue-500 ring-2 ring-blue-500/30" : "border-border"
                   }`}
                 >
-                  {timeLimit}
+                  {t.timeOptions[timeLimit]}
                   <ChevronsUpDown className="size-4 text-neutral-500" />
                 </button>
                 <AnimatePresence>
@@ -122,7 +111,7 @@ export function SetupPanel({
                                 : "text-neutral-800 hover:bg-neutral-100"
                             }`}
                           >
-                            {opt}
+                            {t.timeOptions[opt]}
                           </button>
                         </li>
                       ))}
@@ -135,14 +124,14 @@ export function SetupPanel({
         )}
       </AnimatePresence>
 
-      <h4 className="mt-6 text-sm font-bold text-neutral-900">Vos clients peuvent modifier :</h4>
+      <h4 className="mt-6 text-sm font-bold text-neutral-900">{t.allowEdit}</h4>
       <div className="mt-3 flex flex-col gap-3">
-        {EDIT_OPTIONS.map((o) => {
-          const on = allowed[o.key];
+        {EDIT_OPTIONS.map((key) => {
+          const on = allowed[key];
           return (
             <button
-              key={o.key}
-              onClick={() => setAllowed((p) => ({ ...p, [o.key]: !p[o.key] }))}
+              key={key}
+              onClick={() => setAllowed((p) => ({ ...p, [key]: !p[key] }))}
               className="flex items-center gap-3 text-left text-sm text-neutral-800"
             >
               <span
@@ -152,7 +141,7 @@ export function SetupPanel({
               >
                 {on && <Check className="size-4 text-white" strokeWidth={3} />}
               </span>
-              {o.label}
+              {t.editOptions[key]}
             </button>
           );
         })}
@@ -163,20 +152,20 @@ export function SetupPanel({
           onClick={onBack}
           className="rounded-md px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
         >
-          Retour
+          {t.back}
         </button>
         <div className="flex gap-2">
           <button
             onClick={onSkip ?? onNext}
             className="rounded-md border border-border px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
           >
-            Passer
+            {t.skip}
           </button>
           <button
             onClick={onNext}
             className="rounded-md bg-neutral-900 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-neutral-800 active:scale-[0.98]"
           >
-            Suivant
+            {t.next}
           </button>
         </div>
       </div>

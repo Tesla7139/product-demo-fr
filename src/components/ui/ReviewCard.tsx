@@ -1,7 +1,10 @@
+"use client";
+
 import { Star } from "lucide-react";
 import { Review } from "@/lib/reviews";
-import { customerLogos, extraReviewLogos, brandInfo } from "@/lib/site";
-import { reviewDateFr } from "@/lib/utils";
+import { customerLogos, extraReviewLogos } from "@/lib/site";
+import { parseReviewDate } from "@/lib/utils";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
 
 // Brand logos, keyed by lowercase name: the strip logos + the /reviews-only extras.
 const LOGOS = [
@@ -23,7 +26,9 @@ function findLogo(name: string): string | undefined {
 export function ReviewCard({ review }: { review: Review }) {
   const { name, date, content } = review;
   const logo = findLogo(name);
-  const info = brandInfo[name];
+  const t = useDict();
+  const { date: fmtDate } = useFormat();
+  const info = t.site.brandInfo[name];
 
   return (
     <div className="w-full rounded-2xl border border-black/10 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
@@ -60,7 +65,7 @@ export function ReviewCard({ review }: { review: Review }) {
                 {info.tier}
               </span>
             )}
-            <span className="text-[12.5px] font-medium text-black/40">{reviewDateFr(date)}</span>
+            <span className="text-[12.5px] font-medium text-black/40">{fmtDate(parseReviewDate(date))}</span>
           </div>
         </div>
       </div>

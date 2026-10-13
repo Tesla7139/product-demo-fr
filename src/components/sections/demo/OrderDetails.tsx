@@ -2,6 +2,7 @@
 
 import { CreditCard } from "lucide-react";
 import type { Addr } from "./DemoMock";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
 
 function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -26,22 +27,25 @@ export function OrderDetails({
   country: string;
   amount: string;
 }) {
+  const dict = useDict();
+  const t = dict.checkout.orderDetails;
+  const { fill } = useFormat();
   const lines = [
     `${addr.first} ${addr.last}`,
     addr.line1,
-    `${addr.zip} ${addr.city}`, // French order: postal code first, no region
+    fill(dict.demo.cityLine, { city: addr.city, state: addr.state, zip: addr.zip }),
     country,
     phone,
   ];
 
   return (
     <div className="rounded-xl border border-border p-5">
-      <h3 className="text-[17px] font-bold text-neutral-900">Détails de la commande</h3>
+      <h3 className="text-[17px] font-bold text-neutral-900">{t.title}</h3>
       <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
-        <Block label="Coordonnées">
+        <Block label={t.contact}>
           <div>{email}</div>
         </Block>
-        <Block label="Moyen de paiement">
+        <Block label={t.payment}>
           <div className="flex items-center gap-2">
             <span className="flex h-6 w-9 shrink-0 items-center justify-center rounded border border-border bg-neutral-50">
               <CreditCard className="size-4 text-neutral-400" />
@@ -49,14 +53,14 @@ export function OrderDetails({
             <span className="text-neutral-700">•••• 1 · {amount}</span>
           </div>
         </Block>
-        <Block label="Adresse de livraison">
+        <Block label={t.shippingAddress}>
           {lines.map((l, i) => <div key={i}>{l}</div>)}
         </Block>
-        <Block label="Adresse de facturation">
+        <Block label={t.billingAddress}>
           {lines.map((l, i) => <div key={i}>{l}</div>)}
         </Block>
-        <Block label="Mode de livraison">
-          <div>Standard</div>
+        <Block label={t.shippingMethod}>
+          <div>{t.standard}</div>
         </Block>
       </div>
     </div>

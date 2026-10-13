@@ -2,10 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
-
-const LOADING_STEPS = ["Analyse de votre boutique…", "Récupération de vos produits…", "Création de votre démo…"];
+import { useDict } from "@/i18n/I18nProvider";
 
 export function DemoSkeleton({ step }: { step: number }) {
+  const steps = useDict().checkout.demoSkeleton.steps;
   return (
     <div className="mx-auto w-full max-w-md overflow-hidden rounded-xl border border-border bg-card p-5 shadow-soft-xl">
       <div className="flex items-center gap-3">
@@ -35,7 +35,7 @@ export function DemoSkeleton({ step }: { step: number }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
           >
-            {LOADING_STEPS[step]}
+            {steps[step]}
           </motion.span>
         </AnimatePresence>
       </div>

@@ -6,20 +6,17 @@ import { useRef } from "react";
 import { MapPin } from "lucide-react";
 import { Container } from "@/components/primitives/Container";
 import { SectionHeading } from "@/components/primitives/SectionHeading";
-import { globeEvents } from "@/lib/site";
-import { num } from "@/lib/format";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
 
 /** Live-ticking counters that read as the product working across the globe. */
 function LiveCounter({
   base,
-  prefix = "",
-  suffix = "",
+  format,
   label,
   rate,
 }: {
   base: number;
-  prefix?: string;
-  suffix?: string;
+  format: (n: number) => string;
   label: string;
   rate: number;
 }) {
@@ -36,9 +33,7 @@ function LiveCounter({
   return (
     <div ref={ref} className="flex flex-col gap-1">
       <span className="text-h2 tabular-nums" style={{ fontSize: "clamp(1.8rem,3vw,2.5rem)" }}>
-        {prefix}
-        {num(n)}
-        {suffix}
+        {format(n)}
       </span>
       <span className="text-sm text-muted-foreground">{label}</span>
     </div>
@@ -46,6 +41,7 @@ function LiveCounter({
 }
 
 function EventTicker() {
+  const globeEvents = useDict().demo.globeEvents;
   const [i, setI] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setI((v) => (v + 1) % globeEvents.length), 2400);
@@ -76,14 +72,17 @@ function EventTicker() {
 }
 
 export function GlobalReach() {
+  const s = useDict().sections.globalReach;
+  const { num, money } = useFormat();
+  const plain = (n: number) => num(n);
   return (
     <section className="relative py-24 md:py-32">
       <Container>
         <div className="mx-auto max-w-2xl text-center text-scrim rounded-3xl p-4">
           <SectionHeading
-            eyebrow="Chaque région, chaque commande"
-            title="Des commandes sauvées partout en Europe et au-delà"
-            subtitle="Chaque signal, c’est un client qui se débrouille seul au lieu d’ouvrir un ticket."
+            eyebrow={s.eyebrow}
+            title={s.title}
+            subtitle={s.subtitle}
           />
           <div className="mt-6 flex justify-center">
             <EventTicker />
@@ -91,9 +90,9 @@ export function GlobalReach() {
         </div>
 
         <div className="mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-10 sm:grid-cols-3">
-          <LiveCounter base={128430} label="Modifications traitées" rate={4} />
-          <LiveCounter base={742900} suffix={" €"} label="Revenus d’upsell" rate={120} />
-          <LiveCounter base={31280} label="Annulations évitées" rate={2} />
+          <LiveCounter base={128430} format={plain} label={s.editsHandled} rate={4} />
+          <LiveCounter base={742900} format={(n) => money(n)} label={s.upsellRevenue} rate={120} />
+          <LiveCounter base={31280} format={plain} label={s.cancellationsRecovered} rate={2} />
         </div>
       </Container>
     </section>

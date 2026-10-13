@@ -6,7 +6,7 @@ import type { DemoStore, DemoProduct } from "@/lib/site";
 import { TooGoodToMiss } from "./TooGoodToMiss";
 import { DemoImg } from "./DemoImg";
 
-import { money, DEFAULT_CURRENCY } from "@/lib/format";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
 
 function Img({ src, className }: { src?: string | null; className: string }) {
   return <DemoImg src={src} className={className} />;
@@ -18,11 +18,13 @@ function AddCard({
 }: {
   p: DemoProduct;
   brand: string;
-  currency: string;
+  currency?: string;
   onAdd: (p: DemoProduct, discounted: boolean) => void;
   btnRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   const [qty, setQty] = useState(0);
+  const t = useDict().mocks.thankYouUpsell;
+  const { money } = useFormat();
   const fmt = (n: number) => money(n, currency);
   const add = () => { onAdd(p, false); setQty((q) => q + 1); };
   return (
@@ -39,13 +41,13 @@ function AddCard({
           className="mt-2.5 w-full rounded-md py-2 text-[13px] font-semibold text-white transition-all hover:brightness-110"
           style={{ background: brand }}
         >
-          Ajouter
+          {t.addToOrder}
         </button>
       ) : (
         <div className="mt-2.5 flex items-center justify-between rounded-md" style={{ border: `1.5px solid ${brand}` }}>
-          <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="flex size-8 items-center justify-center text-[18px] font-bold leading-none" style={{ color: brand }} aria-label="Diminuer">−</button>
+          <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="flex size-8 items-center justify-center text-[18px] font-bold leading-none" style={{ color: brand }} aria-label={t.decrease}>−</button>
           <span className="text-[13px] font-bold text-neutral-900">{qty}</span>
-          <button onClick={add} className="flex size-8 items-center justify-center text-[18px] font-bold leading-none" style={{ color: brand }} aria-label="Augmenter">+</button>
+          <button onClick={add} className="flex size-8 items-center justify-center text-[18px] font-bold leading-none" style={{ color: brand }} aria-label={t.increase}>+</button>
         </div>
       )}
     </div>
@@ -79,7 +81,9 @@ export function ThankYouUpsell({
   shipBoxRef?: React.RefObject<HTMLDivElement | null>;
   shipAddBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
-  const fmt = (n: number) => money(n, store.currency || DEFAULT_CURRENCY);
+  const t = useDict().mocks.thankYouUpsell;
+  const { money, fill } = useFormat();
+  const fmt = (n: number) => money(n, store.currency || undefined);
   const featured = products[products.length - 1] ?? products[0];
 
   const showShipBar = typeof subtotal === "number" && typeof freeShipAt === "number" && freeShipAt > 0;
@@ -93,7 +97,7 @@ export function ThankYouUpsell({
   const bestSellers = pool.slice(0, half);
   const moreItems = pool.slice(half).length ? pool.slice(half) : pool;
 
-  const currency = store.currency || DEFAULT_CURRENCY;
+  const currency = store.currency || undefined;
 
   return (
     <div className="flex flex-col gap-4">
@@ -101,7 +105,7 @@ export function ThankYouUpsell({
       {showShipBar && (
         <div ref={shipBoxRef} className="rounded-xl border border-border p-4">
           <h4 className="text-[15px] font-bold text-neutral-900">
-            {unlocked ? "Vous avez débloqué la livraison offerte !" : "Débloquez la livraison offerte en ajoutant nos best-sellers."}
+            {unlocked ? t.unlocked : t.unlockPrompt}
           </h4>
           <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-neutral-200">
             <div
@@ -111,10 +115,12 @@ export function ThankYouUpsell({
           </div>
           <p className="mt-2 text-[13.5px] text-neutral-600">
             {unlocked ? (
-              <span className="font-semibold text-emerald-600">Livraison offerte appliquée à votre commande.</span>
+              <span className="font-semibold text-emerald-600">{t.applied}</span>
             ) : (
               <>
-                <span className="font-bold text-neutral-900">{fmt(remaining)}</span> de plus pour profiter de la livraison offerte.
+                {t.away.before}
+                <span className="font-bold text-neutral-900">{fill(t.away.amount, { amount: fmt(remaining) })}</span>
+                {t.away.after}
               </>
             )}
           </p>
@@ -130,7 +136,7 @@ export function ThankYouUpsell({
       <div ref={gridRef} className="rounded-xl border border-border p-4">
         <div className="mb-3 flex items-center gap-2">
           <Plus className="size-4 text-neutral-500" />
-          <h4 className="text-[15px] font-bold text-neutral-900">Ajouter d’autres articles</h4>
+          <h4 className="text-[15px] font-bold text-neutral-900">{t.addMore}</h4>
         </div>
         <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2">
           {moreItems.map((p, i) => (
@@ -142,7 +148,8 @@ export function ThankYouUpsell({
           className="mt-3 w-full rounded-md py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-110"
           style={{ background: brand }}
         >
-          Voir tous les produits
+          {t.exploreAll}
+
         </button>
       </div>
 

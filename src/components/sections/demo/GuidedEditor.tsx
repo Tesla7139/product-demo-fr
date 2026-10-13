@@ -11,6 +11,8 @@ import { EUWithdrawalMock } from "./EUWithdrawalMock";
 import { TourOverlay, type TourRect } from "./TourOverlay";
 import { ShopifyAppStoreBadge } from "./ShopifyAppStoreBadge";
 import { BuiltForShopifyBadge } from "./BuiltForShopifyBadge";
+import { useDict, useFormat } from "@/i18n/I18nProvider";
+import type { Dict } from "@/i18n/messages/en";
 
 const APP_URL = "https://apps.shopify.com/clickpost-order-edit-cancel";
 
@@ -18,40 +20,47 @@ type Tab = "editing" | "upsell" | "address" | "cancel" | "eu-withdrawal";
 type Tour = "editing" | "upsell" | "address" | "eu-withdrawal";
 type Section = "contact" | "shipping" | "order" | "discount" | "cancel";
 
-/** Address the guided tour drops into the form to demonstrate an edit. */
-const CORRECTED_ADDRESS: Partial<Addr> = { line1: "42 Cours Émile Zola", city: "Villeurbanne", zip: "69100" };
+// The address the guided tour drops into the form comes from t.demo.tourAddress.
+
+type GE = Dict["tour"]["guidedEditor"];
+/** Dictionary key for each tab (features, finale copy). */
+const TAB_KEY: Record<Tab, keyof GE["features"]> = {
+  editing: "editing",
+  upsell: "upsell",
+  address: "address",
+  "eu-withdrawal": "euWithdrawal",
+  cancel: "cancel",
+};
 
 /** Left-rail features, each with an icon. */
-const NAV_FEATURES: { key: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { key: "editing", label: "Modification de commande", icon: Pencil },
-  { key: "upsell", label: "Upsell post-achat", icon: TrendingUp },
-  { key: "address", label: "Validation d’adresse", icon: MapPin },
-  { key: "eu-withdrawal", label: "Rétractation UE", icon: ShieldCheck },
+const NAV_FEATURES: { key: Tab; icon: React.ComponentType<{ className?: string }> }[] = [
+  { key: "editing", icon: Pencil },
+  { key: "upsell", icon: TrendingUp },
+  { key: "address", icon: MapPin },
+  { key: "eu-withdrawal", icon: ShieldCheck },
 ];
 
 
 type ActionPill = {
   key: "tour" | Section;
-  label: string;
   icon?: React.ComponentType<{ className?: string }>;
   section?: Section;
 };
 
 const EDITING_PILLS: ActionPill[] = [
-  { key: "tour", label: "Visite guidée", icon: Sparkles },
-  { key: "shipping", label: "Adresse", section: "shipping" },
-  { key: "order", label: "Commande", section: "order" },
-  { key: "contact", label: "Contact", section: "contact" },
-  { key: "discount", label: "Code promo", section: "discount" },
-  { key: "cancel", label: "Annulation", section: "cancel" },
+  { key: "tour", icon: Sparkles },
+  { key: "shipping", section: "shipping" },
+  { key: "order", section: "order" },
+  { key: "contact", section: "contact" },
+  { key: "discount", section: "discount" },
+  { key: "cancel", section: "cancel" },
 ];
 
 /* ----------------------------- tour step defs ----------------------------- */
 type TourStepDef = {
   id: string;
-  title: string;
-  desc: string;
-  cta: string;
+  /** callout copy key in t.tour.guidedEditor.steps (omit for card-less steps) */
+  text?: keyof GE["steps"];
   measureDelayMs?: number;
   clickThrough?: boolean;
   /** show the red "tap here" dot — only on steps where you tap the highlighted element */
@@ -81,8 +90,8 @@ type TourStepDef = {
   autoClickId?: string;
   /** end-of-feature conversion step: blurred backdrop + centered CTA linking to the app */
   outcome?: boolean;
-  outcomeHeadline?: string;
-  outcomeButton?: string;
+  /** use the EU-withdrawal outcome copy (t.tour.guidedEditor.euOutcome) */
+  euOutcome?: boolean;
   /** rail card highlighted on this outcome step + tour to start on advance ("null" = finish) */
   nextTour?: Tour | null;
   /** label shown after "up next:" on the outcome card */
@@ -94,27 +103,20 @@ type TourStepDef = {
 const EDITING_TOUR_STEPS: TourStepDef[] = [
   {
     id: "window",
-    title: "Votre fenêtre de modification",
-    desc: "Vos clients modifient leur commande pendant le délai que vous fixez — sans le moindre ticket support.",
-    cta: "Suivant",
+    text: "window",
   },
   // ---- Address: ONE persistent box. The shipping section opens with the dot on
   // the address; tapping it drops in the corrected address; the dot then shifts
   // to the Update button; tapping it syncs the change. ----
   {
     id: "addr-show",
-    title: "Modifications en autonomie",
-    desc: "L’adresse change en quelques secondes. Touchez-la pour insérer la bonne, puis validez : elle se synchronise avec votre boutique.",
-    cta: "Suivant",
+    text: "addrShow",
     measureDelayMs: 520,
     spotlightId: "shipping-box", // whole address section, including the Update button
     dotId: "addr-block", // point at the address the shopper taps to fix
   },
   {
     id: "addr-update",
-    title: "",
-    desc: "",
-    cta: "Suivant",
     measureDelayMs: 700, // let the corrected address drop in before pointing at Update
     noScroll: true,
     hideCard: true, // no 3/7 box — the dot just shifts to the Update button
@@ -125,9 +127,7 @@ const EDITING_TOUR_STEPS: TourStepDef[] = [
   // ---- Order: ONE box; dot on + then (no new box) on Update your order. ----
   {
     id: "order-add",
-    title: "Ajouter ou changer des articles",
-    desc: "Un de plus, un échange, un retrait. Touchez + pour ajuster la quantité, puis mettez la commande à jour — le nouveau total s’affiche aussitôt.",
-    cta: "Suivant",
+    text: "orderAdd",
     measureDelayMs: 640,
     spotlightId: "order-row", // whole order section, including the Update button
     dotId: "order-plus",
@@ -136,9 +136,6 @@ const EDITING_TOUR_STEPS: TourStepDef[] = [
   },
   {
     id: "order-apply",
-    title: "",
-    desc: "",
-    cta: "Suivant",
     measureDelayMs: 340,
     hideCard: true,
     spotlightId: "order-row",
@@ -147,9 +144,6 @@ const EDITING_TOUR_STEPS: TourStepDef[] = [
   },
   {
     id: "pay",
-    title: "",
-    desc: "",
-    cta: "Suivant",
     measureDelayMs: 360,
     hideCard: true, // the balance-due panel explains itself — just point at Pay
     spotlightId: "pay-panel",
@@ -159,9 +153,6 @@ const EDITING_TOUR_STEPS: TourStepDef[] = [
   {
     // end of the order-editing tour → conversion screen
     id: "editing-finish",
-    title: "",
-    desc: "",
-    cta: "Terminer",
     measureDelayMs: 320,
     outcome: true,
     finalStep: true,
@@ -171,9 +162,7 @@ const EDITING_TOUR_STEPS: TourStepDef[] = [
 const UPSELL_TOUR_STEPS: TourStepDef[] = [
   {
     id: "upsell-offer",
-    title: "Ajout en un clic",
-    desc: "Une offre unique dès le paiement — un clic et c’est débité sur la carte enregistrée, sans repasser par le paiement.",
-    cta: "Suivant",
+    text: "upsellOffer",
     measureDelayMs: 320,
     spotlightId: "upsell-offer",
     dotId: "upsell-add",
@@ -181,9 +170,7 @@ const UPSELL_TOUR_STEPS: TourStepDef[] = [
   },
   {
     id: "ty-ship",
-    title: "Cap sur la livraison offerte",
-    desc: "Sur la page de suivi de commande, vos clients voient qu’un seul best-seller les sépare de la livraison offerte. Un clic et il rejoint leur commande.",
-    cta: "Suivant",
+    text: "tyShip",
     measureDelayMs: 420,
     spotlightId: "ty-ship",
     dotId: "ty-ship-add", // tap the Add button in the free-shipping bucket
@@ -195,9 +182,7 @@ const UPSELL_TOUR_STEPS: TourStepDef[] = [
   },
   {
     id: "ty-show",
-    title: "Encore plus, ici même",
-    desc: "Suggérez aussi des compléments sur la page de suivi de commande. Un clic et c’est ajouté — le solde se règle à la fin.",
-    cta: "Suivant",
+    text: "tyShow",
     measureDelayMs: 420,
     spotlightId: "ty-grid",
     dotId: "ty-add",
@@ -209,9 +194,6 @@ const UPSELL_TOUR_STEPS: TourStepDef[] = [
   {
     // added item creates a balance — pay it (same as order editing) before moving on
     id: "ty-pay",
-    title: "",
-    desc: "",
-    cta: "Suivant",
     measureDelayMs: 460,
     hideCard: true,
     spotlightId: "pay-panel",
@@ -221,9 +203,6 @@ const UPSELL_TOUR_STEPS: TourStepDef[] = [
   {
     // end of the post-purchase upsell tour → conversion screen
     id: "upsell-finish",
-    title: "",
-    desc: "",
-    cta: "Terminer",
     measureDelayMs: 320,
     outcome: true,
     finalStep: true,
@@ -233,9 +212,7 @@ const UPSELL_TOUR_STEPS: TourStepDef[] = [
 const ADDRESS_TOUR_STEPS: TourStepDef[] = [
   {
     id: "addr-flagged",
-    title: "Adresses erronées, interceptées",
-    desc: "Les adresses incomplètes ou non livrables sont signalées avant l’expédition — votre client accepte l’adresse corrigée en un clic.",
-    cta: "Suivant",
+    text: "addrFlagged",
     measureDelayMs: 420,
     spotlightId: "addr-flagged",
     dotId: "addr-validate", // one red dot only — straight on the validate button
@@ -244,9 +221,7 @@ const ADDRESS_TOUR_STEPS: TourStepDef[] = [
   },
   {
     id: "addr-update",
-    title: "Enregistrez l’adresse corrigée",
-    desc: "Un clic pour fixer l’adresse vérifiée sur la commande — zéro échec de livraison, zéro retour à l’expéditeur.",
-    cta: "Suivant",
+    text: "addrUpdate",
     measureDelayMs: 460, // wait for the button to relabel to "Update Shipping Address"
     spotlightId: "addr-flagged", // highlight the full corrected address block…
     dotId: "addr-validate", // …with the red dot on the Update Shipping Address button
@@ -256,9 +231,6 @@ const ADDRESS_TOUR_STEPS: TourStepDef[] = [
   {
     // end of the address validation tour → conversion screen
     id: "address-finish",
-    title: "",
-    desc: "",
-    cta: "Terminer",
     measureDelayMs: 320,
     outcome: true,
     finalStep: true,
@@ -268,9 +240,7 @@ const ADDRESS_TOUR_STEPS: TourStepDef[] = [
 const EU_WITHDRAWAL_TOUR_STEPS: TourStepDef[] = [
   {
     id: "eu-card",
-    title: "Rétractation UE, intégrée",
-    desc: "Dès le 19 juin 2026, vos clients européens doivent disposer d’une fonction de rétractation claire. Elle est là, sur la page de suivi de commande : un clic, une confirmation, et l’accusé de réception part aussitôt par e-mail.",
-    cta: "Suivant",
+    text: "euCard",
     measureDelayMs: 320,
     spotlightId: "eu-card",
     dotId: "eu-withdraw-row", // one red dot — opens the withdrawal form (empty)
@@ -281,9 +251,6 @@ const EU_WITHDRAWAL_TOUR_STEPS: TourStepDef[] = [
   {
     // details type themselves in (empty → filled), then auto-advance to Send
     id: "eu-fill",
-    title: "",
-    desc: "",
-    cta: "Suivant",
     measureDelayMs: 360,
     hideCard: true,
     spotlightId: "eu-withdraw-row",
@@ -292,9 +259,6 @@ const EU_WITHDRAWAL_TOUR_STEPS: TourStepDef[] = [
   },
   {
     id: "eu-submit",
-    title: "",
-    desc: "",
-    cta: "Suivant",
     measureDelayMs: 520,
     hideCard: true, // no new box — dot moves to the submit button
     spotlightId: "eu-withdraw-row", // the form area — stays framed as it becomes the confirmation
@@ -303,13 +267,10 @@ const EU_WITHDRAWAL_TOUR_STEPS: TourStepDef[] = [
   },
   {
     id: "eu-finish",
-    title: "Rétractation UE, prête à l’emploi",
-    desc: "Un parcours de rétractation conforme et bien orchestré, qui bloque la commande et laisse la main à votre équipe.",
-    cta: "Terminer",
+    text: "euFinish",
     measureDelayMs: 320,
     outcome: true,
-    outcomeHeadline: "Rétractation UE, prête à l’emploi",
-    outcomeButton: "Activer la rétractation UE sur ma boutique",
+    euOutcome: true,
     nextTour: null,
     finalStep: true,
   },
@@ -325,13 +286,8 @@ const TOUR_STEPS: Record<Tour, TourStepDef[]> = {
 // Order features run in — the finale "Watch next" CTA chains to the next one.
 const TOUR_ORDER: Tour[] = ["editing", "upsell", "address", "eu-withdrawal"];
 
-// One-line pitch shown on the "up next" hand-off box before each feature's tour.
-const FEATURE_INTRO: Record<Tour, string> = {
-  editing: "Vos clients modifient eux-mêmes leur commande — échanges, ajouts, quantités — sans ticket support.",
-  upsell: "Des offres en un clic juste après le paiement, qui font grimper le panier moyen sans un euro de pub en plus.",
-  address: "Interceptez les adresses non livrables avant l’expédition — moins d’échecs de livraison et de retours.",
-  "eu-withdrawal": "Automatisez les demandes de rétractation UE et restez conforme, sans aucune saisie manuelle.",
-};
+// The one-line pitch shown on the "up next" hand-off box before each feature's
+// tour lives in t.tour.guidedEditor.intros.
 
 /** Clickpost "Order Edit & Cancel" app icon — official logo from /public. */
 function ClickpostMark({ className }: { className?: string }) {
@@ -341,46 +297,19 @@ function ClickpostMark({ className }: { className?: string }) {
   );
 }
 
-/** Per-feature CTA copy: a store-specific headline verb + one real brand proof point. */
-const FINALE: Record<Tab, { action: string; brand: string; stat: string }> = {
-  editing: {
-    action: "réduire vos tickets support",
-    brand: "Doonails",
-    stat: "a évité 58 % des tickets « Où est ma commande ? » et économisé 12 000 $ par mois.",
-  },
-  upsell: {
-    action: "booster votre panier moyen",
-    brand: "Mars by GHC",
-    stat: "a augmenté son panier moyen de 23 % et généré 18 000 $ d’upsell post-achat ce mois-ci.",
-  },
-  address: {
-    action: "en finir avec les échecs de livraison",
-    brand: "World of Asaya",
-    stat: "a réduit ses retours à l’expéditeur de 25 % en corrigeant les adresses avant l’expédition.",
-  },
-  "eu-withdrawal": {
-    action: "rester conforme aux règles UE",
-    brand: "French Accent",
-    stat: "a automatisé ses demandes de rétractation UE et reste conforme, sans effort supplémentaire.",
-  },
-  cancel: {
-    action: "maîtriser les annulations",
-    brand: "Gladful",
-    stat: "a vu ses annulations chuter dès que ses clients ont pu modifier eux-mêmes leur commande.",
-  },
-};
-
-
 /** The "Ready to try…" conversion box — desktop shows it in the left rail; mobile
  *  shows it at the end (below the demo). */
 function ReadyToTryBox({ tab, className }: { tab: Tab; className?: string }) {
+  const t = useDict().tour.guidedEditor;
+  const { fill } = useFormat();
+  const ready = t.readyToTry;
   return (
     <div className={`relative flex w-full max-w-sm flex-col gap-3.5 overflow-hidden rounded-2xl border border-neutral-200/90 bg-white/70 p-5 text-center shadow-[0_1px_2px_rgba(15,15,25,0.06),0_18px_44px_-14px_rgba(15,15,25,0.30)] backdrop-blur-md ${className ?? ""}`}>
       <h3
         className="text-balance text-[18px] font-semibold leading-[1.15] tracking-tight text-foreground"
         style={{ fontFamily: "var(--font-display), sans-serif" }}
       >
-        Prêt à {FINALE[tab].action} sur <span className="text-[#155FFF]">votre boutique</span> ?
+        {fill(ready.before, { action: t.finale[TAB_KEY[tab]].action })}<span className="text-[#155FFF]">{ready.highlight}</span>{ready.after}
       </h3>
       <div className="flex items-center justify-center gap-2.5">
         <ClickpostMark className="size-10 shrink-0 rounded-[9px] shadow-sm" />
@@ -396,7 +325,14 @@ function ReadyToTryBox({ tab, className }: { tab: Tab; className?: string }) {
 
 /* ----------------------------- guided editor ----------------------------- */
 export function GuidedEditor({ store }: { store: DemoStore }) {
-  const domain = `${(store.brandName || "votreboutique").toLowerCase().replace(/[^a-z0-9]+/g, "")}.fr`;
+  const dict = useDict();
+  const t = dict.tour.guidedEditor;
+  const { fill } = useFormat();
+  const CORRECTED_ADDRESS: Partial<Addr> = dict.demo.tourAddress;
+  const featureLabel = (k: Tab) => t.features[TAB_KEY[k]];
+  const domain = store.brandName
+    ? fill(t.domainPattern, { name: store.brandName.toLowerCase().replace(/[^a-z0-9]+/g, "") })
+    : dict.demo.store.domain;
   const [tab, setTab] = useState<Tab>("editing");
   const [featureMenuOpen, setFeatureMenuOpen] = useState(false); // mobile feature dropdown
   const [activePill, setActivePill] = useState<ActionPill["key"]>("tour");
@@ -478,8 +414,8 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
   const curStep = activeTour ? steps[tourStep] : null;
   // the feature that runs after the current one (for the finale's "Watch next" CTA)
   const nextTourKey = activeTour ? TOUR_ORDER[TOUR_ORDER.indexOf(activeTour) + 1] : undefined;
-  const nextFeatureLabel = nextTourKey ? NAV_FEATURES.find((n) => n.key === nextTourKey)?.label : undefined;
-  const nextFeatureDesc = nextTourKey ? FEATURE_INTRO[nextTourKey] : undefined;
+  const nextFeatureLabel = nextTourKey ? featureLabel(nextTourKey) : undefined;
+  const nextFeatureDesc = nextTourKey ? t.intros[TAB_KEY[nextTourKey] as keyof GE["intros"]] : undefined;
   // Progress numbering — count only the steps that show a box (skip hideCard /
   // outcome steps), running continuously across the chained journey.
   const isBoxStep = (s: TourStepDef) => !s.hideCard && !s.outcome;
@@ -856,7 +792,7 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
               <img src="/clickpost-wordmark.png" alt="Clickpost" className="h-6 w-auto" />
             </div>
             <h3 className="mb-5 font-serif text-[1.3rem] font-bold italic leading-tight tracking-tight text-foreground">
-              Cliquez sur une fonctionnalité pour la voir en action.
+              {t.heading}
             </h3>
             {/* mobile: custom feature dropdown (desktop uses the vertical rail below) */}
             <div className="relative lg:hidden">
@@ -866,7 +802,7 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
                 aria-expanded={featureMenuOpen}
                 className="flex w-full items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-left text-[14px] font-semibold text-neutral-900 shadow-sm"
               >
-                <span>{NAV_FEATURES.find((n) => n.key === tab)?.label ?? "Choisir une fonctionnalité"}</span>
+                <span>{NAV_FEATURES.some((n) => n.key === tab) ? featureLabel(tab) : t.chooseFeature}</span>
                 <ChevronDown className={`size-4 shrink-0 text-[#155FFF] transition-transform ${featureMenuOpen ? "rotate-180" : ""}`} />
               </button>
               {featureMenuOpen && (
@@ -882,7 +818,7 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
                           onClick={() => { selectFeature(n.key); setFeatureMenuOpen(false); }}
                           className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-[14px] font-semibold transition-colors ${active ? "bg-[#155FFF] text-white" : "text-neutral-800 hover:bg-neutral-50"}`}
                         >
-                          <span>{n.label}</span>
+                          <span>{featureLabel(n.key)}</span>
                           {active && <Check className="size-4 shrink-0" strokeWidth={3} />}
                         </button>
                       );
@@ -906,7 +842,7 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
                       : "bg-white text-neutral-800 ring-1 ring-neutral-200 hover:-translate-y-0.5 hover:ring-neutral-300 hover:shadow-md"
                   }`}
                 >
-                  <span className="flex-1">{n.label}</span>
+                  <span className="flex-1">{featureLabel(n.key)}</span>
                   <ChevronRight
                     className={`size-4 shrink-0 transition-transform ${
                       active ? "text-[#155FFF]" : "text-neutral-300 group-hover:translate-x-0.5 group-hover:text-[#155FFF]"
@@ -947,13 +883,14 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
                 transition={{ duration: 1.8, ease: "easeInOut", repeat: Infinity, repeatDelay: 1.2 }}
               />
               <Play className="relative z-10 size-3 fill-current" />
-              <span className="relative z-10">Lancer la visite</span>
+              <span className="relative z-10">{t.startTour}</span>
             </button>
 
             {/* Order-edit sub-tabs — Thank you page / Order status page */}
             {tab === "editing" && (
               <div className="flex shrink-0 items-center gap-1 rounded-full bg-white/70 p-1 shadow-soft-md ring-1 ring-neutral-200">
-                {([["thankyou", "Page de remerciement"], ["orderstatus", "Suivi de commande"]] as const).map(([key, label]) => {
+                {(["thankyou", "orderstatus"] as const).map((key) => {
+                  const label = t.editViews[key];
                   const active = editView === key;
                   return (
                     <button
@@ -973,7 +910,8 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
             {/* Upsell sub-tabs — in the top bar (Upsell feature only) */}
             {tab === "upsell" && (
               <div ref={upsellToggleRef} className="flex shrink-0 items-center gap-1 rounded-full bg-white/70 p-1 shadow-soft-md ring-1 ring-neutral-200">
-                {([["onetap", "Upsell en un clic"], ["thankyou", "Suivi de commande"]] as const).map(([key, label]) => {
+                {(["onetap", "thankyou"] as const).map((key) => {
+                  const label = t.upsellViews[key];
                   const active = upsellView === key;
                   return (
                     <button
@@ -997,7 +935,7 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
               className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-5 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:brightness-110 max-lg:hidden"
               style={{ background: "#155FFF" }}
             >
-              Essai gratuit
+              {t.startTrial}
             </a>
           </div>
 
@@ -1008,7 +946,7 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
               className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold text-neutral-700 shadow-sm ring-1 ring-neutral-200 transition-all hover:bg-neutral-50"
             >
               <Play className="size-3.5 fill-current" />
-              Lancer la visite
+              {t.startTour}
             </button>
           </div>
 
@@ -1111,9 +1049,9 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
           displayStep={displayStep}
           displayTotal={displayTotal}
           rect={spotlightRect}
-          title={curStep.title}
-          desc={curStep.desc}
-          cta={curStep.cta}
+          title={curStep.text ? t.steps[curStep.text].title : ""}
+          desc={curStep.text ? t.steps[curStep.text].desc : ""}
+          cta={curStep.finalStep ? t.finish : t.next}
           clickThrough={!!curStep.clickThrough || !!curStep.autoClickId}
           showDot={!curStep.outcome && measuredStep === tourStep}
           showFinger={tourStep === 0 && !curStep.outcome}
@@ -1122,8 +1060,8 @@ export function GuidedEditor({ store }: { store: DemoStore }) {
           hideCta={curStep.hideCta}
           cardAbove={curStep.cardAbove}
           outcome={curStep.outcome}
-          outcomeHeadline={curStep.outcomeHeadline}
-          outcomeButton={curStep.outcomeButton}
+          outcomeHeadline={curStep.euOutcome ? t.euOutcome.headline : undefined}
+          outcomeButton={curStep.euOutcome ? t.euOutcome.button : undefined}
           outcomeHref={APP_URL}
           nextLabel={curStep.nextLabel}
           finalStep={curStep.finalStep}

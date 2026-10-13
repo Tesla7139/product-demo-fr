@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { CalendarDays, ChevronDown, Search } from "lucide-react";
 import type { DemoStore, DemoProduct } from "@/lib/site";
-import { money, money2, DEFAULT_CURRENCY } from "@/lib/format";
+import { useDict, useFormat, useLocaleMeta } from "@/i18n/I18nProvider";
 
 const TEAL = "#0d9488";
 
-const X_LABELS = ["1 juin", "4 juin", "7 juin", "10 juin", "13 juin", "16 juin", "19 juin", "22 juin", "25 juin", "28 juin"];
+/** Sample reporting period (June 2026) and the days labelled on the x-axis. */
+const RANGE_FROM = "2026-06-01";
+const RANGE_TO = "2026-07-01";
+const X_DAYS = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28];
 
 /** Deterministic 30-point series (SSR-safe: no Math.random / Date). */
 function series(base: number, swing: number, seed: number) {
@@ -17,6 +20,8 @@ function series(base: number, swing: number, seed: number) {
 }
 
 function LineChart({ data, prev }: { data: number[]; prev: number[] }) {
+  const { date } = useFormat();
+  const xLabels = X_DAYS.map((d) => date(`2026-06-${String(d).padStart(2, "0")}`, { day: "numeric", month: "short" }));
   const W = 720, H = 190, PADX = 6, PADT = 14, PADB = 24;
   const max = Math.max(...data, ...prev, 1);
   const x = (i: number) => PADX + (i / (data.length - 1)) * (W - 2 * PADX);
@@ -41,7 +46,7 @@ function LineChart({ data, prev }: { data: number[]; prev: number[] }) {
         <polyline points={path} fill="none" stroke={TEAL} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
       <div className="mt-1 flex justify-between px-1 text-[10px] text-neutral-400">
-        {X_LABELS.map((l) => <span key={l}>{l}</span>)}
+        {xLabels.map((l) => <span key={l}>{l}</span>)}
       </div>
     </div>
   );
@@ -68,7 +73,12 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
   const [innerTab, setInnerTab] = useState<AnalyticsView>("overview");
   const tab = viewTab ?? innerTab;
   const setTab = setInnerTab;
-  const currency = store.currency || DEFAULT_CURRENCY;
+  const t = useDict().mocks.analytics;
+  const { money, money2, num, date, fill } = useFormat();
+  const meta = useLocaleMeta();
+  const currency = store.currency || meta.currency;
+  const pct = (n: number) => num(n, { style: "percent", maximumFractionDigits: 0 });
+  const rangeDate = (d: string) => date(d, { day: "2-digit", month: "2-digit", year: "numeric" });
   const products: DemoProduct[] = store.products.filter((p) => (p.price ?? 0) > 0);
 
   // --- edits ---
@@ -80,21 +90,25 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
   const supportSavings = totalEdits * avgSaved;
   const editsPrev = editsSeries.map((v) => Math.round(v * 0.82));
 
-  const breakdown = [
-    { label: "Adresse modifiée", pct: 0.33 },
-    { label: "Coordonnées mises à jour", pct: 0.18 },
-    { label: "Quantité modifiée", pct: 0.24 },
-    { label: "Articles ajoutés (upsell)", pct: 0.15 },
-    { label: "Commande annulée", pct: 0.05 },
-    { label: "Code promo appliqué", pct: 0.05 },
-  ].map((b) => ({ ...b, value: Math.round(totalEdits * b.pct) }));
+  const breakdown = (
+    [
+      { key: "addressChanged", pct: 0.33 },
+      { key: "contactUpdated", pct: 0.18 },
+      { key: "quantityChanged", pct: 0.24 },
+      { key: "itemsAdded", pct: 0.15 },
+      { key: "orderCancelled", pct: 0.05 },
+      { key: "discountApplied", pct: 0.05 },
+    ] as const
+  ).map((b) => ({ ...b, label: t.breakdown[b.key], value: Math.round(totalEdits * b.pct) }));
 
-  const cancellations = [
-    { reason: "J'ai changé d'avis", count: 11 },
-    { reason: "Commandé par erreur", count: 7 },
-    { reason: "Moins cher ailleurs", count: 5 },
-    { reason: "Livraison trop lente", count: 3 },
-  ];
+  const cancellations = (
+    [
+      { key: "changedMind", count: 11 },
+      { key: "mistake", count: 7 },
+      { key: "cheaper", count: 5 },
+      { key: "slow", count: 3 },
+    ] as const
+  ).map((c) => ({ ...c, reason: t.reasons[c.key] }));
   const cancelTotal = cancellations.reduce((a, c) => a + c.count, 0);
 
   // --- upsell (product-based) ---
@@ -114,9 +128,9 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
   const upsellPrev = upsellSeries.map((v) => Math.round(v * 0.78));
 
   const TABS = [
-    { key: "overview", label: "Vue d'ensemble" },
-    { key: "edits", label: "Modifications" },
-    { key: "upsell", label: "Upsell" },
+    { key: "overview", label: t.tabs.overview },
+    { key: "edits", label: t.tabs.edits },
+    { key: "upsell", label: t.tabs.upsell },
   ] as const;
 
   return (
@@ -124,23 +138,23 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
       <div className="max-h-[560px] overflow-y-auto no-scrollbar p-5">
         {/* header */}
         <div className="flex items-center justify-between">
-          <h3 className="text-[20px] font-extrabold tracking-tight text-neutral-900">Statistiques</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight text-neutral-900">{t.title}</h3>
           <div className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-neutral-600">
             <CalendarDays className="size-3.5 text-neutral-400" />
-            01/06/2026 – 01/07/2026
+            {fill(t.dateRange, { from: rangeDate(RANGE_FROM), to: rangeDate(RANGE_TO) })}
             <ChevronDown className="size-3.5 text-neutral-400" />
           </div>
         </div>
 
         {/* sub-tabs */}
         <div className="mt-4 grid grid-cols-3 gap-1 rounded-xl bg-neutral-100 p-1">
-          {TABS.map((t) => (
+          {TABS.map((tb) => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`rounded-lg py-2 text-[13px] font-semibold transition-colors ${tab === t.key ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-700"}`}
+              key={tb.key}
+              onClick={() => setTab(tb.key)}
+              className={`truncate rounded-lg px-1 py-2 text-[13px] font-semibold transition-colors ${tab === tb.key ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-700"}`}
             >
-              {t.label}
+              {tb.label}
             </button>
           ))}
         </div>
@@ -149,15 +163,15 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
         {tab === "overview" && (
           <div ref={tourRefs?.overview} className="mt-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <Stat label="Modifications totales" value={String(totalEdits)} sub={`${editPct} % des commandes`} />
-              <Stat label="Économies sur le support" value={money2(supportSavings, currency)} sub={`${money(avgSaved, currency)} économisés en moyenne par modification`} />
-              <Stat label="Revenus d'upsell générés" value={money2(upsellRevenue, currency)} sub={`Sur ${upsellCount} upsells finalisés`} />
+              <Stat label={t.totalEdits} value={num(totalEdits)} sub={fill(t.ofTotalOrders, { pct: pct(editPct / 100) })} />
+              <Stat label={t.supportSavings} value={money2(supportSavings, currency)} sub={fill(t.avgSaved, { amount: money(avgSaved, currency) })} />
+              <Stat label={t.upsellRevenueAdded} value={money2(upsellRevenue, currency)} sub={fill(t.fromUpsells, { count: num(upsellCount) })} />
             </div>
             <div className="mt-4 rounded-xl border border-border p-4">
               <LineChart data={editsSeries} prev={editsPrev} />
               <div className="mt-2 flex justify-center gap-5 text-[11px] text-neutral-500">
-                <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded" style={{ background: TEAL }} /> Modifications totales</span>
-                <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded border-b-2 border-dashed border-blue-300" /> Période précédente</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded" style={{ background: TEAL }} /> {t.totalEdits}</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded border-b-2 border-dashed border-blue-300" /> {t.previousPeriod}</span>
               </div>
             </div>
           </div>
@@ -167,26 +181,26 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
         {tab === "edits" && (
           <div ref={tourRefs?.edits} className="mt-4">
             <div className="rounded-xl border border-border px-4 py-3 text-[14px] text-neutral-700">
-              Au total, <span className="font-bold text-neutral-900">{totalEdits} modifications</span> sur <span className="font-bold text-neutral-900">{totalOrders} commandes</span>
+              {t.editsSummary.before}<span className="font-bold text-neutral-900">{fill(t.editsSummary.edits, { count: num(totalEdits) })}</span>{t.editsSummary.middle}<span className="font-bold text-neutral-900">{fill(t.editsSummary.orders, { count: num(totalOrders) })}</span>{t.editsSummary.after}
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {breakdown.map((b) => (
-                <div key={b.label} className="rounded-xl border border-border p-4">
+                <div key={b.key} className="rounded-xl border border-border p-4">
                   <div className="text-[13px] text-neutral-500">{b.label}</div>
-                  <div className="mt-1 text-[20px] font-bold text-neutral-900">{b.value}</div>
-                  <div className="mt-1 text-[12px] text-neutral-400">{Math.round(b.pct * 100)}&nbsp;% des modifications</div>
+                  <div className="mt-1 text-[20px] font-bold text-neutral-900">{num(b.value)}</div>
+                  <div className="mt-1 text-[12px] text-neutral-400">{fill(t.ofEdits, { pct: pct(b.pct) })}</div>
                 </div>
               ))}
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div className="rounded-xl border border-border p-4">
-                <div className="mb-3 text-[14px] font-bold text-neutral-900">Répartition par type de modification</div>
+                <div className="mb-3 text-[14px] font-bold text-neutral-900">{t.distribution}</div>
                 <div className="space-y-2.5">
                   {breakdown.map((b) => (
-                    <div key={b.label}>
-                      <div className="flex justify-between text-[12px] text-neutral-600">
+                    <div key={b.key}>
+                      <div className="flex justify-between gap-2 text-[12px] text-neutral-600">
                         <span>{b.label}</span>
-                        <span className="font-semibold text-neutral-900">{Math.round(b.pct * 100)}&nbsp;%</span>
+                        <span className="font-semibold text-neutral-900">{pct(b.pct)}</span>
                       </div>
                       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
                         <div className="h-full rounded-full" style={{ width: `${Math.round(b.pct * 100)}%`, background: TEAL }} />
@@ -197,16 +211,16 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
               </div>
               <div className="rounded-xl border border-border p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="text-[14px] font-bold text-neutral-900">Motifs d’annulation</div>
+                  <div className="text-[14px] font-bold text-neutral-900">{t.cancellationReasons}</div>
                   <div className="flex gap-1 rounded-lg bg-neutral-100 p-0.5 text-[11px] font-medium">
-                    {["Toutes", "Prépayées", "À la livraison"].map((f, i) => (
-                      <span key={f} className={`rounded px-2 py-0.5 ${i === 0 ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"}`}>{f} ({i === 0 ? cancelTotal : i === 1 ? Math.round(cancelTotal * 0.6) : Math.round(cancelTotal * 0.4)})</span>
+                    {[t.filters.all, t.filters.prepaid, t.filters.cod].map((f, i) => (
+                      <span key={i} className={`rounded px-2 py-0.5 ${i === 0 ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"}`}>{fill(t.filterCount, { label: f, count: num(i === 0 ? cancelTotal : i === 1 ? Math.round(cancelTotal * 0.6) : Math.round(cancelTotal * 0.4)) })}</span>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-2">
                   {cancellations.map((c) => (
-                    <div key={c.reason} className="flex items-center justify-between text-[12.5px]">
+                    <div key={c.key} className="flex items-center justify-between text-[12.5px]">
                       <span className="text-neutral-600">{c.reason}</span>
                       <span className="font-semibold text-neutral-900">{c.count}</span>
                     </div>
@@ -221,16 +235,16 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
         {tab === "upsell" && (
           <div ref={tourRefs?.upsell} className="mt-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <Stat label="Revenus d'upsell" value={money2(upsellRevenue, currency)} sub={`Sur ${upsellCount} upsells finalisés`} />
-              <Stat label="Taux de conversion upsell" value={`${upsellConversion} %`} sub="des commandes éligibles" />
-              <Stat label="Revenu moyen par upsell" value={money2(avgPerUpsell, currency)} sub={`Articles ajoutés : ${upsellCount}`} />
+              <Stat label={t.upsellRevenue} value={money2(upsellRevenue, currency)} sub={fill(t.fromUpsells, { count: num(upsellCount) })} />
+              <Stat label={t.upsellConversion} value={pct(upsellConversion / 100)} sub={t.ofEligible} />
+              <Stat label={t.avgPerUpsell} value={money2(avgPerUpsell, currency)} sub={fill(t.itemsAdded, { count: num(upsellCount) })} />
             </div>
             <div className="mt-4 rounded-xl border border-border p-4">
-              <div className="mb-2 text-[14px] font-bold text-neutral-900">Évolution des revenus d’upsell</div>
+              <div className="mb-2 text-[14px] font-bold text-neutral-900">{t.revenueOverTime}</div>
               <LineChart data={upsellSeries} prev={upsellPrev} />
             </div>
             <div className="mt-4 rounded-xl border border-border p-4">
-              <div className="mb-3 text-[14px] font-bold text-neutral-900">Top {topProducts.length} des produits en upsell</div>
+              <div className="mb-3 text-[14px] font-bold text-neutral-900">{fill(t.topProducts, { count: topProducts.length })}</div>
               {topProducts.length ? (
                 <div className="divide-y divide-border">
                   {topProducts.map((p, i) => (
@@ -245,7 +259,7 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
                       <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-neutral-800">{p.title}</div>
                       <div className="text-right">
                         <div className="text-[13px] font-semibold text-neutral-900">{money(p.revenue, currency)}</div>
-                        <div className="text-[11px] text-neutral-400">{p.units} vendus</div>
+                        <div className="text-[11px] text-neutral-400">{fill(t.sold, { count: num(p.units) })}</div>
                       </div>
                     </div>
                   ))}
@@ -253,8 +267,9 @@ export function AnalyticsMock({ store, viewTab, tourRefs }: { store: DemoStore; 
               ) : (
                 <div className="flex flex-col items-center py-10 text-center">
                   <Search className="size-8 text-neutral-300" />
-                  <div className="mt-3 text-[15px] font-bold text-neutral-900">Aucun article trouvé</div>
-                  <div className="text-[12px] text-neutral-500">Essayez de modifier les filtres ou votre recherche</div>
+                  <div className="mt-3 text-[15px] font-bold text-neutral-900">{t.emptyTitle}</div>
+                  <div className="text-[12px] text-neutral-500">{t.emptySub}</div>
+
                 </div>
               )}
             </div>

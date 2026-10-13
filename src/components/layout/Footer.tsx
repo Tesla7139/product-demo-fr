@@ -4,7 +4,8 @@ import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { Logo } from "./Logo";
 import { Container } from "@/components/primitives/Container";
-import { footerColumns, site } from "@/lib/site";
+import { footerColumnsFor, site } from "@/lib/site";
+import { useDict, useHref } from "@/i18n/I18nProvider";
 
 // Compliance marks. These are official certification badges, so they must be
 // your own licensed assets. Two ways to show them (either works):
@@ -12,11 +13,12 @@ import { footerColumns, site } from "@/lib/site";
 //      image you have) — it renders as-is.
 //   2. Or drop 4 separate files matching COMPLIANCE[].src below.
 // Until a file exists, a clean labeled fallback chip is shown.
-const COMPLIANCE = [
-  { src: "/badges/soc2.svg", label: "AICPA SOC 2", alt: "Conforme AICPA SOC 2" },
-  { src: "/badges/gdpr.svg", label: "RGPD", alt: "Conforme RGPD" },
-  { src: "/badges/iso-27001.svg", label: "ISO 27001", alt: "Certifié ISO 27001" },
-  { src: "/badges/iso-27701.svg", label: "ISO 27701", alt: "Certifié ISO 27701" },
+// Labels/alt texts live in dict.layout.footer.badges (same order).
+const COMPLIANCE_SRC = [
+  "/badges/soc2.svg",
+  "/badges/gdpr.svg",
+  "/badges/iso-27001.svg",
+  "/badges/iso-27701.svg",
 ];
 
 function ComplianceBadge({ src, label, alt }: { src: string; label: string; alt: string }) {
@@ -41,6 +43,9 @@ function ComplianceBadge({ src, label, alt }: { src: string; label: string; alt:
 }
 
 export function Footer() {
+  const t = useDict();
+  const href = useHref();
+  const footerColumns = footerColumnsFor(t.site);
   return (
     <footer
       id="footer"
@@ -53,18 +58,18 @@ export function Footer() {
           <div className="col-span-2 flex flex-col gap-5 lg:col-span-2">
             <Logo light />
             <p className="max-w-xs text-sm text-white/55">
-              Modification de commande en libre-service, validation d’adresse et upsells
-              post-achat pour l’e-commerce d’aujourd’hui.
+              {t.layout.footer.tagline}
             </p>
           </div>
 
           {/* Security & compliance — top-aligned column (lines up with the link columns) */}
           <div className="col-span-2 flex flex-col gap-3 lg:col-span-2">
-            <h3 className="text-eyebrow text-white/45">Sécurité et conformité</h3>
+            <h3 className="text-eyebrow text-white/45">{t.layout.footer.securityTitle}</h3>
             <div className="grid w-fit grid-cols-2 gap-x-4 gap-y-3">
-              {COMPLIANCE.map((b) => (
-                <ComplianceBadge key={b.label} src={b.src} label={b.label} alt={b.alt} />
-              ))}
+              {COMPLIANCE_SRC.map((src, i) => {
+                const b = t.layout.footer.badges[i];
+                return <ComplianceBadge key={src} src={src} label={b.label} alt={b.alt} />;
+              })}
             </div>
           </div>
 
@@ -77,7 +82,7 @@ export function Footer() {
                   return (
                     <li key={link.label}>
                       <a
-                        href={link.href}
+                        href={href(link.href)}
                         target={external ? "_blank" : undefined}
                         rel={external ? "noreferrer" : undefined}
                         className="text-sm text-white/70 transition-colors hover:text-white"
@@ -93,7 +98,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm text-white/50 sm:flex-row">
-          <p>© 2026 ClickPost — Felurian Technology Private Limited. Tous droits réservés.</p>
+          <p>{t.layout.footer.copyright}</p>
         </div>
       </Container>
 

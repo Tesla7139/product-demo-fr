@@ -5,8 +5,10 @@ import { Check } from "lucide-react";
 import { Container } from "@/components/primitives/Container";
 import { SetupPanel } from "./demo/SetupPanel";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
+import { useDict } from "@/i18n/I18nProvider";
 
 export function SetupSection() {
+  const s = useDict().sections.setup;
   return (
     <section id="setup" className="py-20 md:py-28">
       <Container>
@@ -19,21 +21,16 @@ export function SetupSection() {
             viewport={viewportOnce}
           >
             <motion.span variants={fadeUp} className="text-eyebrow text-primary">
-              Configuration
+              {s.eyebrow}
             </motion.span>
             <motion.h2 variants={fadeUp} className="text-h2 mt-3 text-balance">
-              C’est vous qui fixez les règles
+              {s.title}
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-4 max-w-md text-muted-foreground">
-              Décidez combien de temps vos clients peuvent modifier leur commande, et ce qu’ils ont
-              le droit de changer — sans code, en ligne en quelques minutes.
+              {s.body}
             </motion.p>
             <motion.ul variants={fadeUp} className="mt-7 flex flex-col gap-3.5">
-              {[
-                "Délai de modification fixe ou jusqu’à l’expédition",
-                "Activez ou désactivez chaque action",
-                "Modifications synchronisées avec votre logistique",
-              ].map((t) => (
+              {s.points.map((t) => (
                 <li key={t} className="flex items-center gap-3 text-sm text-foreground/90">
                   <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Check className="size-3.5" />

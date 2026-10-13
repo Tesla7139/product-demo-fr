@@ -1,11 +1,16 @@
+"use client";
+
+import { useDict } from "@/i18n/I18nProvider";
+
 const SHOPIFY_LISTING = "https://apps.shopify.com/clickpost-order-edit-cancel";
 
 export function AnnouncementBar() {
+  const t = useDict().layout.announcementBar;
   return (
     <div className="w-full text-white" style={{ background: "linear-gradient(90deg, #001644 0%, #001B61 22%, #155FFF 62%, #0EE2E2 100%)" }}>
       <div className="mx-auto flex max-w-[1240px] items-center justify-center gap-2.5 px-4 py-2.5 text-center text-[0.85rem] sm:px-6">
         <span className="font-semibold tracking-tight">
-          Respectez les directives européennes avec Clickpost Order Editing
+          {t.text}
         </span>
         <a
           href={SHOPIFY_LISTING}
@@ -13,7 +18,7 @@ export function AnnouncementBar() {
           rel="noopener noreferrer"
           className="hidden whitespace-nowrap font-medium text-white/90 underline-offset-4 transition-colors hover:text-white hover:underline sm:inline"
         >
-          Voir la fiche Shopify
+          {t.cta}
         </a>
       </div>
     </div>

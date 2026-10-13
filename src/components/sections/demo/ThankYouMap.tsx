@@ -1,7 +1,11 @@
 "use client";
 
+import { useDict, useFormat } from "@/i18n/I18nProvider";
+
 /** Styled Shopify-thank-you "shipping map" + order-confirmed block (mock, no real map API). */
 export function ThankYouMap({ city, region }: { city: string; region?: string }) {
+  const t = useDict().mocks.thankYouMap;
+  const { fill } = useFormat();
   return (
     <div className="overflow-hidden rounded-xl border border-border">
       {/* faux Google map */}
@@ -25,9 +29,9 @@ export function ThankYouMap({ city, region }: { city: string; region?: string })
 
         {/* shipping address card */}
         <div className="absolute left-1/2 top-5 -translate-x-1/2 rounded-lg bg-white px-6 py-3 text-center shadow-[0_6px_20px_-8px_rgba(0,0,0,0.35)]">
-          <div className="text-[12px] text-neutral-500">Adresse de livraison</div>
+          <div className="text-[12px] text-neutral-500">{t.shippingAddress}</div>
           <div className="text-[15px] font-bold text-neutral-900">
-            {city}{region ? `, ${region}` : ""}
+            {region ? fill(t.place, { city, region }) : city}
           </div>
         </div>
 
@@ -44,10 +48,11 @@ export function ThankYouMap({ city, region }: { city: string; region?: string })
 
       {/* order confirmed */}
       <div className="p-4">
-        <h4 className="text-[16px] font-bold text-neutral-900">Votre commande est confirmée</h4>
-        <p className="mt-1 text-[13.5px] text-neutral-500">Vous recevrez bientôt un e-mail de confirmation</p>
+        <h4 className="text-[16px] font-bold text-neutral-900">{t.confirmed}</h4>
+        <p className="mt-1 text-[13.5px] text-neutral-500">{t.emailSoon}</p>
         <button className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#5a31f4] px-5 py-2.5 text-[13.5px] font-semibold text-white transition-all hover:brightness-110 active:scale-[0.99]">
-          Suivez votre colis avec
+          {t.trackWith}
+
           <span className="font-extrabold lowercase">shop</span>
         </button>
       </div>
